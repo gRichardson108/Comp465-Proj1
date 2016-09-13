@@ -1,3 +1,10 @@
 Makefile
 includes465
 manyModelsStatic
+
+*.sdf
+*.sln
+*.vcxproj
+*.filters
+*.user
+Debug

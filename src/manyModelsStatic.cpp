@@ -21,18 +21,21 @@ Mike Barnes
 */
 
 // define your target operating system: __Windows__  __Linux__  __Mac__
-# define __Windows__ 
+# define __Linux__ 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 # include "../includes465/include465.hpp"
 
 const int X = 0, Y = 1, Z = 2, START = 0, STOP = 1;
 // constants for models:  file names, vertex count, model display size
 const int nModels = 3;  // number of models in this scene
-char * modelFile [nModels] = {"axes-r100.tri", "obelisk-10-20-10.tri", "spaceShip-bs100.tri"};
+char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/spaceShip-bs100.tri"};
 float modelBR[nModels];       // model's bounding radius
 float scaleValue[nModels];    // model's scaling "size" value
 const int nVertices[nModels] = { 120 * 3, 14 * 3, 996 * 3 };
-char * vertexShaderFile   = "simpleVertex.glsl";     
-char * fragmentShaderFile = "simpleFragment.glsl";    
+char * vertexShaderFile   = "src/simpleVertex.glsl";     
+char * fragmentShaderFile = "src/simpleFragment.glsl";    
 GLuint shaderProgram; 
 GLuint VAO[nModels];      // Vertex Array Objects
 GLuint buffer[nModels];   // Vertex Buffer Objects
@@ -139,6 +142,11 @@ int main(int argc, char* argv[]) {
 	glutInitContextVersion(3, 3);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 # endif
+#ifdef _WIN32
+	printf("WINDOWS\n");
+#else
+	printf("LINUX\n");
+#endif
   glutCreateWindow("465 manyModelsStatic Example");
   // initialize and verify glew
   glewExperimental = GL_TRUE;  // needed my home system 
