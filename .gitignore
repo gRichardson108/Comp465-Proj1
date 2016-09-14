@@ -8,3 +8,4 @@ manyModelsStatic
 *.filters
 *.user
 Debug
+*.db
