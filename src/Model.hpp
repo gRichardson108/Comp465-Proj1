@@ -1,8 +1,8 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <glm\glm.hpp>
-#include <gl\glew.h>
+#include <glm/glm.hpp>
+#include <gl/glew.h>
 
 class Model
 {
