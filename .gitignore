@@ -9,3 +9,4 @@ manyModelsStatic
 *.user
 Debug
 *.db
+*.opendb

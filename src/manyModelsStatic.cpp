@@ -164,10 +164,8 @@ int main(int argc, char* argv[]) {
   // set glut callback functions
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
-	glutKeyboardFunc(keyboard);
+  glutKeyboardFunc(keyboard);
   glutMainLoop();
   printf("done\n");
   return 0;
-  }
-  
-
+}
