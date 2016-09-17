@@ -14,7 +14,7 @@ Model::Model(char* modelFile, int vertices,
 {
 	size_t size = strlen(modelFile) + 1;
 	m_cModelFile = new char[size];
-	strcpy_s(m_cModelFile, size, modelFile);
+	strncpy(m_cModelFile, modelFile, size);
 }
 
 Model::~Model()

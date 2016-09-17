@@ -32,6 +32,7 @@ Mike Barnes
 # include <stdio.h>  // My examples use printf, I'm not a fan of cin, cout...
 # include <stdlib.h>
 # include <sys/stat.h>
+# include <cstring>
 
 # include <GL/glew.h>
 # include <GL/freeglut.h>

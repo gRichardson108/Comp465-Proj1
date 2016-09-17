@@ -2,7 +2,7 @@
 #define BASE_ENTITY_H
 
 #include "Model.hpp"
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 class BaseEntity
 {
