@@ -2,7 +2,6 @@
 #define BASE_ENTITY_H
 
 #include "Model.hpp"
-#include <glm/glm.hpp>
 
 class BaseEntity
 {
@@ -34,25 +33,9 @@ public:
 		m_mModel(model)
 	{}
 
-	BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale) :
-		m_vPosition(pos),
-		m_vForward(glm::vec3(0.0, 0.0, -1.0)),
-		m_vLeft(glm::vec3(-1.0, 0.0, 0.0)),
-		m_vUp(glm::vec3(0.0, 1.0, 0.0)),
-		m_mModel(model)
-	{
-		SetScale(scale);
-	}
+	BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale);
 
-	BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale, glm::vec3 target, glm::vec3 worldUp) :
-		m_vPosition(pos),
-		m_mModel(model)
-	{
-		SetScale(scale);
-		m_vForward = glm::normalize(target - pos);
-		m_vLeft = glm::cross(glm::normalize(worldUp), m_vForward);
-		m_vUp = glm::cross(m_vForward, m_vLeft);
-	}
+	BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale, glm::vec3 target);
 
 	virtual ~BaseEntity() {}
 
@@ -78,6 +61,10 @@ public:
 
 	float BoundingRadius() { return m_fBoundingRadius; }
 	Model* ModelFile() { return m_mModel; }
+
+	// Returns a mat4 rotation matrix for rotating the
+	// model to face the forward vector
+	glm::mat4 RotateToForward();
 };
 
 #endif

@@ -28,6 +28,7 @@ Mike Barnes
 # include "../includes465/include465.hpp"
 #include "BaseEntity.hpp"
 #include "Model.hpp"
+#include <time.h>
 
 const int X = 0, Y = 1, Z = 2, START = 0, STOP = 1;
 // constants for models:  file names, vertex count, model display size
@@ -79,7 +80,8 @@ void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   // update model matrix
   for(int e = 0; e < nEntities; e++) {
-    modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) * 
+    modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
+	  entities[e]->RotateToForward() *
       glm::scale(glm::mat4(), entities[e]->Scale());
     // glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr( modelMatrix)); 
     ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix; 
@@ -111,8 +113,13 @@ void init() {
 	  models[i]->Init();
   }
 
+  srand(time(NULL));
+  int max = 500;
+
   for (int i = 0; i < nEntities; i++) {
-	  entities[i] = new BaseEntity(models[i % 3], translate[i % 3] * ((float)i / 3.0f + 1.0f), glm::vec3(modelSize[i % 3]));
+	  glm::vec3 pos = glm::vec3((rand() % (max+1)) - max/2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+	  entities[i] = new BaseEntity(models[i % 3], pos, glm::vec3(modelSize[i % 3]),
+		  glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2));
     }
   
   MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");

@@ -44,6 +44,7 @@ Mike Barnes
 # include <glm/gtc/constants.hpp>
 # include <glm/gtc/matrix_transform.hpp>
 # include <glm/gtc/type_ptr.hpp>
+# include <glm/gtx/quaternion.hpp>
 # include "../includes465/glmUtils465.hpp"  // print matrices and vectors, ... 
 # include "../includes465/shader465.hpp"    // load vertex and fragment shaders
 # include "../includes465/triModel465.hpp"  // load AC3D *.tri model 
