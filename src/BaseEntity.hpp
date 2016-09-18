@@ -35,7 +35,7 @@ public:
 
 	BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale);
 
-	BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale, glm::vec3 target);
+	BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale, glm::vec3 target, glm::vec3 up);
 
 	virtual ~BaseEntity() {}
 

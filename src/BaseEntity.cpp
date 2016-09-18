@@ -10,13 +10,13 @@ BaseEntity::BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale) :
 	SetScale(scale);
 }
 
-BaseEntity::BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale, glm::vec3 target) :
+BaseEntity::BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale, glm::vec3 target, glm::vec3 up) :
 	m_vPosition(pos),
 	m_mModel(model)
 {
 	SetScale(scale);
 	m_vForward = glm::normalize(target - pos);
-	m_vLeft = glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), m_vForward);
+	m_vLeft = glm::cross(glm::normalize(up), m_vForward);
 	m_vUp = glm::cross(m_vForward, m_vLeft);
 }
 

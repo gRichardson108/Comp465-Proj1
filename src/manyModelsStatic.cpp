@@ -36,6 +36,8 @@ const int nModels = 3;  // number of models in this scene
 Model* models[nModels];
 const int nEntities = 6;
 BaseEntity* entities[nEntities];
+BaseEntity* localAxis[nEntities];
+bool showAxis = false;
 char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/spaceShip-bs100.tri"};
 float modelBR[nModels];       // model's bounding radius
 float scaleValue[nModels];    // model's scaling "size" value
@@ -73,6 +75,7 @@ void reshape(int width, int height) {
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 		case 033: case 'q':  case 'Q': exit(EXIT_SUCCESS); break;
+		case 't': showAxis = !showAxis; glutPostRedisplay(); break;
 		}
 	}
 
@@ -94,6 +97,20 @@ void display() {
 	*/
     glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() ); 
     }
+
+  if (showAxis)
+  {
+	  for (int e = 0; e < nEntities; e++) {
+		  modelMatrix = glm::translate(glm::mat4(), localAxis[e]->Position()) *
+			  glm::rotate(glm::mat4(), PI, localAxis[e]->Up()) *
+			  localAxis[e]->RotateToForward() *
+			  glm::scale(glm::mat4(), localAxis[e]->Scale());
+		  ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+		  glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+		  glBindVertexArray(*(localAxis[e]->ModelFile()->VAO()));
+		  glDrawArrays(GL_TRIANGLES, 0, localAxis[e]->ModelFile()->Vertices());
+	  }
+  }
   glutSwapBuffers();
   }
 
@@ -118,8 +135,9 @@ void init() {
 
   for (int i = 0; i < nEntities; i++) {
 	  glm::vec3 pos = glm::vec3((rand() % (max+1)) - max/2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
-	  entities[i] = new BaseEntity(models[i % 3], pos, glm::vec3(modelSize[i % 3]),
-		  glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2));
+	  glm::vec3 target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+	  entities[i] = new BaseEntity(models[i % 2 + 1], pos, glm::vec3(modelSize[i % 2 + 1]), target, glm::vec3(0.0f, 1.0f, 0.0f));
+	  localAxis[i] = new BaseEntity(models[0], pos, glm::vec3(modelSize[i % 2 + 1]) * 1.5f, target, glm::vec3(0.0f, 1.0f, 0.0f));
     }
   
   MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
@@ -162,7 +180,7 @@ int main(int argc, char* argv[]) {
 #else
 	printf("LINUX\n");
 #endif
-  glutCreateWindow("465 manyModelsStatic Example");
+  glutCreateWindow("465 manyModelsStatic Example: t - Show Axis");
   // initialize and verify glew
   glewExperimental = GL_TRUE;  // needed my home system 
   GLenum err = glewInit();  
