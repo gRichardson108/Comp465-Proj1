@@ -158,13 +158,14 @@ void init() {
         glm::vec3 target;
         if (i == nEntities - 1){//don't generate random coordinates for the sphere
             printf("\tSphere drawn\n");
-            pos = glm::vec3(0, 0, 0);
-            target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+            pos = glm::vec3(0.0f, 0.0f, 0.0f);
+            target = glm::vec3(0.0f, 0.0f, -1.0f);
             entities[i] = new BaseEntity(models[3], pos, glm::vec3(modelSize[3]), target, glm::vec3(0.0f, 1.0f, 0.0f));
             localAxis[i] = new BaseEntity(models[0], pos, glm::vec3(modelSize[3]) * 1.5f, target, glm::vec3(0.0f, 1.0f, 0.0f));
         } else {
             pos = glm::vec3((rand() % (max+1)) - max/2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
-            target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+            //target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+            target = glm::vec3(0.0f, 0.0f, 0.0f);
             entities[i] = new BaseEntity(models[i % 2 + 1], pos, glm::vec3(modelSize[i % 2 + 1]), target, glm::vec3(0.0f, 1.0f, 0.0f));
             localAxis[i] = new BaseEntity(models[0], pos, glm::vec3(modelSize[i % 2 + 1]) * 1.5f, target, glm::vec3(0.0f, 1.0f, 0.0f));
         }
