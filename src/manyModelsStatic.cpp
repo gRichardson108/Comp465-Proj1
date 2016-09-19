@@ -156,7 +156,8 @@ void init() {
             entities[i] = new BaseEntity(models[3], pos, glm::vec3(modelSize[3]), target, glm::vec3(0.0f, 1.0f, 0.0f));
         } else {
             pos = glm::vec3((rand() % (max+1)) - max/2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
-            target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+            //target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+            target = glm::vec3(0.0f, 0.0f, 0.0f);
             entities[i] = new BaseEntity(models[i % 2 + 1], pos, glm::vec3(modelSize[i % 2 + 1]), target, glm::vec3(0.0f, 1.0f, 0.0f));
         }
 
