@@ -10,3 +10,4 @@ manyModelsStatic
 Debug
 *.db
 *.opendb
+*.swp
