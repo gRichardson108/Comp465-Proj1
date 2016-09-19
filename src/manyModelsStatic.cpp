@@ -207,7 +207,7 @@ int main(int argc, char* argv[]) {
 #else
     printf("LINUX\n");
 #endif
-    glutCreateWindow("465 manyModelsStatic Example: t - Show Axis");
+    glutCreateWindow("465 manyModelsStatic Example: t - Show Axis \n cameras: a s d z x");
     // initialize and verify glew
     glewExperimental = GL_TRUE;  // needed my home system 
     GLenum err = glewInit();  
