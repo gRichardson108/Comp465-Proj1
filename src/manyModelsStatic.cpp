@@ -36,7 +36,6 @@ const int nModels = 3;  // number of models in this scene
 Model* models[nModels];
 const int nEntities = 6;
 BaseEntity* entities[nEntities];
-BaseEntity* localAxis[nEntities];
 bool showAxis = false;
 char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/spaceShip-bs100.tri"};
 float modelBR[nModels];       // model's bounding radius
@@ -86,29 +85,23 @@ void display() {
     modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
 	  entities[e]->RotateToForward() *
       glm::scale(glm::mat4(), entities[e]->Scale());
-    // glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr( modelMatrix)); 
     ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix; 
     glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(*(entities[e]->ModelFile()->VAO()));
-	/*  The following 3 lines are not needed !
-    glEnableVertexAttribArray( vPosition[m] );
-    glEnableVertexAttribArray( vColor[m] );
-    glEnableVertexAttribArray( vNormal[m] );
-	*/
     glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() ); 
     }
 
   if (showAxis)
   {
 	  for (int e = 0; e < nEntities; e++) {
-		  modelMatrix = glm::translate(glm::mat4(), localAxis[e]->Position()) *
-			  glm::rotate(glm::mat4(), PI, localAxis[e]->Up()) *
-			  localAxis[e]->RotateToForward() *
-			  glm::scale(glm::mat4(), localAxis[e]->Scale());
+		  modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
+			  glm::rotate(glm::mat4(), PI, entities[e]->Up()) *
+			  entities[e]->RotateToForward() *
+			  glm::scale(glm::mat4(), entities[e]->Scale() * entities[e]->ModelFile()->BoundingRadius() * 1.5f / models[0]->BoundingRadius());
 		  ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 		  glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-		  glBindVertexArray(*(localAxis[e]->ModelFile()->VAO()));
-		  glDrawArrays(GL_TRIANGLES, 0, localAxis[e]->ModelFile()->Vertices());
+		  glBindVertexArray(*(models[0]->VAO()));
+		  glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
 	  }
   }
   glutSwapBuffers();
@@ -137,18 +130,9 @@ void init() {
 	  glm::vec3 pos = glm::vec3((rand() % (max+1)) - max/2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
 	  glm::vec3 target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
 	  entities[i] = new BaseEntity(models[i % 2 + 1], pos, glm::vec3(modelSize[i % 2 + 1]), target, glm::vec3(0.0f, 1.0f, 0.0f));
-	  localAxis[i] = new BaseEntity(models[0], pos, glm::vec3(modelSize[i % 2 + 1]) * 1.5f, target, glm::vec3(0.0f, 1.0f, 0.0f));
     }
   
   MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
-
- /*
-  printf("Shader program variable locations:\n");
-  printf("  vPosition = %d  vColor = %d  vNormal = %d MVP = %d\n",
-    glGetAttribLocation( shaderProgram, "vPosition" ),
-    glGetAttribLocation( shaderProgram, "vColor" ),
-    glGetAttribLocation( shaderProgram, "vNormal" ), MVP);
- */
 
   viewMatrix = glm::lookAt(
     glm::vec3(50.0f, 50.0f, 500.0f),  // eye position
