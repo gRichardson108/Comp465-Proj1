@@ -138,6 +138,39 @@ void display() {
   }
   glutSwapBuffers();
   }
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // update model matrix
+    for(int e = 0; e < nEntities; e++) {
+        modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
+            entities[e]->RotateToForward() * 
+            glm::scale(glm::mat4(), entities[e]->Scale());
+        // glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr( modelMatrix)); 
+        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix; 
+        glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+        glBindVertexArray(*(entities[e]->ModelFile()->VAO()));
+        /*  The following 3 lines are not needed !
+            glEnableVertexAttribArray( vPosition[m] );
+            glEnableVertexAttribArray( vColor[m] );
+            glEnableVertexAttribArray( vNormal[m] );
+            */
+        glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() ); 
+    }
+
+    if (showAxis)
+    {
+        for (int e = 0; e < nEntities; e++) {
+            modelMatrix = glm::translate(glm::mat4(), localAxis[e]->Position()) *
+                glm::rotate(glm::mat4(), PI, localAxis[e]->Up()) *
+                localAxis[e]->RotateToForward() *
+                glm::scale(glm::mat4(), localAxis[e]->Scale());
+            ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+            glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+            glBindVertexArray(*(localAxis[e]->ModelFile()->VAO()));
+            glDrawArrays(GL_TRIANGLES, 0, localAxis[e]->ModelFile()->Vertices());
+        }
+    }
+    glutSwapBuffers();
+}
 
 // load the shader programs, vertex data from model files, create the solids, set initial view
 void init() {
@@ -177,6 +210,7 @@ void init() {
     }
 
     MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
+
     viewMatrix = glm::lookAt(
             glm::vec3(50.0f, 50.0f, 500.0f),  // eye position
             glm::vec3(0),                   // look at position
@@ -207,7 +241,7 @@ int main(int argc, char* argv[]) {
 #else
     printf("LINUX\n");
 #endif
-    glutCreateWindow("465 manyModelsStatic Example: t - Show Axis \n cameras: a s d z x");
+    glutCreateWindow("465 manyModelsStatic Example: t - Show Axis - cameras: a s d z x");
     // initialize and verify glew
     glewExperimental = GL_TRUE;  // needed my home system 
     GLenum err = glewInit();  
