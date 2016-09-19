@@ -84,13 +84,26 @@ void keyboard(unsigned char key, int x, int y) {
                   glutPostRedisplay(); 
                   break;
         case 's': viewMatrix = glm::lookAt(
-                          glm::vec3(100.0f, 0.0f, 0.0f),  // eye position
+                          glm::vec3(500.0f, 0.0f, 0.0f),  // eye position
                           glm::vec3(0),                   // look at position
                           glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
                   glutPostRedisplay(); 
                   break;
         case 'd': viewMatrix = glm::lookAt(
-                          glm::vec3(0.0f, 0.0f, 100.0f),  // eye position
+                          glm::vec3(0.0f, 0.0f, 500.0f),  // eye position
+                          glm::vec3(0),                   // look at position
+                          glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
+                  glutPostRedisplay(); 
+                  break;
+        case 'z': viewMatrix = glm::lookAt(
+                          glm::vec3(-500.0f, 0.0f, 0.0f),  // eye position
+                          glm::vec3(0),                   // look at position
+                          glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
+                  glutPostRedisplay(); 
+                  break;
+
+        case 'x': viewMatrix = glm::lookAt(
+                          glm::vec3(0.0f, 0.0f, -500.0f),  // eye position
                           glm::vec3(0),                   // look at position
                           glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
                   glutPostRedisplay(); 
