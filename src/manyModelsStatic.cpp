@@ -110,67 +110,38 @@ void keyboard(unsigned char key, int x, int y) {
     }
 }
 
-void display() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // update model matrix
-  for(int e = 0; e < nEntities; e++) {
-    modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
-	  entities[e]->RotateToForward() *
-      glm::scale(glm::mat4(), entities[e]->Scale());
-    ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix; 
-    glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-	glBindVertexArray(*(entities[e]->ModelFile()->VAO()));
-    glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() ); 
-    }
-
-  if (showAxis)
-  {
-	  for (int e = 0; e < nEntities; e++) {
-		  modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
-			  glm::rotate(glm::mat4(), PI, entities[e]->Up()) *
-			  entities[e]->RotateToForward() *
-			  glm::scale(glm::mat4(), entities[e]->Scale() * entities[e]->ModelFile()->BoundingRadius() * 1.5f / models[0]->BoundingRadius());
-		  ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-		  glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-		  glBindVertexArray(*(models[0]->VAO()));
-		  glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
-	  }
-  }
-  glutSwapBuffers();
-  }
+void display() 
+{
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // update model matrix
-    for(int e = 0; e < nEntities; e++) {
+    for(int e = 0; e < nEntities; e++) 
+    {
         modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
-            entities[e]->RotateToForward() * 
+            entities[e]->RotateToForward() *
             glm::scale(glm::mat4(), entities[e]->Scale());
-        // glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr( modelMatrix)); 
         ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix; 
         glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
         glBindVertexArray(*(entities[e]->ModelFile()->VAO()));
-        /*  The following 3 lines are not needed !
-            glEnableVertexAttribArray( vPosition[m] );
-            glEnableVertexAttribArray( vColor[m] );
-            glEnableVertexAttribArray( vNormal[m] );
-            */
         glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() ); 
     }
 
     if (showAxis)
     {
-        for (int e = 0; e < nEntities; e++) {
-            modelMatrix = glm::translate(glm::mat4(), localAxis[e]->Position()) *
-                glm::rotate(glm::mat4(), PI, localAxis[e]->Up()) *
-                localAxis[e]->RotateToForward() *
-                glm::scale(glm::mat4(), localAxis[e]->Scale());
+        for (int e = 0; e < nEntities; e++) 
+        {
+            modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
+                glm::rotate(glm::mat4(), PI, entities[e]->Up()) *
+                entities[e]->RotateToForward() *
+                glm::scale(glm::mat4(), entities[e]->Scale() * entities[e]->ModelFile()->BoundingRadius() * 1.5f / models[0]->BoundingRadius());
             ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
             glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-            glBindVertexArray(*(localAxis[e]->ModelFile()->VAO()));
-            glDrawArrays(GL_TRIANGLES, 0, localAxis[e]->ModelFile()->Vertices());
+            glBindVertexArray(*(models[0]->VAO()));
+            glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
         }
     }
     glutSwapBuffers();
 }
+
 
 // load the shader programs, vertex data from model files, create the solids, set initial view
 void init() {
