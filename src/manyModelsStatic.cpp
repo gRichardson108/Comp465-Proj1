@@ -116,10 +116,7 @@ void display()
     // update model matrix
     for(int e = 0; e < nEntities; e++) 
     {
-        modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
-            entities[e]->RotateToForward() *
-            glm::scale(glm::mat4(), entities[e]->Scale());
-        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix; 
+        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entities[e]->ModelMatrix(); 
         glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
         glBindVertexArray(*(entities[e]->ModelFile()->VAO()));
         glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() ); 

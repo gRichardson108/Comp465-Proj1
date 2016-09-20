@@ -65,6 +65,9 @@ public:
 	// Returns a mat4 rotation matrix for rotating the
 	// model to face the forward vector
 	glm::mat4 RotateToForward();
+
+	// Returns a mat4 model matrix of translate * rotate * scale
+	glm::mat4 ModelMatrix();
 };
 
 #endif

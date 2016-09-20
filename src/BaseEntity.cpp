@@ -26,3 +26,8 @@ glm::mat4 BaseEntity::RotateToForward()
 	glm::quat rot2 = glm::rotation(rot1 * glm::vec3(0.0f, 1.0f, 0.0f), m_vUp);
 	return glm::mat4_cast(rot2 * rot1);
 }
+
+glm::mat4 BaseEntity::ModelMatrix()
+{
+	return glm::translate(glm::mat4(), m_vPosition) * RotateToForward() * glm::scale(glm::mat4(), m_vScale);
+}
