@@ -24,7 +24,7 @@ public:
 		m_mModel(model)
 	{}
 
-	BaseEntity(Model* model, glm::vec3 pos) :
+	BaseEntity(Model* model, const glm::vec3& pos) :
 		m_vPosition(pos),
 		m_vScale(glm::vec3(1.0, 1.0, 1.0)),
 		m_vForward(glm::vec3(0.0, 0.0, -1.0)),
@@ -33,20 +33,20 @@ public:
 		m_mModel(model)
 	{}
 
-	BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale);
+	BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale);
 
-	BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale, glm::vec3 target, glm::vec3 up);
+	BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target, const glm::vec3& up);
 
 	virtual ~BaseEntity() {}
 
 	glm::vec3 Position() const { return m_vPosition; }
-	void SetPosition(glm::vec3 position) { m_vPosition = position; }
+	void SetPosition(const glm::vec3& position) { m_vPosition = position; }
 	void SetPosition(float x, float y, float z) { m_vPosition = glm::vec3(x, y, z); }
 
 	glm::vec3 Scale() const { return m_vScale; }
 	void SetScale(float scale) { SetScale(glm::vec3(scale)); }
 	void SetScale(float x, float y, float z) { SetScale(glm::vec3(x, y, z)); }
-	void SetScale(glm::vec3 scale)
+	void SetScale(const glm::vec3& scale)
 	{
 		m_vScale = scale * 1.0f / m_mModel->BoundingRadius();
 		m_fBoundingRadius = glm::max(m_vScale.x, glm::max(m_vScale.y, m_vScale.z));

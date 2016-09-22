@@ -1,6 +1,6 @@
 #include "BaseEntity.hpp"
 
-BaseEntity::BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale) :
+BaseEntity::BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale) :
 	m_vPosition(pos),
 	m_vForward(glm::vec3(0.0, 0.0, -1.0)),
 	m_vLeft(glm::vec3(-1.0, 0.0, 0.0)),
@@ -10,7 +10,7 @@ BaseEntity::BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale) :
 	SetScale(scale);
 }
 
-BaseEntity::BaseEntity(Model* model, glm::vec3 pos, glm::vec3 scale, glm::vec3 target, glm::vec3 up) :
+BaseEntity::BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target, const glm::vec3& up) :
 	m_vPosition(pos),
 	m_mModel(model)
 {
