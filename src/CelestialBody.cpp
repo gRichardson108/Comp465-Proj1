@@ -1,19 +1,18 @@
 #include "CelestialBody.hpp"
 
 
-CelestialBody::setDefaultRotation()
+void CelestialBody::setDefaultRotation()
 {
     selfRotationRate = 0.2f;
     rotationAxis = m_vUp;
 }
 
-CelestialBody::rotate()
+glm::mat4 CelestialBody::rotate()
 {
-    m_vForward = glm::rotate(m_vForward, selfRotationRate, rotationAxis);
-    return glm::orientation(m_vForward, m_vUp);
+    return glm::rotate(rotationMatrix, selfRotationRate, rotationAxis);
 }
 
-CelestialBody::update()
+void CelestialBody::update()
 {
     rotationMatrix = rotate();
 }

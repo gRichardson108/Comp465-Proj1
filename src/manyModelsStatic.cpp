@@ -142,11 +142,11 @@ void display()
             glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
         }
     }
-    
+
     //some repetitive code here while I test out celestialBody
 
     // update model matrix
-    for(int e = 0; e < n; e++) 
+    for(int e = 0; e < nUpdateable; e++) 
     {
         ModelViewProjectionMatrix = projectionMatrix * viewMatrix * updateableEntities[e]->ModelMatrix(); 
         glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
@@ -184,7 +184,7 @@ void update()
 {
     glutTimerFunc(timerDelay, update, 1);
     for (int e = 0; e < nUpdateable; e++){
-        updateableEntities[e] -> update()
+        updateableEntities[e] -> update();
     }
 }
 // load the shader programs, vertex data from model files, create the solids, set initial view
@@ -224,18 +224,18 @@ void init() {
 
     lastTime = glutGet(GLUT_ELAPSED_TIME);
 
-}
 
-MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
 
-viewMatrix = glm::lookAt(
-        glm::vec3(50.0f, 50.0f, 500.0f),  // eye position
-        glm::vec3(0),                   // look at position
-        glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
+    MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
 
-// set render state values
-glEnable(GL_DEPTH_TEST);
-glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
+    viewMatrix = glm::lookAt(
+            glm::vec3(50.0f, 50.0f, 500.0f),  // eye position
+            glm::vec3(0),                   // look at position
+            glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
+
+    // set render state values
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 }
 
 int main(int argc, char* argv[]) {
@@ -276,7 +276,7 @@ int main(int argc, char* argv[]) {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
-    glutTimerFunc(timerDelay, update, 1);a
+    glutTimerFunc(timerDelay, update, 1);
     glutIdleFunc(display);
     glutMainLoop();
     printf("done\n");
