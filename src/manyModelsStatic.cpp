@@ -108,7 +108,7 @@ void keyboard(unsigned char key, int x, int y) {
                   break;
 
         case 'x': viewMatrix = glm::lookAt(
-                          glm::vec3(0.0f, 0.0f, -500.0f),  // eye position
+                          glm::vec3(-500.0f, -500.0f, -500.0f),  // eye position
                           glm::vec3(0),                   // look at position
                           glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
                   glutPostRedisplay(); 
@@ -167,6 +167,15 @@ void display()
             glBindVertexArray(*(models[0]->VAO()));
             glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
         }
+
+
+        for(int e = 0; e < nUpdateable; e++) 
+        {
+            ModelViewProjectionMatrix = projectionMatrix * viewMatrix * updateableEntities[e]->ModelMatrix(); 
+            glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+            glBindVertexArray(*(models[0]->VAO()));
+            glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices() ); 
+        }
     }
     glutSwapBuffers();
 
@@ -211,7 +220,7 @@ void init() {
 
     printf("\tSphere drawn\n");
     pos = glm::vec3(0.0f,0.0f,0.0f);
-    target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+    target = glm::vec3(0, 0, 1);
     updateableEntities[0] = new CelestialBody(models[3], pos, glm::vec3(modelSize[3]), target, glm::vec3(0.0f, 1.0f, 0.0f));
 
     for (int i = 0; i < nEntities; i++) {
