@@ -1,7 +1,7 @@
 #ifndef CELESTIAL_BODY_H
 #define CELESTIAL_BODY_H
 
-#include "MoveableEntity.h"
+#include "MoveableEntity.hpp"
 #include <math.h> //for cosine and sine
 
 class CelestialBody : public MoveableEntity

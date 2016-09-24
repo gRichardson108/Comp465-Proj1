@@ -1,4 +1,4 @@
-#include "CelestialBody.h"
+#include "CelestialBody.hpp"
 
 
 CelestialBody::setDefaultRotation()
