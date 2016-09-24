@@ -180,7 +180,7 @@ void display()
 
 }
 
-void update()
+void update(int value)
 {
     glutTimerFunc(timerDelay, update, 1);
     for (int e = 0; e < nUpdateable; e++){

@@ -30,7 +30,7 @@ class MoveableEntity : public BaseEntity
             rotationMatrix = RotateToForward();
         }
 
-        virtual ~MoveableEntity();
+        virtual ~MoveableEntity(){}
 
         virtual void update() =0;
 
