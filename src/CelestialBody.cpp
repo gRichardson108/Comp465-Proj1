@@ -48,8 +48,8 @@ void CelestialBody::Update()
 		// There seems to be an issue where occasionally there's a quick scale change
 		// I think this has something to do with changing these vectors but haven't
 		// figured it out yet.
-		m_vForward = glm::normalize(m_mRotation * m_vForward);
-		m_vLeft = glm::normalize(glm::cross(m_vUp, m_vForward));
+		m_vForward = m_mRotation * m_vForward;
+		m_vLeft = m_mRotation * m_vLeft;
 	}
 
 	// Old position is due to the parent being

@@ -102,4 +102,12 @@ inline glm::vec3 unitNormal(glm::vec4 &point0, glm::vec4 &point1,
   return normal;
   }
 
+// Checks if two vectors have equal signs
+inline bool checkSigns(glm::vec3& v1, glm::vec3& v2)
+{
+	return (glm::sign(v1.x) == glm::sign(v2.x) &&
+		glm::sign(v1.y) == glm::sign(v2.y) &&
+		glm::sign(v1.z) == glm::sign(v2.z));
+}
+
 #endif

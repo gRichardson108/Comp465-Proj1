@@ -23,21 +23,18 @@ BaseEntity::BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scal
 glm::mat4 BaseEntity::RotateToForward()
 {
 	glm::quat rot1 = glm::rotation(glm::vec3(0.0f, 0.0f, -1.0f), m_vForward);
-	glm::vec3 adjustedUp = rot1 * glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 adjustedUp = glm::normalize(rot1 * glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::quat rot2 = glm::quat();
 	float dot = glm::dot(m_vUp, adjustedUp);
+	glm::vec3 cross = glm::normalize(glm::cross(adjustedUp, m_vUp));
 
-	// Adjusted up and desired up might be opposite
-	// in this case there's no guarantee which axis the
-	// second rotation will be applied to, we want to
-	// rotate around the forward axis.
-	if (dot >= -1.000001f && dot <= -0.999999f)
+	if (checkSigns(m_vForward, cross))
 	{
-		rot2 = glm::rotate(rot2, glm::pi<float>(), m_vForward);
+		rot2 = glm::rotate(rot2, glm::acos(dot), m_vForward);
 	}
 	else
 	{
-		rot2 = glm::rotation(rot1 * glm::vec3(0.0f, 1.0f, 0.0f), m_vUp);
+		rot2 = glm::rotate(rot2, -glm::acos(dot), m_vForward);
 	}
 
 	return glm::mat4_cast(rot2 * rot1);

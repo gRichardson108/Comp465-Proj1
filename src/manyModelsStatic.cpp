@@ -158,8 +158,6 @@ void update(int value)
 {
     for (int e = 0; e < nUpdateable; e++){
         updateableEntities[e] -> Update();
-		showVec3("Sphere Forward", updateableEntities[e]->Forward());
-		showVec3("Sphere Left   ", updateableEntities[e]->Left());
     }
 	glutPostRedisplay();
 	glutTimerFunc(timerDelay, update, 1);
