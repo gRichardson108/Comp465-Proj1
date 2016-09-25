@@ -40,16 +40,16 @@ public:
 	virtual ~BaseEntity() {}
 
 	glm::vec3 Position() const { return m_vPosition; }
-	void SetPosition(const glm::vec3& position) { m_vPosition = position; }
-	void SetPosition(float x, float y, float z) { m_vPosition = glm::vec3(x, y, z); }
+	virtual void SetPosition(const glm::vec3& position) { m_vPosition = position; }
+	virtual void SetPosition(float x, float y, float z) { SetPosition(glm::vec3(x, y, z)); }
 
 	glm::vec3 Scale() const { return m_vScale; }
 	void SetScale(float scale) { SetScale(glm::vec3(scale)); }
 	void SetScale(float x, float y, float z) { SetScale(glm::vec3(x, y, z)); }
 	void SetScale(const glm::vec3& scale)
 	{
-		m_vScale = scale * 1.0f / m_mModel->BoundingRadius();
-		m_fBoundingRadius = glm::max(m_vScale.x, glm::max(m_vScale.y, m_vScale.z));
+		m_vScale = scale / m_mModel->BoundingRadius();
+		m_fBoundingRadius = glm::max(m_vScale.x, glm::max(m_vScale.y, m_vScale.z)) * m_mModel->BoundingRadius();
 	}
 
 	glm::vec3 Forward() { return m_vForward; }

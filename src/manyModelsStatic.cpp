@@ -36,9 +36,9 @@ const int X = 0, Y = 1, Z = 2, START = 0, STOP = 1;
 // constants for models:  file names, vertex count, model display size
 const int nModels = 4;  // number of models in this scene
 Model* models[nModels];
-const int nEntities = 6;
+const int nEntities = 3;
+const int nUpdateable = 3;
 BaseEntity* entities[nEntities];
-const int nUpdateable = 1;
 MoveableEntity* updateableEntities[nUpdateable];
 bool showAxis = false;
 bool snapToForward = false; //when true, the models should be facing forward, away from the camera view
@@ -142,32 +142,6 @@ void display()
             glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
         }
     }
-
-    //some repetitive code here while I test out celestialBody
-
-    // update model matrix
-    for(int e = 0; e < nUpdateable; e++) 
-    {
-        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * updateableEntities[e]->ModelMatrix(); 
-        glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-        glBindVertexArray(*(updateableEntities[e]->ModelFile()->VAO()));
-        glDrawArrays(GL_TRIANGLES, 0, updateableEntities[e]->ModelFile()->Vertices() ); 
-    }
-
-    if (showAxis)
-    {
-        for (int e = 0; e < nEntities; e++) 
-        {
-            modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
-                glm::rotate(glm::mat4(), glm::pi<float>(), entities[e]->Up()) *
-                entities[e]->RotateToForward() *
-                glm::scale(glm::mat4(), entities[e]->Scale() * entities[e]->ModelFile()->BoundingRadius() * 1.5f / models[0]->BoundingRadius());
-            ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-            glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-            glBindVertexArray(*(models[0]->VAO()));
-            glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
-        }
-    }
     glutSwapBuffers();
 
     frameCount++;
@@ -182,10 +156,13 @@ void display()
 
 void update(int value)
 {
-    glutTimerFunc(timerDelay, update, 1);
     for (int e = 0; e < nUpdateable; e++){
-        updateableEntities[e] -> update();
+        updateableEntities[e] -> Update();
+		showVec3("Sphere Forward", updateableEntities[e]->Forward());
+		showVec3("Sphere Left   ", updateableEntities[e]->Left());
     }
+	glutPostRedisplay();
+	glutTimerFunc(timerDelay, update, 1);
 }
 // load the shader programs, vertex data from model files, create the solids, set initial view
 void init() {
@@ -204,28 +181,41 @@ void init() {
     }
 
     srand(time(NULL));
-    int max = 500;
+    int max = 250;
 
     glm::vec3 pos;
     glm::vec3 target;
 
-    printf("\tSphere drawn\n");
-    pos = glm::vec3(0.0f,0.0f,0.0f);
+    printf("\Sun drawn\n");
     target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
-    updateableEntities[0] = new CelestialBody(models[3], pos, glm::vec3(modelSize[3]), target, glm::vec3(0.0f, 1.0f, 0.0f));
+    updateableEntities[0] = new CelestialBody(models[3], NULL, glm::vec3(0.0f), glm::vec3(modelSize[3]), target, 
+		glm::vec3(0.0f, 1.0f, 0.0f), 60.0f);
+	entities[0] = updateableEntities[0];
 
-    for (int i = 0; i < nEntities; i++) {
+	printf("\tPlanet drawn\n");
+	target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+	updateableEntities[1] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(0.0f),
+		glm::vec3(modelSize[3] / 2), target, glm::vec3(0.0f, 1.0f, 0.0f), 4.0f, 30.0f);
+	entities[1] = updateableEntities[1];
+	pos = glm::vec3(100 + entities[0]->BoundingRadius() + entities[1]->BoundingRadius(), 0.0f, 0.0f);
+	entities[1]->SetPosition(pos);
+
+	printf("\tMoon drawn\n");
+	target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
+	updateableEntities[2] = new CelestialBody(models[3], (CelestialBody*)entities[1], glm::vec3(0.0f),
+		glm::vec3(modelSize[3] / 4), target, glm::vec3(0.0f, 1.0f, 0.0f), 8.0f, 8.0f);
+	entities[2] = updateableEntities[2];
+	pos = glm::vec3(25 + entities[1]->BoundingRadius() + entities[2]->BoundingRadius(), 0.0f, 0.0f);
+	entities[2]->SetPosition(pos);
+
+    for (int i = nUpdateable; i < nEntities; i++) {
         printf("init i:%d\n", i);
-
         pos = glm::vec3((rand() % (max+1)) - max/2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
         target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
         entities[i] = new BaseEntity(models[i % 2 + 1], pos, glm::vec3(modelSize[i % 2 + 1]), target, glm::vec3(0.0f, 1.0f, 0.0f));
     }
 
     lastTime = glutGet(GLUT_ELAPSED_TIME);
-
-
-
     MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
 
     viewMatrix = glm::lookAt(
@@ -277,7 +267,7 @@ int main(int argc, char* argv[]) {
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutTimerFunc(timerDelay, update, 1);
-    glutIdleFunc(display);
+    //glutIdleFunc(display);
     glutMainLoop();
     printf("done\n");
     return 0;
