@@ -130,6 +130,7 @@ void display()
 
     if (showAxis)
     {
+		// Local axis for each entity
         for (int e = 0; e < nEntities; e++) 
         {
             modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
@@ -142,16 +143,16 @@ void display()
             glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
         }
     }
-    glutSwapBuffers();
 
+    glutSwapBuffers();
     frameCount++;
     currentTime = glutGet(GLUT_ELAPSED_TIME);
     timeInterval = currentTime - lastTime;
+
     if (timeInterval >= 1000){
         lastTime = currentTime;
         frameCount = 0;
     }
-
 }
 
 void update(int value)
@@ -187,38 +188,38 @@ void init() {
     glm::vec3 target;
 
     printf("\tSun drawn\n");
-    target = glm::vec3(rand() , rand(), 0.0f);
+    target = glm::vec3(rand() , rand(), rand());
 	glm::vec3 up = glm::vec3(0, 1, 0);
-	if (colinear(target, up, 0.1))
+	if (colinear(target, up, 0.1)) // These can't be colinear
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
     updateableEntities[0] = new CelestialBody(models[3], NULL, glm::vec3(0.0f), glm::vec3(modelSize[3]), target, 
-		up, 4.0f);
+		up, 60.0f);
 	entities[0] = updateableEntities[0];
 
 	printf("\tPlanet drawn\n");
-	target = glm::vec3(rand(), rand(), 0.0f);
+	target = glm::vec3(rand(), rand(), rand());
 	up = glm::vec3(0, 1, 0);
 	if (colinear(target, up, 0.1))
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
 	updateableEntities[1] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(0.0f),
-		glm::vec3(modelSize[3] / 2), target, up, 4.0f, 8.0f);
+		glm::vec3(modelSize[3] / 2), target, up, 8.0f, 30.0f);
 	entities[1] = updateableEntities[1];
-	pos = glm::vec3(100 + entities[0]->BoundingRadius() + entities[1]->BoundingRadius(), 0.0f, 0.0f);
+	pos = glm::vec3(100 + entities[0]->BoundingRadius() + entities[1]->BoundingRadius(), 100.0f, 0.0f);
 	entities[1]->SetPosition(pos);
 
 	printf("\tMoon drawn\n");
-	target = glm::vec3(rand(), rand(), 0.0f);
+	target = glm::vec3(rand(), rand(), rand());
 	up = glm::vec3(0, 1, 0);
 	if (colinear(target, up, 0.1))
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
 	updateableEntities[2] = new CelestialBody(models[3], (CelestialBody*)entities[1], glm::vec3(0.0f),
-		glm::vec3(modelSize[3] / 4), target, up, 4.0f, 4.0f);
+		glm::vec3(modelSize[3] / 4), target, up, 8.0f, 8.0f);
 	entities[2] = updateableEntities[2];
 	pos = glm::vec3(25 + entities[1]->BoundingRadius() + entities[2]->BoundingRadius(), 0.0f, 0.0f);
 	entities[2]->SetPosition(pos);

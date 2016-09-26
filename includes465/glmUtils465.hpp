@@ -102,6 +102,7 @@ inline glm::vec3 unitNormal(glm::vec4 &point0, glm::vec4 &point1,
   return normal;
   }
 
+// Clamps vec3 values to zero if close to zero
 inline glm::vec3 clampZero(glm::vec3& v)
 {
 	glm::vec3 vN = v;
@@ -129,8 +130,6 @@ inline bool checkSigns(glm::vec3& v1, glm::vec3& v2)
 {
 	glm::vec3 v1N = clampZero(v1);
 	glm::vec3 v2N = clampZero(v2);
-	showVec3("\tv1N", v1N);
-	showVec3("\tv2N", v2N);
 
 	return (glm::sign(v1N.x) == glm::sign(v2N.x) &&
 		glm::sign(v1N.y) == glm::sign(v2N.y) &&

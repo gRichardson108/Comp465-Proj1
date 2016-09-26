@@ -9,10 +9,19 @@ CelestialBody::CelestialBody(Model* model, CelestialBody* parent, const glm::vec
 	m_fOrbitRate(orbitRate),
 	m_vOrbitAxis(orbitAxis)
 {
+	// Get proper orbital axis
+	if (m_vPosition != glm::vec3(0.0f, 0.0f, 0.0f))
+	{
+		glm::vec3 orbitLeft = glm::normalize(glm::cross(m_vOrbitAxis, m_vPosition));
+		m_vOrbitAxis = glm::normalize(glm::cross(m_vPosition, orbitLeft));
+	}
+
+	// Update position using parent
 	if (m_eParent != NULL)
 	{
-		m_vPosition += m_eParent->Position();
-		m_fOrbitDistance = (m_vPosition - m_eParent->Position()).length();
+		m_vParentOldPosition = m_eParent->Position();
+		m_vPosition += m_vParentOldPosition;
+		m_fOrbitDistance = (m_vPosition - m_vParentOldPosition).length();
 	}
 	else
 	{
@@ -29,6 +38,17 @@ void CelestialBody::SetPosition(const glm::vec3& position)
 {
 	m_vPosition = position;
 
+	// Get new orbital axis
+	if (m_vPosition != glm::vec3(0.0f, 0.0f, 0.0f))
+	{
+		glm::vec3 orbitLeft = glm::normalize(glm::cross(m_vOrbitAxis, m_vPosition));
+		m_vOrbitAxis = glm::normalize(glm::cross(m_vPosition, orbitLeft));
+	}
+
+	// New orbit matrix
+	m_mOrbit = glm::mat3(glm::rotate(glm::mat4(), 40 * glm::two_pi<float>() / (m_fOrbitRate * 1000.0f), m_vOrbitAxis));
+
+	// New position using parent
 	if (m_eParent != NULL)
 	{
 		m_vParentOldPosition = m_eParent->Position();
@@ -43,11 +63,9 @@ void CelestialBody::SetPosition(const glm::vec3& position)
 
 void CelestialBody::Update()
 {
+	// Rotate forward and left vectors
 	if (m_fRotationRate > 0.0f)
 	{
-		// There seems to be an issue where occasionally there's a quick scale change
-		// I think this has something to do with changing these vectors but haven't
-		// figured it out yet.
 		m_vForward = glm::normalize(m_mRotation * m_vForward);
 		m_vLeft = glm::normalize(m_mRotation * m_vLeft);
 	}
@@ -60,10 +78,12 @@ void CelestialBody::Update()
 		m_vParentOldPosition = m_eParent->Position();
 	}
 
+	// Rotate position around origin
 	if (m_fOrbitRate > 0.0f)
 	{
 		if (m_eParent != NULL)
 		{
+			// Need to remove parent position first
 			m_vPosition = m_mOrbit * (m_vPosition - m_vParentOldPosition) + m_vParentOldPosition;
 		}
 		else

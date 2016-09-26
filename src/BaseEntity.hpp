@@ -6,13 +6,13 @@
 class BaseEntity
 {
 protected:
-	glm::vec3 m_vPosition;
-	glm::vec3 m_vForward;
-	glm::vec3 m_vLeft;
-	glm::vec3 m_vUp;
-	glm::vec3 m_vScale;
-	float m_fBoundingRadius;
-	Model* m_mModel;
+	glm::vec3 m_vPosition; // Position of entity
+	glm::vec3 m_vForward; // Forward vector of entity
+	glm::vec3 m_vLeft; // Left vector of entity
+	glm::vec3 m_vUp; // Up vector of entity
+	glm::vec3 m_vScale; // Scale vector of entity
+	float m_fBoundingRadius; // Bounding radius of entity
+	Model* m_mModel; // Model to render
 
 public:
 	BaseEntity(Model* model) :

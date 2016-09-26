@@ -6,17 +6,16 @@
 class CelestialBody : public MoveableEntity
 {
     private :
-		CelestialBody* m_eParent;//if we're orbiting another body, which one?
-		glm::vec3 m_vParentOldPosition;
-        float m_fRotationRate;//rate we rotate on our axis
-		glm::mat3 m_mRotation;
-		float m_fOrbitDistance;
-        float m_fOrbitRate;//speed we orbit our parent, if any
-        glm::vec3 m_vOrbitAxis;//the axis we orbit our parent, if any
-		glm::mat3 m_mOrbit;
+		CelestialBody* m_eParent; // If we're orbiting another body, which one?
+		glm::vec3 m_vParentOldPosition; // Parent's previous position
+        float m_fRotationRate; // Rate in seconds for full rotation
+		glm::mat3 m_mRotation; // Axis rotation matrix
+		float m_fOrbitDistance; // Orbit distance from parent
+        float m_fOrbitRate; // Rate in seconds for full orbit
+        glm::vec3 m_vOrbitAxis; // Orbital axis
+		glm::mat3 m_mOrbit; // Orbit rotation matrix
         
     public :
-        //bunch of boilerplate constructors that pass parameters up the hierarchy
 		CelestialBody(Model* model, CelestialBody* parent = NULL, const glm::vec3& pos = glm::vec3(0.0f),
 			const glm::vec3& scale = glm::vec3(1.0f), const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f),
 			const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f), float rotationRate = 0.0f, float orbitRate = 0.0f,
