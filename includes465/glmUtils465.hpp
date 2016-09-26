@@ -31,7 +31,7 @@ Mike Barnes
 
 inline void showVec3(char * name, const glm::vec3 &v) {
   printf("%s:  ", name);
-  printf("[%8.3f  %8.3f  %8.3f ] \n", v.x, v.y, v.z); 
+  printf("[%8.10f  %8.10f  %8.10f ] \n", v.x, v.y, v.z); 
   }
 
 inline void showVec4(char * name, const glm::vec4 &v) {
@@ -101,5 +101,39 @@ inline glm::vec3 unitNormal(glm::vec4 &point0, glm::vec4 &point1,
   glm::vec3  normal = glm::normalize(glm::cross(v1, v2));
   return normal;
   }
+
+// Clamps vec3 values to zero if close to zero
+inline glm::vec3 clampZero(glm::vec3& v)
+{
+	glm::vec3 vN = v;
+
+	if (glm::abs(vN.x) < 0.0001f)
+	{
+		vN.x = 0.0f;
+	}
+
+	if (glm::abs(vN.y) < 0.0001f)
+	{
+		vN.y = 0.0f;
+	}
+
+	if (glm::abs(vN.z) < 0.0001f)
+	{
+		vN.z = 0.0f;
+	}
+
+	return vN;
+}
+
+// Checks if two vectors have equal signs
+inline bool checkSigns(glm::vec3& v1, glm::vec3& v2)
+{
+	glm::vec3 v1N = clampZero(v1);
+	glm::vec3 v2N = clampZero(v2);
+
+	return (glm::sign(v1N.x) == glm::sign(v2N.x) &&
+		glm::sign(v1N.y) == glm::sign(v2N.y) &&
+		glm::sign(v1N.z) == glm::sign(v2N.z));
+}
 
 #endif

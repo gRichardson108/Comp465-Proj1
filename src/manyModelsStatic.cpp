@@ -36,9 +36,9 @@ const int X = 0, Y = 1, Z = 2, START = 0, STOP = 1;
 // constants for models:  file names, vertex count, model display size
 const int nModels = 4;  // number of models in this scene
 Model* models[nModels];
-const int nEntities = 6;
+const int nEntities = 3;
+const int nUpdateable = 3;
 BaseEntity* entities[nEntities];
-const int nUpdateable = 1;
 MoveableEntity* updateableEntities[nUpdateable];
 bool showAxis = false;
 bool snapToForward = false; //when true, the models should be facing forward, away from the camera view
@@ -130,6 +130,7 @@ void display()
 
     if (showAxis)
     {
+		// Local axis for each entity
         for (int e = 0; e < nEntities; e++) 
         {
             modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
@@ -178,23 +179,25 @@ void display()
         }
     }
     glutSwapBuffers();
-
     frameCount++;
     currentTime = glutGet(GLUT_ELAPSED_TIME);
     timeInterval = currentTime - lastTime;
+
     if (timeInterval >= 1000){
         lastTime = currentTime;
         frameCount = 0;
     }
-
 }
 
 void update(int value)
 {
-    glutTimerFunc(timerDelay, update, 1);
+	printf("\n");
     for (int e = 0; e < nUpdateable; e++){
-        updateableEntities[e] -> update();
+        updateableEntities[e] -> Update();
+		printf("Sphere %d\n", e);
     }
+	glutPostRedisplay();
+	glutTimerFunc(timerDelay, update, 1);
 }
 // load the shader programs, vertex data from model files, create the solids, set initial view
 void init() {
@@ -213,32 +216,60 @@ void init() {
     }
 
     srand(time(NULL));
-    int max = 500;
+    int max = 250;
 
     glm::vec3 pos;
     glm::vec3 target;
 
-    printf("\tSphere drawn\n");
-    pos = glm::vec3(0.0f,0.0f,0.0f);
-    target = glm::vec3(0, 0, 1);
-    updateableEntities[0] = new CelestialBody(models[3], pos, glm::vec3(modelSize[3]), target, glm::vec3(0.0f, 1.0f, 0.0f));
+    printf("\tSun drawn\n");
+    target = glm::vec3(rand() , rand(), rand());
+	glm::vec3 up = glm::vec3(0, 1, 0);
+	if (colinear(target, up, 0.1)) // These can't be colinear
+	{
+		up = glm::vec3(-1, 0, 0);
+	}
+    updateableEntities[0] = new CelestialBody(models[3], NULL, glm::vec3(0.0f), glm::vec3(modelSize[3]), target, 
+		up, 60.0f);
+	entities[0] = updateableEntities[0];
 
-    for (int i = 0; i < nEntities; i++) {
+	printf("\tPlanet drawn\n");
+	target = glm::vec3(rand(), rand(), rand());
+	up = glm::vec3(0, 1, 0);
+	if (colinear(target, up, 0.1))
+	{
+		up = glm::vec3(-1, 0, 0);
+	}
+	updateableEntities[1] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(0.0f),
+		glm::vec3(modelSize[3] / 2), target, up, 8.0f, 30.0f);
+	entities[1] = updateableEntities[1];
+	pos = glm::vec3(100 + entities[0]->BoundingRadius() + entities[1]->BoundingRadius(), 100.0f, 0.0f);
+	entities[1]->SetPosition(pos);
+
+	printf("\tMoon drawn\n");
+	target = glm::vec3(rand(), rand(), rand());
+	up = glm::vec3(0, 1, 0);
+	if (colinear(target, up, 0.1))
+	{
+		up = glm::vec3(-1, 0, 0);
+	}
+	updateableEntities[2] = new CelestialBody(models[3], (CelestialBody*)entities[1], glm::vec3(0.0f),
+		glm::vec3(modelSize[3] / 4), target, up, 8.0f, 8.0f);
+	entities[2] = updateableEntities[2];
+	pos = glm::vec3(25 + entities[1]->BoundingRadius() + entities[2]->BoundingRadius(), 0.0f, 0.0f);
+	entities[2]->SetPosition(pos);
+
+    for (int i = nUpdateable; i < nEntities; i++) {
         printf("init i:%d\n", i);
-
         pos = glm::vec3((rand() % (max+1)) - max/2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
         target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
         entities[i] = new BaseEntity(models[i % 2 + 1], pos, glm::vec3(modelSize[i % 2 + 1]), target, glm::vec3(0.0f, 1.0f, 0.0f));
     }
 
     lastTime = glutGet(GLUT_ELAPSED_TIME);
-
-
-
     MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
 
     viewMatrix = glm::lookAt(
-            glm::vec3(50.0f, 50.0f, 500.0f),  // eye position
+            glm::vec3(0.0f, 0.0f, 500.0f),  // eye position
             glm::vec3(0),                   // look at position
             glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
 
@@ -286,7 +317,7 @@ int main(int argc, char* argv[]) {
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutTimerFunc(timerDelay, update, 1);
-    glutIdleFunc(display);
+    //glutIdleFunc(display);
     glutMainLoop();
     printf("done\n");
     return 0;
