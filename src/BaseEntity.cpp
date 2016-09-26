@@ -26,15 +26,30 @@ glm::mat4 BaseEntity::RotateToForward()
 	glm::vec3 adjustedUp = glm::normalize(rot1 * glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::quat rot2 = glm::quat();
 	float dot = glm::dot(m_vUp, adjustedUp);
+	dot = dot > 1.0f ? 1.0f : (dot < -1.0f ? -1.0f : dot);
 	glm::vec3 cross = glm::normalize(glm::cross(adjustedUp, m_vUp));
 
-	if (checkSigns(m_vForward, cross))
+	printf("Adjust Up: %1.10f\n", dot);
+	showVec3("Forward", m_vForward);
+	showVec3("Cross", cross);
+
+	if (colinear(m_vForward, cross, 0.1))
 	{
-		rot2 = glm::rotate(rot2, glm::acos(dot), m_vForward);
+		printf("Colinear\n");
+		if (checkSigns(m_vForward, cross))
+		{
+			printf("Equal\n");
+			rot2 = glm::rotate(rot2, glm::acos(dot), m_vForward);
+		}
+		else
+		{
+			printf("Not Equal\n");
+			rot2 = glm::rotate(rot2, -glm::acos(dot), m_vForward);
+		}
 	}
 	else
 	{
-		rot2 = glm::rotate(rot2, -glm::acos(dot), m_vForward);
+		rot2 = glm::rotation(adjustedUp, m_vUp);
 	}
 
 	return glm::mat4_cast(rot2 * rot1);
