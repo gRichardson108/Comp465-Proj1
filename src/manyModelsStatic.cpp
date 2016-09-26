@@ -53,6 +53,7 @@ GLuint VAO[nModels];      // Vertex Array Objects
 GLuint buffer[nModels];   // Vertex Buffer Objects
 int timerDelay = 40, frameCount = 0;
 double currentTime, lastTime, timeInterval;
+int currentCamera = 0, nCameras = 4;
 
 // Shader handles, matrices, etc
 GLuint MVP ;  // Model View Projection matrix's handle
@@ -78,41 +79,54 @@ void reshape(int width, int height) {
     projectionMatrix = glm::perspective(FOVY, aspectRatio, 1.0f, 100000.0f); 
 }
 
-void keyboard(unsigned char key, int x, int y) {
-    switch (key) {
-        case 033: case 'q':  case 'Q': exit(EXIT_SUCCESS); break;
-        case 't': showAxis = !showAxis; glutPostRedisplay(); break;
-        case 'a': viewMatrix = glm::lookAt(
-                          glm::vec3(50.0f, 50.0f, 500.0f),  // eye position
-                          glm::vec3(0),                   // look at position
-                          glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
-                  glutPostRedisplay(); 
-                  break;
-        case 's': viewMatrix = glm::lookAt(
-                          glm::vec3(500.0f, 0.0f, 0.0f),  // eye position
-                          glm::vec3(0),                   // look at position
-                          glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
-                  glutPostRedisplay(); 
-                  break;
-        case 'd': viewMatrix = glm::lookAt(
-                          glm::vec3(0.0f, 0.0f, 500.0f),  // eye position
-                          glm::vec3(0),                   // look at position
-                          glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
-                  glutPostRedisplay(); 
-                  break;
-        case 'z': viewMatrix = glm::lookAt(
-                          glm::vec3(-500.0f, 0.0f, 0.0f),  // eye position
-                          glm::vec3(0),                   // look at position
-                          glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
-                  glutPostRedisplay(); 
-                  break;
-
-        case 'x': viewMatrix = glm::lookAt(
-                          glm::vec3(-500.0f, -500.0f, -500.0f),  // eye position
-                          glm::vec3(0),                   // look at position
-                          glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
-                  glutPostRedisplay(); 
-                  break;
+void keyboard(unsigned char key, int x, int y)
+{
+    switch (key)
+	{
+        case 033: case 'q':  case 'Q':
+			exit(EXIT_SUCCESS);
+			break;
+		case 't': case 'T':
+			showAxis = !showAxis;
+			glutPostRedisplay();
+			break;
+		case 'c': case 'C':
+			currentCamera = (currentCamera + 1) % nCameras;
+			switch (currentCamera)
+			{
+				case 0:
+					viewMatrix = glm::lookAt(
+						glm::vec3(0.0f, 0.0f, 500.0f),
+						glm::vec3(0),
+						glm::vec3(0.0f, 1.0f, 0.0f));
+					break;
+				case 1:
+					viewMatrix = glm::lookAt(
+						glm::vec3(500.0f, 0.0f, 0.0f),
+						glm::vec3(0),
+						glm::vec3(0.0f, 1.0f, 0.0f));
+					break;
+				case 2:
+					viewMatrix = glm::lookAt(
+						glm::vec3(0.0f, 0.0f, -500.0f),
+						glm::vec3(0),
+						glm::vec3(0.0f, 1.0f, 0.0f));
+					break;
+				case 3:
+					viewMatrix = glm::lookAt(
+						glm::vec3(-500.0f, 0.0f, 0.0f),
+						glm::vec3(0),
+						glm::vec3(0.0f, 1.0f, 0.0f));
+					break;
+				default:
+					viewMatrix = glm::lookAt(
+						glm::vec3(0.0f, 0.0f, 500.0f),
+						glm::vec3(0),
+						glm::vec3(0.0f, 1.0f, 0.0f));
+					break;
+			}
+            glutPostRedisplay(); 
+            break;
     }
 }
 
@@ -298,7 +312,7 @@ int main(int argc, char* argv[]) {
 #else
     printf("LINUX\n");
 #endif
-    glutCreateWindow("465 manyModelsStatic Example: t - Show Axis - cameras: a s d z x");
+    glutCreateWindow("Warbird Simulation: t - Show Axis, Camera - c");
     // initialize and verify glew
     glewExperimental = GL_TRUE;  // needed my home system 
     GLenum err = glewInit();  
