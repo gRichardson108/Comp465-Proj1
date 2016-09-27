@@ -10,8 +10,9 @@ class StaticCamera {
         glm::mat4 projectionMatrix;
 
         //viewport width and height for determining aspect ratio
-        int viewportWidth;
-        int viewportHeight;
+        //we set a default, but this will be wiped out by the reshapeFunc
+        int viewportWidth = 800;
+        int viewportHeight = 600;
         float FOVY;
 
         //the near and far clipping planes
@@ -21,11 +22,16 @@ class StaticCamera {
 
 
     public :
-        Camera(glm::mat4 cameraMatrix);
-        Camera(glm::vec3 eye, glm::vec3 up, glm::vec3 at);
+        StaticCamera(glm::mat4 cameraMatrix, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, float farClip = 10000000.0f);
+        StaticCamera(glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, float farClip = 10000000.0f);
 
         glm::mat4 getViewMatrix(void);//setup viewMatrix as read-only
-        glm::mat4 getProjectionMatrix(void);
+        void reshapeFunc(int width, int height);//functions as the glutReshapeFunc whenever this camera is selected
+
+        glm::mat4 updateProjectionMatrix();
+
+        void setFOVY(float newFOVY);
+        float getFOVY();
         
         
 
