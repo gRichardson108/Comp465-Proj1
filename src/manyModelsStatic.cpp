@@ -26,18 +26,19 @@ Mike Barnes
 #endif
 
 # include "../includes465/include465.hpp"
-#include "CelestialBody.hpp"
-#include "MoveableEntity.hpp"
-#include "BaseEntity.hpp"
+#include "Scene.hpp"
 #include "Model.hpp"
+#include "BaseEntity.hpp"
+#include "MoveableEntity.hpp"
+#include "CelestialBody.hpp"
 #include <time.h>
 
 const int X = 0, Y = 1, Z = 2, START = 0, STOP = 1;
 // constants for models:  file names, vertex count, model display size
 const int nModels = 4;  // number of models in this scene
 Model* models[nModels];
-const int nEntities = 3;
-const int nUpdateable = 3;
+const int nEntities = 5;
+const int nUpdateable = 5;
 BaseEntity* entities[nEntities];
 MoveableEntity* updateableEntities[nUpdateable];
 bool showAxis = false;
@@ -51,9 +52,11 @@ char * fragmentShaderFile = "src/simpleFragment.glsl";
 GLuint shaderProgram; 
 GLuint VAO[nModels];      // Vertex Array Objects
 GLuint buffer[nModels];   // Vertex Buffer Objects
-int timerDelay = 40, frameCount = 0;
+Scene* Scene::s_pInstance = NULL;
+Scene* scene = new Scene();
+int tq = 0, frameCount = 0;
 double currentTime, lastTime, timeInterval;
-int currentCamera = 0, nCameras = 4;
+int currentCamera = 0, nCameras = 6;
 
 // Shader handles, matrices, etc
 GLuint MVP ;  // Model View Projection matrix's handle
@@ -96,37 +99,67 @@ void keyboard(unsigned char key, int x, int y)
 			{
 				case 0:
 					viewMatrix = glm::lookAt(
-						glm::vec3(0.0f, 0.0f, 500.0f),
+						glm::vec3(0.0f, 10000.0f, 20000.0f),
 						glm::vec3(0),
 						glm::vec3(0.0f, 1.0f, 0.0f));
 					break;
 				case 1:
 					viewMatrix = glm::lookAt(
-						glm::vec3(500.0f, 0.0f, 0.0f),
+						glm::vec3(0.0f, 20000.0f, 0.0f),
 						glm::vec3(0),
-						glm::vec3(0.0f, 1.0f, 0.0f));
+						glm::vec3(0.0f, 0.0f, -1.0f));
 					break;
 				case 2:
 					viewMatrix = glm::lookAt(
-						glm::vec3(0.0f, 0.0f, -500.0f),
+						glm::vec3(0.0f, 0.0f, 20000.0f),
 						glm::vec3(0),
 						glm::vec3(0.0f, 1.0f, 0.0f));
 					break;
 				case 3:
 					viewMatrix = glm::lookAt(
-						glm::vec3(-500.0f, 0.0f, 0.0f),
+						glm::vec3(20000.0f, 0.0f, 0.0f),
+						glm::vec3(0),
+						glm::vec3(0.0f, 1.0f, 0.0f));
+					break;
+				case 4:
+					viewMatrix = glm::lookAt(
+						glm::vec3(0.0f, 0.0f, -20000.0f),
+						glm::vec3(0),
+						glm::vec3(0.0f, 1.0f, 0.0f));
+					break;
+				case 5:
+					viewMatrix = glm::lookAt(
+						glm::vec3(-20000.0f, 0.0f, 0.0f),
 						glm::vec3(0),
 						glm::vec3(0.0f, 1.0f, 0.0f));
 					break;
 				default:
 					viewMatrix = glm::lookAt(
-						glm::vec3(0.0f, 0.0f, 500.0f),
+						glm::vec3(0.0f, 10000.0f, 20000.0f),
 						glm::vec3(0),
 						glm::vec3(0.0f, 1.0f, 0.0f));
 					break;
 			}
             glutPostRedisplay(); 
             break;
+		case 'u': case 'U':
+			tq = (tq + 1) % 4;
+			switch (tq)
+			{
+				case 0:
+					scene->SetTimerDelay(5);
+					break;
+				case 1:
+					scene->SetTimerDelay(40);
+					break;
+				case 2:
+					scene->SetTimerDelay(100);
+					break;
+				case 3:
+					scene->SetTimerDelay(500);
+					break;
+			}
+			break;
     }
 }
 
@@ -171,13 +204,11 @@ void display()
 
 void update(int value)
 {
-	printf("\n");
     for (int e = 0; e < nUpdateable; e++){
         updateableEntities[e] -> Update();
-		printf("Sphere %d\n", e);
     }
 	glutPostRedisplay();
-	glutTimerFunc(timerDelay, update, 1);
+	glutTimerFunc(scene->TimerDelay(), update, 1);
 }
 // load the shader programs, vertex data from model files, create the solids, set initial view
 void init() {
@@ -201,42 +232,60 @@ void init() {
     glm::vec3 pos;
     glm::vec3 target;
 
-    printf("\tSun drawn\n");
+    printf("\tRuber drawn\n");
     target = glm::vec3(rand() , rand(), rand());
 	glm::vec3 up = glm::vec3(0, 1, 0);
 	if (colinear(target, up, 0.1)) // These can't be colinear
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-    updateableEntities[0] = new CelestialBody(models[3], NULL, glm::vec3(0.0f), glm::vec3(modelSize[3]), target, 
+    updateableEntities[0] = new CelestialBody(models[3], NULL, glm::vec3(0.0f), glm::vec3(2000), target, 
 		up, 60.0f);
 	entities[0] = updateableEntities[0];
 
-	printf("\tPlanet drawn\n");
+	printf("\tUnum drawn\n");
 	target = glm::vec3(rand(), rand(), rand());
 	up = glm::vec3(0, 1, 0);
 	if (colinear(target, up, 0.1))
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[1] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(0.0f),
-		glm::vec3(modelSize[3] / 2), target, up, 8.0f, 30.0f);
+	updateableEntities[1] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(4000.0f, 0.0f, 0.0f),
+		glm::vec3(200), target, up, 5.0f, 8.0f);
 	entities[1] = updateableEntities[1];
-	pos = glm::vec3(100 + entities[0]->BoundingRadius() + entities[1]->BoundingRadius(), 100.0f, 0.0f);
-	entities[1]->SetPosition(pos);
 
-	printf("\tMoon drawn\n");
+	printf("\tDuo drawn\n");
 	target = glm::vec3(rand(), rand(), rand());
 	up = glm::vec3(0, 1, 0);
 	if (colinear(target, up, 0.1))
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[2] = new CelestialBody(models[3], (CelestialBody*)entities[1], glm::vec3(0.0f),
-		glm::vec3(modelSize[3] / 4), target, up, 8.0f, 8.0f);
+	updateableEntities[2] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(9000.0f, 0.0f, 0.0f),
+		glm::vec3(400), target, up, 5.0f, 16.0f);
 	entities[2] = updateableEntities[2];
-	pos = glm::vec3(25 + entities[1]->BoundingRadius() + entities[2]->BoundingRadius(), 0.0f, 0.0f);
-	entities[2]->SetPosition(pos);
+
+	printf("\tPrimus drawn\n");
+	target = glm::vec3(rand(), rand(), rand());
+	up = glm::vec3(0, 1, 0);
+	if (colinear(target, up, 0.1))
+	{
+		up = glm::vec3(-1, 0, 0);
+	}
+	updateableEntities[3] = new CelestialBody(models[3], (CelestialBody*)entities[2], glm::vec3(8100.0f, 0.0f, 0.0f) - entities[2]->Position(),
+		glm::vec3(100), target, up, 5.0f, 8.0f);
+	entities[3] = updateableEntities[3];
+
+	printf("\tSecundus drawn\n");
+	target = glm::vec3(rand(), rand(), rand());
+	up = glm::vec3(0, 1, 0);
+	if (colinear(target, up, 0.1))
+	{
+		up = glm::vec3(-1, 0, 0);
+	}
+	updateableEntities[4] = new CelestialBody(models[3], (CelestialBody*)entities[2], glm::vec3(7250.0f, 0.0f, 0.0f) - entities[2]->Position(),
+		glm::vec3(150), target, up, 5.0f, 16.0f);
+	entities[4] = updateableEntities[4];
 
     for (int i = nUpdateable; i < nEntities; i++) {
         printf("init i:%d\n", i);
@@ -245,11 +294,14 @@ void init() {
         entities[i] = new BaseEntity(models[i % 2 + 1], pos, glm::vec3(modelSize[i % 2 + 1]), target, glm::vec3(0.0f, 1.0f, 0.0f));
     }
 
+	Scene::Instance()->SetEntities(entities, nEntities);
+	Scene::Instance()->SetMoveables(updateableEntities, nUpdateable);
+
     lastTime = glutGet(GLUT_ELAPSED_TIME);
     MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
 
     viewMatrix = glm::lookAt(
-            glm::vec3(0.0f, 0.0f, 500.0f),  // eye position
+            glm::vec3(0.0f, 10000.0f, 20000.0f),  // eye position
             glm::vec3(0),                   // look at position
             glm::vec3(0.0f, 1.0f, 0.0f)); // up vect0r
 
@@ -296,7 +348,7 @@ int main(int argc, char* argv[]) {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
-    glutTimerFunc(timerDelay, update, 1);
+    glutTimerFunc(scene->TimerDelay(), update, 1);
     //glutIdleFunc(display);
     glutMainLoop();
     printf("done\n");
