@@ -38,9 +38,9 @@ glm::mat4 BaseEntity::RotateToForward()
 		cross = glm::normalize(cross);
 	}
 
-	printf("Adjust Up: %1.10f\n", dot);
-	showVec3("Forward", m_vForward);
-	showVec3("Cross", cross);
+	//printf("Adjust Up: %1.10f\n", dot);
+	//showVec3("Forward", m_vForward);
+	//showVec3("Cross", cross);
 
 	if (colinear(m_vForward, cross, 0.1))
 	{

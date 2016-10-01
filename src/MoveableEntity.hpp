@@ -22,8 +22,8 @@ class MoveableEntity : public BaseEntity
 		{}
 
         virtual ~MoveableEntity(){}
-
 		virtual void Update() = 0;
+		virtual void UpdateTimeDelay() = 0;
 };
 
 #endif

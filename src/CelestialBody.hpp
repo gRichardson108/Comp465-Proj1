@@ -23,6 +23,7 @@ class CelestialBody : public MoveableEntity
 
         virtual ~CelestialBody() {}
         void Update();
+		void UpdateTimeDelay();
 		void SetPosition(const glm::vec3& position);
 		void SetPosition(float x, float y, float z) { SetPosition(glm::vec3(x, y, z)); }
 };
