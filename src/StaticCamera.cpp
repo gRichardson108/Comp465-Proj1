@@ -10,18 +10,17 @@ glm::mat4 StaticCamera::getViewMatrix(){
     return viewMatrix;
 }
 
-//you must set this as the glutReshapeFunc callback function whenever
-//the camera becomes the active view
-void reshapeFunc(int width, int height){
-    viewportWidth = width;
-    viewportHeight = height;
+glm::mat4 StaticCamera::updateProjectionMatrix(int width, int height){
     float aspectRatio = (float) width / (float) height;
-    glViewport(0, 0, width, height);
-    projectionMatrix = glm::perspective(FOVY, aspectRatio, nearClip, farClip);
-}
-
-glm::mat4 updateProjectionMatrix(){
-    float aspectRatio = (float) viewportWidth / (float) viewportHeight;
     projectionMatrix = glm::perspective(FOVY, aspectRatio, nearClip, farClip); 
     return projectionMatrix;
 }
+
+void StaticCamera::setFOVY(float newFOVY){
+    FOVY = newFOVY;
+}
+
+float StaticCamera::getFOVY(){
+    return FOVY;
+}
+

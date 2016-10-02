@@ -15,27 +15,22 @@ class StaticCamera {
         int viewportHeight = 600;
         float FOVY;
 
-        //the near and far clipping planes
-        float nearClip;
-        float farClip;
 
 
 
     public :
+        float nearClip;
+        float farClip;
         StaticCamera(glm::mat4 cameraMatrix, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, float farClip = 10000000.0f);
         StaticCamera(glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, float farClip = 10000000.0f);
 
         glm::mat4 getViewMatrix(void);//setup viewMatrix as read-only
-        void reshapeFunc(int width, int height);//functions as the glutReshapeFunc whenever this camera is selected
 
-        glm::mat4 updateProjectionMatrix();
+        glm::mat4 updateProjectionMatrix(int width, int height);
 
         void setFOVY(float newFOVY);
         float getFOVY();
-        
-        
-
-}
+};
 
 
 #endif
