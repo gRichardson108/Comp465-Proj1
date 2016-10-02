@@ -35,7 +35,7 @@ Mike Barnes
 
 const int X = 0, Y = 1, Z = 2, START = 0, STOP = 1;
 // constants for models:  file names, vertex count, model display size
-const int nModels = 4;  // number of models in this scene
+const int nModels = 8;  // number of models in this scene
 Model* models[nModels];
 const int nEntities = 5;
 const int nUpdateable = 5;
@@ -43,10 +43,11 @@ BaseEntity* entities[nEntities];
 MoveableEntity* updateableEntities[nUpdateable];
 bool showAxis = false;
 bool snapToForward = false; //when true, the models should be facing forward, away from the camera view
-char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/spaceShip-bs100.tri", "src/sphere-r50.tri"};
+char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/spaceShip-bs100.tri",
+	"src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri"};
 float modelBR[nModels];       // model's bounding radius
 float scaleValue[nModels];    // model's scaling "size" value
-const int nVertices[nModels] = { 120 * 3, 14 * 3, 996 * 3, 264 * 3};
+const int nVertices[nModels] = { 120 * 3, 14 * 3, 996 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3};
 char * vertexShaderFile   = "src/simpleVertex.glsl";     
 char * fragmentShaderFile = "src/simpleFragment.glsl";    
 GLuint shaderProgram; 
@@ -71,7 +72,7 @@ glm::mat4 projectionMatrix;     // set in reshape()
 glm::mat4 ModelViewProjectionMatrix; // set in display();
 
 // window title string
-char titleStr [50]= "465 manyModelsStatic Example ";
+char titleStr [50]= "Warbird Simulation ";
 
 void reshape(int width, int height) {
     float aspectRatio = (float) width / (float) height;
@@ -250,7 +251,7 @@ void init() {
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[1] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(4000.0f, 0.0f, 0.0f),
+	updateableEntities[1] = new CelestialBody(models[4], (CelestialBody*)entities[0], glm::vec3(4000.0f, 0.0f, 0.0f),
 		glm::vec3(200), target, up, 5.0f, 8.0f);
 	entities[1] = updateableEntities[1];
 
@@ -261,7 +262,7 @@ void init() {
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[2] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(9000.0f, 0.0f, 0.0f),
+	updateableEntities[2] = new CelestialBody(models[5], (CelestialBody*)entities[0], glm::vec3(9000.0f, 0.0f, 0.0f),
 		glm::vec3(400), target, up, 5.0f, 16.0f);
 	entities[2] = updateableEntities[2];
 
@@ -272,7 +273,7 @@ void init() {
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[3] = new CelestialBody(models[3], (CelestialBody*)entities[2], glm::vec3(8100.0f, 0.0f, 0.0f) - entities[2]->Position(),
+	updateableEntities[3] = new CelestialBody(models[6], (CelestialBody*)entities[2], glm::vec3(8100.0f, 0.0f, 0.0f) - entities[2]->Position(),
 		glm::vec3(100), target, up, 5.0f, 8.0f);
 	entities[3] = updateableEntities[3];
 
@@ -283,7 +284,7 @@ void init() {
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[4] = new CelestialBody(models[3], (CelestialBody*)entities[2], glm::vec3(7250.0f, 0.0f, 0.0f) - entities[2]->Position(),
+	updateableEntities[4] = new CelestialBody(models[7], (CelestialBody*)entities[2], glm::vec3(7250.0f, 0.0f, 0.0f) - entities[2]->Position(),
 		glm::vec3(150), target, up, 5.0f, 16.0f);
 	entities[4] = updateableEntities[4];
 
