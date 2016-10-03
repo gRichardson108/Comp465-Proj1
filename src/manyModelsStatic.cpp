@@ -269,7 +269,7 @@ void init() {
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[3] = new CelestialBody(models[6], (CelestialBody*)entities[2], glm::vec3(8100.0f, 0.0f, 0.0f) - entities[2]->Position(),
+	updateableEntities[3] = new CelestialBody(models[3], (CelestialBody*)entities[2], glm::vec3(-900.0f, 0.0f, 0.0f),
 		glm::vec3(100), target, up, 5.0f, 8.0f);
 	entities[3] = updateableEntities[3];
 
@@ -280,7 +280,7 @@ void init() {
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[4] = new CelestialBody(models[7], (CelestialBody*)entities[2], glm::vec3(7250.0f, 0.0f, 0.0f) - entities[2]->Position(),
+	updateableEntities[4] = new CelestialBody(models[3], (CelestialBody*)entities[2], glm::vec3(-1750.0f, 0.0f, 0.0f),
 		glm::vec3(150), target, up, 5.0f, 16.0f);
 	entities[4] = updateableEntities[4];
 

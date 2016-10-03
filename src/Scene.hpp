@@ -43,7 +43,7 @@ public:
 		m_iTimerDelay = delay;
 		for (int i = 0; i < m_iNumMoveableEntities; i++)
 		{
-			m_pMoveableEntities[i]->UpdateTimeDelay();
+			//m_pMoveableEntities[i]->UpdateTimeDelay();
 		}
 	}
 	
