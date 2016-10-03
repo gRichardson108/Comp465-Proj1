@@ -111,7 +111,7 @@ void reshape(int width, int height) {
     float FOVY = viewingCamera->getFOVY();
     glViewport(0, 0, width, height);
     printf("reshape: FOVY = %5.2f, width = %4d height = %4d aspect = %5.2f \n + nearclip = %5f farclip = %5f \n", 
-            FOVY, width, height, aspectRatio, viewingCamera->nearClip, viewingCamera->farClip);
+            FOVY, width, height, aspectRatio, viewingCamera->NearClip(), viewingCamera->FarClip());
     projectionMatrix = viewingCamera->updateProjectionMatrix(width, height);
 }
 

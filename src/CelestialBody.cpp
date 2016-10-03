@@ -13,8 +13,8 @@ CelestialBody::CelestialBody(Model* model, CelestialBody* parent, const glm::vec
 	// Get proper orbital axis
 	if (m_vPosition != glm::vec3(0.0f, 0.0f, 0.0f))
 	{
-		glm::vec3 orbitLeft = glm::normalize(glm::cross(m_vOrbitAxis, m_vPosition));
-		m_vOrbitAxis = glm::normalize(glm::cross(m_vPosition, orbitLeft));
+		m_vHeading = glm::normalize(glm::cross(m_vOrbitAxis, m_vPosition));
+		m_vOrbitAxis = glm::normalize(glm::cross(m_vPosition, m_vHeading));
 	}
 
 	// Update position using parent
@@ -31,8 +31,8 @@ CelestialBody::CelestialBody(Model* model, CelestialBody* parent, const glm::vec
 	
 	// Rates are in seconds for full rotation/orbit
 	// multiplied by 40 because that's timeDelay
-	m_mRotation = glm::mat3(glm::rotate(glm::mat4(), Scene::Instance()->TimerDelay() * glm::two_pi<float>() / (m_fRotationRate * 1000.0f), m_vUp));
-	m_mOrbit = glm::mat3(glm::rotate(glm::mat4(), Scene::Instance()->TimerDelay() * glm::two_pi<float>() / (m_fOrbitRate * 1000.0f), m_vOrbitAxis));
+	m_mRotation = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (m_fRotationRate * 1000.0f), m_vUp));
+	m_mOrbit = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (m_fOrbitRate * 1000.0f), m_vOrbitAxis));
 }
 
 void CelestialBody::SetPosition(const glm::vec3& position)
@@ -42,12 +42,12 @@ void CelestialBody::SetPosition(const glm::vec3& position)
 	// Get new orbital axis
 	if (m_vPosition != glm::vec3(0.0f, 0.0f, 0.0f))
 	{
-		glm::vec3 orbitLeft = glm::normalize(glm::cross(m_vOrbitAxis, m_vPosition));
-		m_vOrbitAxis = glm::normalize(glm::cross(m_vPosition, orbitLeft));
+		m_vHeading = glm::normalize(glm::cross(m_vOrbitAxis, m_vPosition));
+		m_vOrbitAxis = glm::normalize(glm::cross(m_vPosition, m_vHeading));
 	}
 
 	// New orbit matrix
-	m_mOrbit = glm::mat3(glm::rotate(glm::mat4(), Scene::Instance()->TimerDelay() * glm::two_pi<float>() / (m_fOrbitRate * 1000.0f), m_vOrbitAxis));
+	m_mOrbit = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (m_fOrbitRate * 1000.0f), m_vOrbitAxis));
 
 	// New position using parent
 	if (m_eParent != NULL)
@@ -91,11 +91,7 @@ void CelestialBody::Update()
 		{
 			m_vPosition = m_mOrbit * m_vPosition;
 		}
-	}
-}
 
-void CelestialBody::UpdateTimeDelay()
-{
-	m_mRotation = glm::mat3(glm::rotate(glm::mat4(), Scene::Instance()->TimerDelay() * glm::two_pi<float>() / (m_fRotationRate * 1000.0f), m_vUp));
-	m_mOrbit = glm::mat3(glm::rotate(glm::mat4(), Scene::Instance()->TimerDelay() * glm::two_pi<float>() / (m_fOrbitRate * 1000.0f), m_vOrbitAxis));
+		m_vHeading = glm::normalize(m_mOrbit * m_vHeading);
+	}
 }
