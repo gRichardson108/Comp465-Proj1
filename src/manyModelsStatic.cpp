@@ -37,18 +37,19 @@ Mike Barnes
 
 const int X = 0, Y = 1, Z = 2, START = 0, STOP = 1;
 // constants for models:  file names, vertex count, model display size
-const int nModels = 4;  // number of models in this scene
+const int nModels = 8;  // number of models in this scene
 Model* models[nModels];
-const int nEntities = 5;
+const int nEntities = 6;
 const int nUpdateable = 5;
 BaseEntity* entities[nEntities];
 MoveableEntity* updateableEntities[nUpdateable];
 bool showAxis = false;
 bool snapToForward = false; //when true, the models should be facing forward, away from the camera view
-char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/spaceShip-bs100.tri", "src/sphere-r50.tri"};
+char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/Warbird.tri",
+    "src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri"};
 float modelBR[nModels];       // model's bounding radius
 float scaleValue[nModels];    // model's scaling "size" value
-const int nVertices[nModels] = { 120 * 3, 14 * 3, 996 * 3, 264 * 3};
+const int nVertices[nModels] = { 120 * 3, 14 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3};
 char * vertexShaderFile   = "src/simpleVertex.glsl";     
 char * fragmentShaderFile = "src/simpleFragment.glsl";    
 GLuint shaderProgram; 
@@ -71,16 +72,16 @@ StaticCamera* availableCameras[6] = {
                 glm::vec3(0),
                 glm::vec3(0.0f, 0.0f, -1.0f))),
     new StaticCamera(glm::lookAt(
-                glm::vec3(0.0f, 0.0f, 20000.0f),
-                glm::vec3(0),
+                glm::vec3(5000.0f, 1300.0f, 6000.0f),
+                glm::vec3(5000.0f, 1300.0f, 5000.0f),
                 glm::vec3(0.0f, 1.0f, 0.0f))),
     new StaticCamera(glm::lookAt(
-                glm::vec3(20000.0f, 0.0f, 0.0f),
-                glm::vec3(0),
+                glm::vec3(5250.0f, 1000.0f, 5000.0f),
+                glm::vec3(5000.0f, 1000.0f, 5000.0f),
                 glm::vec3(0.0f, 1.0f, 0.0f))),
     new StaticCamera(glm::lookAt(
-                glm::vec3(0.0f, 0.0f, -20000.0f),
-                glm::vec3(0),
+                glm::vec3(5100.0f, 1100.0f, 5100.0f),
+                glm::vec3(5000.0f, 1000.0f, 5000.0f),
                 glm::vec3(0.0f, 1.0f, 0.0f))),
     new StaticCamera(glm::lookAt(
                 glm::vec3(-20000.0f, 0.0f, 0.0f),
@@ -92,9 +93,6 @@ StaticCamera* availableCameras[6] = {
 GLuint MVP ;  // Model View Projection matrix's handle
 GLuint vPosition[nModels], vColor[nModels], vNormal[nModels];   // vPosition, vColor, vNormal handles for models
 // model, view, projection matrices and values to create modelMatrix.
-float modelSize[nModels] = { 100.0f, 25.0f, 50.0f, 50.0f };   // size of model
-glm::vec3 scale[nModels];       // set in init()
-glm::vec3 translate[nModels] = {glm::vec3(10,0,0), glm::vec3(50, -50, 0), glm::vec3(-150, -50, -50), glm::vec3(0,0,0)};
 glm::mat4 modelMatrix;          // set in display()
 
 glm::mat4 projectionMatrix;     // set in reshape()
@@ -104,7 +102,7 @@ int windowWidth = 800;
 int windowHeight = 600;
 
 // window title string
-char titleStr [50]= "465 manyModelsStatic Example ";
+char titleStr [50]= "Warbird Simulation ";
 
 void reshape(int width, int height) {
     windowWidth = width;
@@ -128,11 +126,33 @@ void keyboard(unsigned char key, int x, int y)
             showAxis = !showAxis;
             glutPostRedisplay();
             break;
-        case 'c': case 'C':
+        case 'v': case 'V':
             currentCamera = (currentCamera + 1) % nCameras;
             viewingCamera = availableCameras[currentCamera];
             viewMatrix = viewingCamera->getViewMatrix();
-            glutPostRedisplay(); 
+            break;
+        case 'x': case 'X':
+            currentCamera = (currentCamera - 1) % nCameras;
+            viewingCamera = availableCameras[currentCamera];
+            viewMatrix = viewingCamera->getViewMatrix();
+            break;
+        case 'u': case 'U':
+            tq = (tq + 1) % 4;
+            switch (tq)
+            {
+                case 0:
+                    scene->SetTimerDelay(5);
+                    break;
+                case 1:
+                    scene->SetTimerDelay(40);
+                    break;
+                case 2:
+                    scene->SetTimerDelay(100);
+                    break;
+                case 3:
+                    scene->SetTimerDelay(500);
+                    break;
+            }
             break;
         case 'u': case 'U':
             tq = (tq + 1) % 4;
@@ -153,6 +173,8 @@ void keyboard(unsigned char key, int x, int y)
             }
             break;
     }
+
+    glutPostRedisplay();
 }
 
 void display() 
@@ -276,7 +298,7 @@ void init() {
     {
         up = glm::vec3(-1, 0, 0);
     }
-    updateableEntities[1] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(4000.0f, 0.0f, 0.0f),
+    updateableEntities[1] = new CelestialBody(models[4], (CelestialBody*)entities[0], glm::vec3(4000.0f, 0.0f, 0.0f),
             glm::vec3(200), target, up, 5.0f, 8.0f);
     entities[1] = updateableEntities[1];
 
@@ -287,7 +309,7 @@ void init() {
     {
         up = glm::vec3(-1, 0, 0);
     }
-    updateableEntities[2] = new CelestialBody(models[3], (CelestialBody*)entities[0], glm::vec3(9000.0f, 0.0f, 0.0f),
+    updateableEntities[2] = new CelestialBody(models[5], (CelestialBody*)entities[0], glm::vec3(9000.0f, 0.0f, 0.0f),
             glm::vec3(400), target, up, 5.0f, 16.0f);
     entities[2] = updateableEntities[2];
 
@@ -298,7 +320,7 @@ void init() {
     {
         up = glm::vec3(-1, 0, 0);
     }
-    updateableEntities[3] = new CelestialBody(models[3], (CelestialBody*)entities[2], glm::vec3(8100.0f, 0.0f, 0.0f) - entities[2]->Position(),
+    updateableEntities[3] = new CelestialBody(models[6], (CelestialBody*)entities[2], glm::vec3(8100.0f, 0.0f, 0.0f) - entities[2]->Position(),
             glm::vec3(100), target, up, 5.0f, 8.0f);
     entities[3] = updateableEntities[3];
 
@@ -309,16 +331,12 @@ void init() {
     {
         up = glm::vec3(-1, 0, 0);
     }
-    updateableEntities[4] = new CelestialBody(models[3], (CelestialBody*)entities[2], glm::vec3(7250.0f, 0.0f, 0.0f) - entities[2]->Position(),
+    updateableEntities[4] = new CelestialBody(models[7], (CelestialBody*)entities[2], glm::vec3(7250.0f, 0.0f, 0.0f) - entities[2]->Position(),
             glm::vec3(150), target, up, 5.0f, 16.0f);
     entities[4] = updateableEntities[4];
 
-    for (int i = nUpdateable; i < nEntities; i++) {
-        printf("init i:%d\n", i);
-        pos = glm::vec3((rand() % (max+1)) - max/2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
-        target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
-        entities[i] = new BaseEntity(models[i % 2 + 1], pos, glm::vec3(modelSize[i % 2 + 1]), target, glm::vec3(0.0f, 1.0f, 0.0f));
-    }
+    printf("\tWarbird drawn\n");
+    entities[5] = new BaseEntity(models[2], glm::vec3(5000.0f, 1000.0f, 5000.0f), glm::vec3(100.0f));
 
     Scene::Instance()->SetEntities(entities, nEntities);
     Scene::Instance()->SetMoveables(updateableEntities, nUpdateable);
