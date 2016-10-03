@@ -132,7 +132,7 @@ void keyboard(unsigned char key, int x, int y)
             viewMatrix = viewingCamera->getViewMatrix();
             break;
         case 'x': case 'X':
-            currentCamera = (currentCamera - 1) % nCameras;
+            currentCamera = (nCameras + currentCamera - 1) % nCameras;
             viewingCamera = availableCameras[currentCamera];
             viewMatrix = viewingCamera->getViewMatrix();
             break;
@@ -186,41 +186,6 @@ void display()
             glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
         }
     }
-
-    //some repetitive code here while I test out celestialBody
-
-    // update model matrix
-    for(int e = 0; e < nUpdateable; e++) 
-    {
-        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * updateableEntities[e]->ModelMatrix(); 
-        glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-        glBindVertexArray(*(updateableEntities[e]->ModelFile()->VAO()));
-        glDrawArrays(GL_TRIANGLES, 0, updateableEntities[e]->ModelFile()->Vertices() ); 
-    }
-
-    if (showAxis)
-    {
-        for (int e = 0; e < nEntities; e++) 
-        {
-            modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
-                glm::rotate(glm::mat4(), glm::pi<float>(), entities[e]->Up()) *
-                entities[e]->RotateToForward() *
-                glm::scale(glm::mat4(), entities[e]->Scale() * entities[e]->ModelFile()->BoundingRadius() * 1.5f / models[0]->BoundingRadius());
-            ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-            glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-            glBindVertexArray(*(models[0]->VAO()));
-            glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
-        }
-
-
-        for(int e = 0; e < nUpdateable; e++) 
-        {
-            ModelViewProjectionMatrix = projectionMatrix * viewMatrix * updateableEntities[e]->ModelMatrix(); 
-            glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-            glBindVertexArray(*(models[0]->VAO()));
-            glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices() ); 
-        }
-    }
     glutSwapBuffers();
     frameCount++;
     currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -270,58 +235,58 @@ void init() {
         up = glm::vec3(-1, 0, 0);
     }
     updateableEntities[0] = new CelestialBody(models[3], NULL, glm::vec3(0.0f), glm::vec3(2000), target, 
-            up, 60.0f);
-    entities[0] = updateableEntities[0];
+		up, 60.0f);
+	entities[0] = updateableEntities[0];
 
-    printf("\tUnum drawn\n");
-    target = glm::vec3(rand(), rand(), rand());
-    up = glm::vec3(0, 1, 0);
-    if (colinear(target, up, 0.1))
-    {
-        up = glm::vec3(-1, 0, 0);
-    }
-    updateableEntities[1] = new CelestialBody(models[4], (CelestialBody*)entities[0], glm::vec3(4000.0f, 0.0f, 0.0f),
-            glm::vec3(200), target, up, 5.0f, 8.0f);
-    entities[1] = updateableEntities[1];
+	printf("\tUnum drawn\n");
+	target = glm::vec3(rand(), rand(), rand());
+	up = glm::vec3(0, 1, 0);
+	if (colinear(target, up, 0.1))
+	{
+		up = glm::vec3(-1, 0, 0);
+	}
+	updateableEntities[1] = new CelestialBody(models[4], (CelestialBody*)entities[0], glm::vec3(4000.0f, 0.0f, 0.0f),
+		glm::vec3(200), target, up, 5.0f, 8.0f);
+	entities[1] = updateableEntities[1];
 
-    printf("\tDuo drawn\n");
-    target = glm::vec3(rand(), rand(), rand());
-    up = glm::vec3(0, 1, 0);
-    if (colinear(target, up, 0.1))
-    {
-        up = glm::vec3(-1, 0, 0);
-    }
-    updateableEntities[2] = new CelestialBody(models[5], (CelestialBody*)entities[0], glm::vec3(9000.0f, 0.0f, 0.0f),
-            glm::vec3(400), target, up, 5.0f, 16.0f);
-    entities[2] = updateableEntities[2];
+	printf("\tDuo drawn\n");
+	target = glm::vec3(rand(), rand(), rand());
+	up = glm::vec3(0, 1, 0);
+	if (colinear(target, up, 0.1))
+	{
+		up = glm::vec3(-1, 0, 0);
+	}
+	updateableEntities[2] = new CelestialBody(models[5], (CelestialBody*)entities[0], glm::vec3(9000.0f, 0.0f, 0.0f),
+		glm::vec3(400), target, up, 5.0f, 16.0f);
+	entities[2] = updateableEntities[2];
 
-    printf("\tPrimus drawn\n");
-    target = glm::vec3(rand(), rand(), rand());
-    up = glm::vec3(0, 1, 0);
-    if (colinear(target, up, 0.1))
-    {
-        up = glm::vec3(-1, 0, 0);
-    }
-    updateableEntities[3] = new CelestialBody(models[6], (CelestialBody*)entities[2], glm::vec3(8100.0f, 0.0f, 0.0f) - entities[2]->Position(),
-            glm::vec3(100), target, up, 5.0f, 8.0f);
-    entities[3] = updateableEntities[3];
+	printf("\tPrimus drawn\n");
+	target = glm::vec3(rand(), rand(), rand());
+	up = glm::vec3(0, 1, 0);
+	if (colinear(target, up, 0.1))
+	{
+		up = glm::vec3(-1, 0, 0);
+	}
+	updateableEntities[3] = new CelestialBody(models[6], (CelestialBody*)entities[2], glm::vec3(-900.0f, 0.0f, 0.0f),
+		glm::vec3(100), target, up, 5.0f, 8.0f);
+	entities[3] = updateableEntities[3];
 
-    printf("\tSecundus drawn\n");
-    target = glm::vec3(rand(), rand(), rand());
-    up = glm::vec3(0, 1, 0);
-    if (colinear(target, up, 0.1))
-    {
-        up = glm::vec3(-1, 0, 0);
-    }
-    updateableEntities[4] = new CelestialBody(models[7], (CelestialBody*)entities[2], glm::vec3(7250.0f, 0.0f, 0.0f) - entities[2]->Position(),
-            glm::vec3(150), target, up, 5.0f, 16.0f);
-    entities[4] = updateableEntities[4];
+	printf("\tSecundus drawn\n");
+	target = glm::vec3(rand(), rand(), rand());
+	up = glm::vec3(0, 1, 0);
+	if (colinear(target, up, 0.1))
+	{
+		up = glm::vec3(-1, 0, 0);
+	}
+	updateableEntities[4] = new CelestialBody(models[7], (CelestialBody*)entities[2], glm::vec3(-1750.0f, 0.0f, 0.0f),
+		glm::vec3(150), target, up, 5.0f, 16.0f);
+	entities[4] = updateableEntities[4];
 
-    printf("\tWarbird drawn\n");
-    entities[5] = new BaseEntity(models[2], glm::vec3(5000.0f, 1000.0f, 5000.0f), glm::vec3(100.0f));
+	printf("\tWarbird drawn\n");
+	entities[5] = new BaseEntity(models[2], glm::vec3(5000.0f, 1000.0f, 5000.0f), glm::vec3(100.0f));
 
-    Scene::Instance()->SetEntities(entities, nEntities);
-    Scene::Instance()->SetMoveables(updateableEntities, nUpdateable);
+	Scene::Instance()->SetEntities(entities, nEntities);
+	Scene::Instance()->SetMoveables(updateableEntities, nUpdateable);
 
     lastTime = glutGet(GLUT_ELAPSED_TIME);
     MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
