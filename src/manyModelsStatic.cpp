@@ -37,17 +37,17 @@ const int X = 0, Y = 1, Z = 2, START = 0, STOP = 1;
 // constants for models:  file names, vertex count, model display size
 const int nModels = 8;  // number of models in this scene
 Model* models[nModels];
-const int nEntities = 5;
+const int nEntities = 6;
 const int nUpdateable = 5;
 BaseEntity* entities[nEntities];
 MoveableEntity* updateableEntities[nUpdateable];
 bool showAxis = false;
 bool snapToForward = false; //when true, the models should be facing forward, away from the camera view
-char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/spaceShip-bs100.tri",
+char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/Warbird.tri",
 	"src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri"};
 float modelBR[nModels];       // model's bounding radius
 float scaleValue[nModels];    // model's scaling "size" value
-const int nVertices[nModels] = { 120 * 3, 14 * 3, 996 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3};
+const int nVertices[nModels] = { 120 * 3, 14 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3};
 char * vertexShaderFile   = "src/simpleVertex.glsl";     
 char * fragmentShaderFile = "src/simpleFragment.glsl";    
 GLuint shaderProgram; 
@@ -63,9 +63,6 @@ int currentCamera = 0, nCameras = 6;
 GLuint MVP ;  // Model View Projection matrix's handle
 GLuint vPosition[nModels], vColor[nModels], vNormal[nModels];   // vPosition, vColor, vNormal handles for models
 // model, view, projection matrices and values to create modelMatrix.
-float modelSize[nModels] = { 100.0f, 25.0f, 50.0f, 50.0f };   // size of model
-glm::vec3 scale[nModels];       // set in init()
-glm::vec3 translate[nModels] = {glm::vec3(10,0,0), glm::vec3(50, -50, 0), glm::vec3(-150, -50, -50), glm::vec3(0,0,0)};
 glm::mat4 modelMatrix;          // set in display()
 glm::mat4 viewMatrix;           // set in init()
 glm::mat4 projectionMatrix;     // set in reshape()
@@ -92,57 +89,13 @@ void keyboard(unsigned char key, int x, int y)
 			break;
 		case 't': case 'T':
 			showAxis = !showAxis;
-			glutPostRedisplay();
 			break;
-		case 'c': case 'C':
+		case 'v': case 'V':
 			currentCamera = (currentCamera + 1) % nCameras;
-			switch (currentCamera)
-			{
-				case 0:
-					viewMatrix = glm::lookAt(
-						glm::vec3(0.0f, 10000.0f, 20000.0f),
-						glm::vec3(0),
-						glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 1:
-					viewMatrix = glm::lookAt(
-						glm::vec3(0.0f, 20000.0f, 0.0f),
-						glm::vec3(0),
-						glm::vec3(0.0f, 0.0f, -1.0f));
-					break;
-				case 2:
-					viewMatrix = glm::lookAt(
-						glm::vec3(0.0f, 0.0f, 20000.0f),
-						glm::vec3(0),
-						glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 3:
-					viewMatrix = glm::lookAt(
-						glm::vec3(20000.0f, 0.0f, 0.0f),
-						glm::vec3(0),
-						glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 4:
-					viewMatrix = glm::lookAt(
-						glm::vec3(0.0f, 0.0f, -20000.0f),
-						glm::vec3(0),
-						glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				case 5:
-					viewMatrix = glm::lookAt(
-						glm::vec3(-20000.0f, 0.0f, 0.0f),
-						glm::vec3(0),
-						glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-				default:
-					viewMatrix = glm::lookAt(
-						glm::vec3(0.0f, 10000.0f, 20000.0f),
-						glm::vec3(0),
-						glm::vec3(0.0f, 1.0f, 0.0f));
-					break;
-			}
-            glutPostRedisplay(); 
             break;
+		case 'x': case 'X':
+			currentCamera = (currentCamera - 1) % nCameras;
+			break;
 		case 'u': case 'U':
 			tq = (tq + 1) % 4;
 			switch (tq)
@@ -162,6 +115,49 @@ void keyboard(unsigned char key, int x, int y)
 			}
 			break;
     }
+
+	switch (currentCamera)
+	{
+		case 0:
+			viewMatrix = glm::lookAt(
+				glm::vec3(0.0f, 10000.0f, 20000.0f),
+				glm::vec3(0),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			break;
+		case 1:
+			viewMatrix = glm::lookAt(
+				glm::vec3(0.0f, 20000.0f, 0.0f),
+				glm::vec3(0),
+				glm::vec3(0.0f, 0.0f, -1.0f));
+			break;
+		case 2:
+			viewMatrix = glm::lookAt(
+				glm::vec3(5000.0f, 1300.0f, 6000.0f),
+				glm::vec3(5000.0f, 1300.0f, 5000.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			break;
+		case 3:
+			viewMatrix = glm::lookAt(
+				glm::vec3(5250.0f, 1000.0f, 5000.0f),
+				glm::vec3(5000.0f, 1000.0f, 5000.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			break;
+		case 4:
+			viewMatrix = glm::lookAt(
+				glm::vec3(5100.0f, 1100.0f, 5100.0f),
+				glm::vec3(5000.0f, 1000.0f, 5000.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			break;
+		default:
+			currentCamera = 0;
+			viewMatrix = glm::lookAt(
+				glm::vec3(0.0f, 10000.0f, 20000.0f),
+				glm::vec3(0),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			break;
+	}
+
+	glutPostRedisplay();
 }
 
 void display() 
@@ -288,12 +284,8 @@ void init() {
 		glm::vec3(150), target, up, 5.0f, 16.0f);
 	entities[4] = updateableEntities[4];
 
-    for (int i = nUpdateable; i < nEntities; i++) {
-        printf("init i:%d\n", i);
-        pos = glm::vec3((rand() % (max+1)) - max/2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
-        target = glm::vec3((rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2, (rand() % (max + 1)) - max / 2);
-        entities[i] = new BaseEntity(models[i % 2 + 1], pos, glm::vec3(modelSize[i % 2 + 1]), target, glm::vec3(0.0f, 1.0f, 0.0f));
-    }
+	printf("\tWarbird drawn\n");
+	entities[5] = new BaseEntity(models[2], glm::vec3(5000.0f, 1000.0f, 5000.0f), glm::vec3(100.0f));
 
 	Scene::Instance()->SetEntities(entities, nEntities);
 	Scene::Instance()->SetMoveables(updateableEntities, nUpdateable);
