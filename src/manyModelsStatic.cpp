@@ -154,24 +154,6 @@ void keyboard(unsigned char key, int x, int y)
                     break;
             }
             break;
-        case 'u': case 'U':
-            tq = (tq + 1) % 4;
-            switch (tq)
-            {
-                case 0:
-                    scene->SetTimerDelay(5);
-                    break;
-                case 1:
-                    scene->SetTimerDelay(40);
-                    break;
-                case 2:
-                    scene->SetTimerDelay(100);
-                    break;
-                case 3:
-                    scene->SetTimerDelay(500);
-                    break;
-            }
-            break;
     }
 
     glutPostRedisplay();
