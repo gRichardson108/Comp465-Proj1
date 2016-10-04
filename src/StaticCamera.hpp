@@ -2,7 +2,6 @@
 #define STATIC_CAMERA_H
 
 #include "../includes465/include465.hpp"
-#include "MoveableEntity.hpp"
 
 class StaticCamera {
     private :
