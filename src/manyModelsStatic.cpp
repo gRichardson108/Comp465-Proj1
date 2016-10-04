@@ -53,8 +53,9 @@ GLuint VAO[nModels];      // Vertex Array Objects
 GLuint buffer[nModels];   // Vertex Buffer Objects
 Scene* Scene::s_pInstance = NULL;
 Scene* scene = new Scene();
-int tq = 0, frameCount = 0;
+int tq = 0, frameCount = 0, updateCount = 0;
 double currentTime, lastTime, timeInterval;
+double UcurrentTime, UlastTime, UtimeInterval;
 int currentCamera = 0;
 const int nCameras = 5, nDynamicCameras = 3;
 glm::mat4 viewMatrix;           // set in init()
@@ -222,6 +223,18 @@ void update(int value)
 	viewMatrix = viewingCamera->ViewMatrix();
     glutPostRedisplay();
     glutTimerFunc(scene->TimerDelay(), update, 1);
+
+	updateCount++;
+	UcurrentTime = glutGet(GLUT_ELAPSED_TIME);
+	UtimeInterval = UcurrentTime - UlastTime;
+
+	if (UtimeInterval >= 1000)
+	{
+		sprintf(upsStr, "  U/S %3d", (int)(updateCount / (UtimeInterval / 1000.0f)));
+		UlastTime = UcurrentTime;
+		updateCount = 0;
+		updateTitle();
+	}
 }
 
 // load the shader programs, vertex data from model files, create the solids, set initial view
@@ -320,6 +333,7 @@ void init() {
 	availableCameras[4] = dynamicCameras[2];
 
     lastTime = glutGet(GLUT_ELAPSED_TIME);
+	UlastTime = glutGet(GLUT_ELAPSED_TIME);
     MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
     viewingCamera = availableCameras[0];
     viewMatrix = viewingCamera->ViewMatrix();
