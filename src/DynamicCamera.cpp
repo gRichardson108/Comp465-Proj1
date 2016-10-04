@@ -17,9 +17,10 @@ DynamicCamera::DynamicCamera(char* name, MoveableEntity* parent, bool useHeading
 
 void DynamicCamera::Update()
 {
+	// If camera is attached then update
 	if (m_pParent != NULL)
 	{
-		if (m_bUsesHeading)
+		if (m_bUsesHeading) // Uses parent's heading vector
 		{
 			m_vEye = m_fHeadingOffset * m_pParent->Heading() + m_pParent->Position() + m_vEyeOffset;
 		}

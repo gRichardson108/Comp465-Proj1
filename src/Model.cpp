@@ -15,6 +15,7 @@ Model::Model(char* modelFile, int vertices,
 	size_t size = strlen(modelFile) + 1;
 	m_cModelFile = new char[size];
 	strncpy(m_cModelFile, modelFile, size);
+	Init();
 }
 
 Model::~Model()

@@ -6,12 +6,12 @@
 class Scene
 {
 private:
-	int m_iTimerDelay; // In miliseconds
+	int m_iTimerDelay; // Delay in miliseconds
 	static Scene* s_pInstance; // Singleton
 	BaseEntity** m_pEntities; // Pointer array of scene entities
 	MoveableEntity** m_pMoveableEntities; // Pointer array of moveable scene entities
 	int m_iNumEntities; // Number of entities
-	int m_iNumMoveableEntities;// Number of moveable entities
+	int m_iNumMoveableEntities; // Number of moveable entities
 
 public:
 	Scene(int delay = 5) :

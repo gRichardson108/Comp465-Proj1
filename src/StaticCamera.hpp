@@ -6,11 +6,11 @@
 class StaticCamera
 {
 protected :
-    glm::mat4 m_mViewMatrix;
-    glm::mat4 m_mProjectionMatrix;
-	glm::vec3 m_vEye;
-	glm::vec3 m_vAt;
-	glm::vec3 m_vUp;
+    glm::mat4 m_mViewMatrix; // Camera view matrix
+    glm::mat4 m_mProjectionMatrix; // Camera projection matrix
+	glm::vec3 m_vEye; // Camera eye vector
+	glm::vec3 m_vAt; // Camera at vector
+	glm::vec3 m_vUp; // Camera up vector
 
     //viewport width and height for determining aspect ratio
     //we set a default, but this will be wiped out by the reshapeFunc

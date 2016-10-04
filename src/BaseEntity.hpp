@@ -12,7 +12,7 @@ protected:
 	glm::vec3 m_vUp; // Up vector of entity
 	glm::vec3 m_vScale; // Scale vector of entity
 	float m_fBoundingRadius; // Bounding radius of entity
-	Model* m_mModel; // Model to render
+	Model* m_pModel; // Model to render
 
 public:
 	BaseEntity(Model* model) :
@@ -21,7 +21,7 @@ public:
 		m_vForward(glm::vec3(0.0, 0.0, -1.0)),
 		m_vLeft(glm::vec3(-1.0, 0.0, 0.0)),
 		m_vUp(glm::vec3(0.0, 1.0, 0.0)),
-		m_mModel(model)
+		m_pModel(model)
 	{}
 
 	BaseEntity(Model* model, const glm::vec3& pos) :
@@ -30,7 +30,7 @@ public:
 		m_vForward(glm::vec3(0.0, 0.0, -1.0)),
 		m_vLeft(glm::vec3(-1.0, 0.0, 0.0)),
 		m_vUp(glm::vec3(0.0, 1.0, 0.0)),
-		m_mModel(model)
+		m_pModel(model)
 	{}
 
 	BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale);
@@ -48,8 +48,8 @@ public:
 	void SetScale(float x, float y, float z) { SetScale(glm::vec3(x, y, z)); }
 	void SetScale(const glm::vec3& scale)
 	{
-		m_vScale = scale / m_mModel->BoundingRadius();
-		m_fBoundingRadius = glm::max(m_vScale.x, glm::max(m_vScale.y, m_vScale.z)) * m_mModel->BoundingRadius();
+		m_vScale = scale / m_pModel->BoundingRadius();
+		m_fBoundingRadius = glm::max(m_vScale.x, glm::max(m_vScale.y, m_vScale.z)) * m_pModel->BoundingRadius();
 	}
 
 	glm::vec3 Forward() { return m_vForward; }
@@ -60,7 +60,7 @@ public:
 	glm::vec3 Down() { return -m_vUp; }
 
 	float BoundingRadius() { return m_fBoundingRadius; }
-	Model* ModelFile() { return m_mModel; }
+	Model* ModelFile() { return m_pModel; }
 
 	// Returns a mat4 rotation matrix for rotating the
 	// model to face the forward vector
