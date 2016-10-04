@@ -21,11 +21,65 @@ Mike Barnes
 */
 
 
+#include "../includes465/include465.hpp"
+
 #ifdef _WIN32
 #include <Windows.h>
+#include <gl/wglext.h>
+	bool WGLExtensionSupported(const char *extension_name)
+	{
+		// this is pointer to function which returns pointer to string with list of all wgl extensions
+		PFNWGLGETEXTENSIONSSTRINGEXTPROC _wglGetExtensionsStringEXT = NULL;
+
+		// determine pointer to wglGetExtensionsStringEXT function
+		_wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)wglGetProcAddress("wglGetExtensionsStringEXT");
+
+		if (strstr(_wglGetExtensionsStringEXT(), extension_name) == NULL)
+		{
+			// string was not found
+			return false;
+		}
+
+		// extension is supported
+		return true;
+	}
+
+	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
+#elif defined __linux__
+#include <gl\glxext.h>
+	bool checkGLXExtension(const char* extName)
+	{
+		/*
+		Search for extName in the extensions string.  Use of strstr()
+		is not sufficient because extension names can be prefixes of
+		other extension names.  Could use strtok() but the constant
+		string returned by glGetString can be in read-only memory.
+		*/
+		Display* dpy = glXGetCurrentDisplay();
+		int screen = glXGetCurrentDrawable();
+		char* list = (char*)glXQueryExtensionsString(dpy, screen);
+		char* end;
+		int extNameLen;
+
+		extNameLen = strlen(extName);
+		end = list + strlen(list);
+
+		while (list < end)
+		{
+			int n = strcspn(list, " ");
+
+			if ((extNameLen == n) && (strncmp(extName, list, n) == 0))
+				return true;
+
+			list += (n + 1);
+		};
+		return false;
+	};
+
+	void(*)(int) glXSwapIntervalEXT = NULL;
 #endif
 
-#include "../includes465/include465.hpp"
+
 #include "Scene.hpp"
 #include "CelestialBody.hpp"
 #include "Ship.hpp"
@@ -39,7 +93,7 @@ const int nEntities = 6;
 const int nUpdateable = 6;
 BaseEntity* entities[nEntities];
 MoveableEntity* updateableEntities[nUpdateable];
-bool showAxis = false;
+bool showAxis = false, idleTimerFlag = false;
 bool snapToForward = false; //when true, the models should be facing forward, away from the camera view
 char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/Warbird.tri",
     "src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri"};
@@ -117,54 +171,6 @@ void updateTitle()
 	glutSetWindowTitle(titleStr);
 }
 
-void keyboard(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-        case 033: case 'q':  case 'Q':
-            exit(EXIT_SUCCESS);
-            break;
-        case 't': case 'T':
-            showAxis = !showAxis;
-			printf("Show Axis: %d\n", showAxis);
-            break;
-        case 'v': case 'V':
-            currentCamera = (currentCamera + 1) % nCameras;
-            viewingCamera = availableCameras[currentCamera];
-            viewMatrix = viewingCamera->ViewMatrix();
-			sprintf(viewStr, "  View %s", viewingCamera->Name());
-            break;
-        case 'x': case 'X':
-            currentCamera = (nCameras + currentCamera - 1) % nCameras;
-            viewingCamera = availableCameras[currentCamera];
-            viewMatrix = viewingCamera->ViewMatrix();
-			sprintf(viewStr, "  View %s", viewingCamera->Name());
-            break;
-        case 'u': case 'U':
-            tq = (tq + 1) % 4;
-            switch (tq)
-            {
-                case 0:
-                    scene->SetTimerDelay(5);
-                    break;
-                case 1:
-                    scene->SetTimerDelay(40);
-                    break;
-                case 2:
-                    scene->SetTimerDelay(100);
-                    break;
-                case 3:
-                    scene->SetTimerDelay(500);
-                    break;
-            }
-			sprintf(upsStr, "  U/S %4d", 1000 / scene->TimerDelay());
-            break;
-    }
-
-	updateTitle();
-    glutPostRedisplay();
-}
-
 void display() 
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -207,8 +213,10 @@ void display()
     }
 }
 
-void update(int value)
+void update()
 {
+	//glutTimerFunc(scene->TimerDelay(), update, 1);
+
     for (int e = 0; e < nUpdateable; e++)
 	{
         updateableEntities[e]->Update();
@@ -221,7 +229,12 @@ void update(int value)
 
 	viewMatrix = viewingCamera->ViewMatrix();
     glutPostRedisplay();
-    glutTimerFunc(scene->TimerDelay(), update, 1);
+}
+
+void timerFunc(int value)
+{
+	glutTimerFunc(scene->TimerDelay(), timerFunc, 1);
+	if (!idleTimerFlag) update();
 }
 
 // load the shader programs, vertex data from model files, create the solids, set initial view
@@ -329,6 +342,67 @@ void init() {
     glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 }
 
+void keyboard(unsigned char key, int x, int y)
+{
+	switch (key)
+	{
+	case 033: case 'q':  case 'Q':
+		exit(EXIT_SUCCESS);
+		break;
+	case 'a': case 'A':  // change animation timer
+						 // printf("%s   %s\n", timerStr, fpsStr);
+		if (idleTimerFlag) // switch to interval timer  
+		{
+			glutIdleFunc(NULL);
+			idleTimerFlag = false;
+		}
+		else // switch to idle timer
+		{
+			glutIdleFunc(update);
+			idleTimerFlag = true;
+		}
+		break;
+	case 't': case 'T':
+		showAxis = !showAxis;
+		printf("Show Axis: %d\n", showAxis);
+		break;
+	case 'v': case 'V':
+		currentCamera = (currentCamera + 1) % nCameras;
+		viewingCamera = availableCameras[currentCamera];
+		viewMatrix = viewingCamera->ViewMatrix();
+		sprintf(viewStr, "  View %s", viewingCamera->Name());
+		break;
+	case 'x': case 'X':
+		currentCamera = (nCameras + currentCamera - 1) % nCameras;
+		viewingCamera = availableCameras[currentCamera];
+		viewMatrix = viewingCamera->ViewMatrix();
+		sprintf(viewStr, "  View %s", viewingCamera->Name());
+		break;
+	case 'u': case 'U':
+		tq = (tq + 1) % 4;
+		switch (tq)
+		{
+		case 0:
+			scene->SetTimerDelay(5);
+			break;
+		case 1:
+			scene->SetTimerDelay(40);
+			break;
+		case 2:
+			scene->SetTimerDelay(100);
+			break;
+		case 3:
+			scene->SetTimerDelay(500);
+			break;
+		}
+		sprintf(upsStr, "  U/S %4d", 1000 / scene->TimerDelay());
+		break;
+}
+
+	updateTitle();
+	glutPostRedisplay();
+}
+
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
 # ifdef __Mac__
@@ -344,11 +418,6 @@ int main(int argc, char* argv[]) {
     glutInitContextVersion(3, 3);
     glutInitContextProfile(GLUT_CORE_PROFILE);
 # endif
-#ifdef _WIN32
-    printf("WINDOWS\n");
-#else
-    printf("LINUX\n");
-#endif
     glutCreateWindow("");
 	updateTitle();
     // initialize and verify glew
@@ -362,14 +431,34 @@ int main(int argc, char* argv[]) {
                 glGetString(GL_VERSION),
                 glGetString(GL_SHADING_LANGUAGE_VERSION));
     }
+
+#ifdef _WIN32
+	printf("WINDOWS\n");
+	if (WGLExtensionSupported("WGL_EXT_swap_control"))
+	{
+		// Extension is supported, init pointer
+		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+	}
+
+	wglSwapIntervalEXT(0);
+#elif defined __linux__
+	printf("LINUX\n");
+	if (checkGLXExtension("GLX_EXT_swap_control"))
+	{
+		glXSwapIntervalEXT = (void(*)(int))glXGetProcAddress((const GLubyte*) "glXSwapIntervalEXT");
+	}
+
+	glXSwapIntervalEXT(0);
+#endif
+
     // initialize scene
     init();
     // set glut callback functions
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
-    glutTimerFunc(scene->TimerDelay(), update, 1);
-    //glutIdleFunc(display);
+    glutTimerFunc(scene->TimerDelay(), timerFunc, 1);
+    glutIdleFunc(NULL);
     glutMainLoop();
     printf("done\n");
     return 0;
