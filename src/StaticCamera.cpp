@@ -1,29 +1,24 @@
 #include "StaticCamera.hpp"
 
-StaticCamera::StaticCamera(glm::mat4 cameraMatrix, float fieldOfViewY, float nearClip, float farClip) : 
-	viewMatrix(cameraMatrix),FOVY(fieldOfViewY),m_fNearClip(nearClip),m_fFarClip(farClip)
-{}
-
-StaticCamera::StaticCamera(glm::vec3 eye, glm::vec3 at, glm::vec3 up, float fieldOfViewY, float nearClip, float farClip) :
-	viewMatrix(glm::lookAt(eye,at,up)),FOVY(fieldOfViewY),m_fNearClip(nearClip),m_fFarClip(farClip)
-{}
-
-glm::mat4 StaticCamera::getViewMatrix()
+StaticCamera::StaticCamera(char* name, glm::mat4 cameraMatrix, float FOVY, float nearClip, float farClip) :
+	m_mViewMatrix(cameraMatrix), m_fFOVY(FOVY), m_fNearClip(nearClip), m_fFarClip(farClip)
 {
-    return viewMatrix;
+	size_t size = strlen(name) + 1;
+	m_cName = new char[size];
+	strncpy(m_cName, name, size);
 }
 
-glm::mat4 StaticCamera::updateProjectionMatrix(int width, int height){
+StaticCamera::StaticCamera(char* name, glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY, float nearClip,
+	float farClip) : StaticCamera(name, glm::lookAt(eye, at, up), FOVY, nearClip, farClip)
+{
+	m_vEye = eye;
+	m_vAt = at;
+	m_vUp = up;
+}
+
+glm::mat4 StaticCamera::updateProjectionMatrix(int width, int height)
+{
     float aspectRatio = (float) width / (float) height;
-    projectionMatrix = glm::perspective(FOVY, aspectRatio, m_fNearClip, m_fFarClip); 
-    return projectionMatrix;
+    m_mProjectionMatrix = glm::perspective(m_fFOVY, aspectRatio, m_fNearClip, m_fFarClip); 
+    return m_mProjectionMatrix;
 }
-
-void StaticCamera::setFOVY(float newFOVY){
-    FOVY = newFOVY;
-}
-
-float StaticCamera::getFOVY(){
-    return FOVY;
-}
-
