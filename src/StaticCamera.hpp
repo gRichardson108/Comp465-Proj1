@@ -3,7 +3,8 @@
 
 #include "../includes465/include465.hpp"
 
-class StaticCamera {
+class StaticCamera
+{
     private :
         glm::mat4 viewMatrix;
         glm::mat4 projectionMatrix;
@@ -13,13 +14,10 @@ class StaticCamera {
         int viewportWidth = 800;
         int viewportHeight = 600;
         float FOVY;
-
-
-
+		float m_fNearClip;
+		float m_fFarClip;
 
     public :
-        float nearClip;
-        float farClip;
         StaticCamera(glm::mat4 cameraMatrix, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, float farClip = 10000000.0f);
         StaticCamera(glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, float farClip = 10000000.0f);
 
@@ -27,9 +25,13 @@ class StaticCamera {
 
         glm::mat4 updateProjectionMatrix(int width, int height);
 
+		float NearClip() { return m_fNearClip; }
+		void SetNearClip(float nearClip) { m_fNearClip = nearClip; }
+		float FarClip() { return m_fFarClip; }
+		void SetFarClip(float farClip) { m_fFarClip = farClip; }
+
         void setFOVY(float newFOVY);
         float getFOVY();
 };
-
 
 #endif

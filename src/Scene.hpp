@@ -38,14 +38,7 @@ public:
 	}
 
 	int TimerDelay() { return m_iTimerDelay; }
-	void SetTimerDelay(int delay)
-	{
-		m_iTimerDelay = delay;
-		for (int i = 0; i < m_iNumMoveableEntities; i++)
-		{
-			//m_pMoveableEntities[i]->UpdateTimeDelay();
-		}
-	}
+	void SetTimerDelay(int delay) { m_iTimerDelay = delay; }
 	
 	BaseEntity** Entities() { return m_pEntities; }
 	void SetEntities(BaseEntity* entities[], int num)
