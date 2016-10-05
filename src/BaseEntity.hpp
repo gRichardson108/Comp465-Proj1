@@ -11,8 +11,17 @@ protected:
 	glm::vec3 m_vLeft; // Left vector of entity
 	glm::vec3 m_vUp; // Up vector of entity
 	glm::vec3 m_vScale; // Scale vector of entity
+	glm::mat4 m_mRotation; // Rotation matrix
+	glm::mat4 m_mObject; // Object matrix
 	float m_fBoundingRadius; // Bounding radius of entity
 	Model* m_pModel; // Model to render
+
+	// Sets rotation matrix for rotating the
+	// model to face the forward vector
+	void RotateToForward();
+
+	// Sets the object matrix
+	void CreateObjectMatrix();
 
 public:
 	BaseEntity(Model* model) :
@@ -62,12 +71,11 @@ public:
 	float BoundingRadius() { return m_fBoundingRadius; }
 	Model* ModelFile() { return m_pModel; }
 
-	// Returns a mat4 rotation matrix for rotating the
-	// model to face the forward vector
-	glm::mat4 RotateToForward();
+	// Returns the rotation matrix
+	glm::mat4 RotationMatrix() { return m_mRotation; }
 
-	// Returns a mat4 model matrix of translate * rotate * scale
-	glm::mat4 ModelMatrix();
+	// Returns the object matrix
+	glm::mat4 ObjectMatrix() { return m_mObject; }
 };
 
 #endif

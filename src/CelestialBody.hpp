@@ -9,7 +9,7 @@ private :
 	CelestialBody* m_pParent; // If orbiting another body, which one?
 	glm::vec3 m_vParentOldPosition; // Parent's previous position
     float m_fRotationRate; // Rate in seconds for full rotation
-	glm::mat3 m_mRotation; // Axis rotation matrix
+	glm::mat3 m_mAxisRotation; // Axis rotation matrix
 	float m_fOrbitDistance; // Orbit distance from parent
     float m_fOrbitRate; // Rate in seconds for full orbit
     glm::vec3 m_vOrbitAxis; // Orbital axis
