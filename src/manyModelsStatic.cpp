@@ -88,13 +88,7 @@ Mike Barnes
 
 // constants for models:  file names, vertex count, model display size
 const int nModels = 8;  // number of models in this scene
-Model* models[nModels];
-const int nEntities = 6;
-const int nUpdateable = 6;
-BaseEntity* entities[nEntities];
-MoveableEntity* updateableEntities[nUpdateable];
-bool showAxis = false, idleTimerFlag = false;
-bool snapToForward = false; //when true, the models should be facing forward, away from the camera view
+Model* models[nModels];  // Models
 char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/Warbird.tri",
     "src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri"};
 float modelBR[nModels];       // model's bounding radius
@@ -105,14 +99,34 @@ char * fragmentShaderFile = "src/simpleFragment.glsl";
 GLuint shaderProgram; 
 GLuint VAO[nModels];      // Vertex Array Objects
 GLuint buffer[nModels];   // Vertex Buffer Objects
+
+// Shader handles, matrices, etc
+GLuint MVP;  // Model View Projection matrix's handle
+GLuint vPosition[nModels], vColor[nModels], vNormal[nModels];   // vPosition, vColor, vNormal handles for models
+
+// model, view, projection matrices and values to create modelMatrix.
+glm::mat4 modelMatrix;          // set in display()
+glm::mat4 projectionMatrix;     // set in reshape()
+glm::mat4 ModelViewProjectionMatrix; // set in display();
+
+// constants for entities
+const int nEntities = 6;  // Number of entities
+const int nUpdateable = 6;  // Number of updateable entities
+BaseEntity* entities[nEntities];  // Entities
+MoveableEntity* updateableEntities[nUpdateable]; // Updateable entities
+bool showAxes = false, idleTimerFlag = false;
+
+// Constants for scene
 Scene* Scene::s_pInstance = NULL;
-Scene* scene = new Scene();
+Scene* scene = new Scene();  // Scene object
 int tq = 0, frameCount = 0;
 double currentTime, lastTime, timeInterval;
+
+// Constants for cameras
 int currentCamera = 0;
-const int nCameras = 5, nDynamicCameras = 3;
-glm::mat4 viewMatrix;           // set in init()
-StaticCamera* viewingCamera;
+const int nCameras = 5, nDynamicCameras = 3;  // Number of cameras
+glm::mat4 viewMatrix;  // Current view matrix
+StaticCamera* viewingCamera;  // Current camera
 StaticCamera* availableCameras[nCameras] = {
     new StaticCamera("Front", glm::lookAt(
                 glm::vec3(0.0f, 10000.0f, 20000.0f),
@@ -123,24 +137,11 @@ StaticCamera* availableCameras[nCameras] = {
                 glm::vec3(0),
                 glm::vec3(0.0f, 0.0f, -1.0f)))
 };
-
-DynamicCamera* dynamicCameras[nDynamicCameras];
-
-// Shader handles, matrices, etc
-GLuint MVP ;  // Model View Projection matrix's handle
-GLuint vPosition[nModels], vColor[nModels], vNormal[nModels];   // vPosition, vColor, vNormal handles for models
-// model, view, projection matrices and values to create modelMatrix.
-glm::mat4 modelMatrix;          // set in display()
-
-glm::mat4 projectionMatrix;     // set in reshape()
-glm::mat4 ModelViewProjectionMatrix; // set in display();
-
-int windowWidth = 800;
-int windowHeight = 600;
+DynamicCamera* dynamicCameras[nDynamicCameras];  // Dynamic cameras
 
 // window title string
-char titleStr[110];
-char baseStr [32] = "Warbird Simulation {x, v, t, u}";
+char titleStr[160];
+char baseStr [76] = "Warbird Simulation {a - Idle, x - Prev Cam, v - Next Cam, t - Axes, u - TQ}";
 char shipCountStr[12] = "  Warbird ?";
 char unumCountStr[9] = "  Unum ?";
 char secundusCountStr[13] = "  Secundus ?";
@@ -148,17 +149,16 @@ char upsStr[10] = "  U/S 200";
 char fpsStr[11] = "  F/S ????";
 char viewStr[13] = "  View Front";
 
-
+// Update window display and projection matrix
 void reshape(int width, int height) {
-    windowWidth = width;
-    windowHeight = height;
-    float aspectRatio = (float) width / (float) height;
+	projectionMatrix = viewingCamera->updateProjectionMatrix(width, height);
+    float aspectRatio = (float)width / (float)height;
     glViewport(0, 0, width, height);
     printf("reshape: FOVY = %5.2f, width = %4d height = %4d aspect = %5.2f \n + nearclip = %5f farclip = %5f \n", 
 		viewingCamera->FOVY(), width, height, aspectRatio, viewingCamera->NearClip(), viewingCamera->FarClip());
-    projectionMatrix = viewingCamera->updateProjectionMatrix(width, height);
 }
 
+// Update window title
 void updateTitle()
 {
 	strcpy(titleStr, baseStr);
@@ -183,7 +183,7 @@ void display()
         glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() ); 
     }
 
-    if (showAxis)
+    if (showAxes)
     {
         // Local axis for each entity
         for (int e = 0; e < nEntities; e++) 
@@ -204,6 +204,7 @@ void display()
     currentTime = glutGet(GLUT_ELAPSED_TIME);
     timeInterval = currentTime - lastTime;
 
+	// Update fps
     if (timeInterval >= 1000)
 	{
 		sprintf(fpsStr, "  F/S %4d", (int)(frameCount / (timeInterval / 1000.0f)));
@@ -213,32 +214,29 @@ void display()
     }
 }
 
-void update()
+void update(int value)
 {
-	//glutTimerFunc(scene->TimerDelay(), update, 1);
+	glutTimerFunc(scene->TimerDelay(), update, 1);
 
+	// Update entities
     for (int e = 0; e < nUpdateable; e++)
 	{
         updateableEntities[e]->Update();
     }
 
+	// Update cameras
 	for (int i = 0; i < nDynamicCameras; i++)
 	{
 		dynamicCameras[i]->Update();
 	}
 
 	viewMatrix = viewingCamera->ViewMatrix();
-    glutPostRedisplay();
-}
-
-void timerFunc(int value)
-{
-	glutTimerFunc(scene->TimerDelay(), timerFunc, 1);
-	if (!idleTimerFlag) update();
+    if (!idleTimerFlag) glutPostRedisplay(); // Redisplay if no idle function
 }
 
 // load the shader programs, vertex data from model files, create the solids, set initial view
-void init() {
+void init()
+{
     // load the shader programs
     shaderProgram = loadShaders(vertexShaderFile,fragmentShaderFile);
     glUseProgram(shaderProgram);
@@ -246,82 +244,92 @@ void init() {
     // generate VAOs and VBOs
     glGenVertexArrays( nModels, VAO );
     glGenBuffers( nModels, buffer );
-    // load the buffers from the model files
-    for (int i = 0; i < nModels; i++) {
+
+    // Load models
+    for (int i = 0; i < nModels; i++)
+	{
         models[i] = new Model(modelFile[i], nVertices[i], &VAO[i], &buffer[i], &shaderProgram,
                 &vPosition[i], &vColor[i], &vNormal[i]);
-        models[i]->Init();
     }
 
     srand(time(NULL));
-    int max = 250;
+    glm::vec3 pos; // Position of entity
+    glm::vec3 target; // Direction vector
+	glm::vec3 up; // Up vector
 
-    glm::vec3 pos;
-    glm::vec3 target;
+	// Create each entity
 
     printf("\tRuber drawn\n");
+	pos = glm::vec3(0.0f);
     target = glm::vec3(rand() , rand(), rand());
-    glm::vec3 up = glm::vec3(0, 1, 0);
-    if (colinear(target, up, 0.1)) // These can't be colinear
+	up = glm::vec3(0, 1, 0);
+    if (colinear(target, up, 0.1)) // Up and target can't be colinear
     {
         up = glm::vec3(-1, 0, 0);
     }
-    updateableEntities[0] = new CelestialBody(models[3], NULL, glm::vec3(0.0f), glm::vec3(2000), pos + target,
+    updateableEntities[0] = new CelestialBody(models[3], NULL, pos, glm::vec3(2000), pos + target,
 		up, 60.0f);
 	entities[0] = updateableEntities[0];
 
 	printf("\tUnum drawn\n");
+	pos = glm::vec3(4000.0f, 0.0f, 0.0f);
 	target = glm::vec3(rand(), rand(), rand());
 	up = glm::vec3(0, 1, 0);
 	if (colinear(target, up, 0.1))
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[1] = new CelestialBody(models[4], (CelestialBody*)entities[0], glm::vec3(4000.0f, 0.0f, 0.0f),
+	updateableEntities[1] = new CelestialBody(models[4], (CelestialBody*)entities[0], pos,
 		glm::vec3(200), pos + target, up, 5.0f, 8.0f);
 	entities[1] = updateableEntities[1];
 
 	printf("\tDuo drawn\n");
+	pos = glm::vec3(9000.0f, 0.0f, 0.0f);
 	target = glm::vec3(rand(), rand(), rand());
 	up = glm::vec3(0, 1, 0);
 	if (colinear(target, up, 0.1))
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[2] = new CelestialBody(models[5], (CelestialBody*)entities[0], glm::vec3(9000.0f, 0.0f, 0.0f),
+	updateableEntities[2] = new CelestialBody(models[5], (CelestialBody*)entities[0], pos,
 		glm::vec3(400), pos + target, up, 5.0f, 16.0f);
 	entities[2] = updateableEntities[2];
 
 	printf("\tPrimus drawn\n");
+	pos = glm::vec3(-900.0f, 0.0f, 0.0f);
 	target = glm::vec3(rand(), rand(), rand());
 	up = glm::vec3(0, 1, 0);
 	if (colinear(target, up, 0.1))
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[3] = new CelestialBody(models[6], (CelestialBody*)entities[2], glm::vec3(-900.0f, 0.0f, 0.0f),
+	updateableEntities[3] = new CelestialBody(models[6], (CelestialBody*)entities[2], pos,
 		glm::vec3(100), pos + target, up, 5.0f, 8.0f);
 	entities[3] = updateableEntities[3];
 
 	printf("\tSecundus drawn\n");
+	pos = glm::vec3(-1750.0f, 0.0f, 0.0f);
 	target = glm::vec3(rand(), rand(), rand());
 	up = glm::vec3(0, 1, 0);
 	if (colinear(target, up, 0.1))
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[4] = new CelestialBody(models[7], (CelestialBody*)entities[2], glm::vec3(-1750.0f, 0.0f, 0.0f),
+	updateableEntities[4] = new CelestialBody(models[7], (CelestialBody*)entities[2], pos,
 		glm::vec3(150), pos + target, up, 5.0f, 16.0f);
 	entities[4] = updateableEntities[4];
 
 	printf("\tWarbird drawn\n");
 	pos = glm::vec3(5000.0f, 1000.0f, 5000.0f);
-	updateableEntities[5] = new Ship(models[2], pos, glm::vec3(100.0f), pos + glm::vec3(0.0f, 0.0f, -1.0f));
+	target = glm::vec3(0.0f, 0.0f, -1.0f);
+	updateableEntities[5] = new Ship(models[2], pos, glm::vec3(100.0f), pos + target);
 	entities[5] = updateableEntities[5];
 
+	// Set entities in scene
 	Scene::Instance()->SetEntities(entities, nEntities);
 	Scene::Instance()->SetMoveables(updateableEntities, nUpdateable);
 
+	// Create dynamic cameras
 	dynamicCameras[0] = new DynamicCamera("Ship", (MoveableEntity*)updateableEntities[5], false, 0.0f,
 		glm::vec3(0.0f, 300.0f, 1000.0f), glm::vec3(0.0f, 300.0f, 0.0f));
 	availableCameras[2] = dynamicCameras[0];
@@ -342,6 +350,7 @@ void init() {
     glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 }
 
+// Keyboard input
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
@@ -350,7 +359,6 @@ void keyboard(unsigned char key, int x, int y)
 		exit(EXIT_SUCCESS);
 		break;
 	case 'a': case 'A':  // change animation timer
-						 // printf("%s   %s\n", timerStr, fpsStr);
 		if (idleTimerFlag) // switch to interval timer  
 		{
 			glutIdleFunc(NULL);
@@ -358,46 +366,45 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		else // switch to idle timer
 		{
-			glutIdleFunc(update);
+			glutIdleFunc(display);
 			idleTimerFlag = true;
 		}
 		break;
-	case 't': case 'T':
-		showAxis = !showAxis;
-		printf("Show Axis: %d\n", showAxis);
+	case 't': case 'T':  // Toggle axes
+		showAxes = !showAxes;
 		break;
-	case 'v': case 'V':
+	case 'v': case 'V':  // Next camera
 		currentCamera = (currentCamera + 1) % nCameras;
 		viewingCamera = availableCameras[currentCamera];
 		viewMatrix = viewingCamera->ViewMatrix();
 		sprintf(viewStr, "  View %s", viewingCamera->Name());
 		break;
-	case 'x': case 'X':
+	case 'x': case 'X':  // Prev camera
 		currentCamera = (nCameras + currentCamera - 1) % nCameras;
 		viewingCamera = availableCameras[currentCamera];
 		viewMatrix = viewingCamera->ViewMatrix();
 		sprintf(viewStr, "  View %s", viewingCamera->Name());
 		break;
-	case 'u': case 'U':
+	case 'u': case 'U':  // Change time quantum
 		tq = (tq + 1) % 4;
 		switch (tq)
 		{
-		case 0:
-			scene->SetTimerDelay(5);
-			break;
-		case 1:
-			scene->SetTimerDelay(40);
-			break;
-		case 2:
-			scene->SetTimerDelay(100);
-			break;
-		case 3:
-			scene->SetTimerDelay(500);
-			break;
+			case 0:
+				scene->SetTimerDelay(5);
+				break;
+			case 1:
+				scene->SetTimerDelay(40);
+				break;
+			case 2:
+				scene->SetTimerDelay(100);
+				break;
+			case 3:
+				scene->SetTimerDelay(500);
+				break;
 		}
 		sprintf(upsStr, "  U/S %4d", 1000 / scene->TimerDelay());
 		break;
-}
+	}
 
 	updateTitle();
 	glutPostRedisplay();
@@ -432,6 +439,7 @@ int main(int argc, char* argv[]) {
                 glGetString(GL_SHADING_LANGUAGE_VERSION));
     }
 
+	// Disable vsync
 #ifdef _WIN32
 	printf("WINDOWS\n");
 	if (WGLExtensionSupported("WGL_EXT_swap_control"))
@@ -457,7 +465,7 @@ int main(int argc, char* argv[]) {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
-    glutTimerFunc(scene->TimerDelay(), timerFunc, 1);
+    glutTimerFunc(scene->TimerDelay(), update, 1);
     glutIdleFunc(NULL);
     glutMainLoop();
     printf("done\n");

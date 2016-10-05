@@ -29,6 +29,7 @@ public :
 		float nearClip = 1.0f, float farClip = 10000000.0f);
 
 	~DynamicCamera() {}
+	
 	void Update();
 	bool UsesHeading() { return m_bUsesHeading; }
 	

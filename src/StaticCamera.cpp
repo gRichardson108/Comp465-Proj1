@@ -18,7 +18,9 @@ StaticCamera::StaticCamera(char* name, glm::vec3 eye, glm::vec3 at, glm::vec3 up
 
 glm::mat4 StaticCamera::updateProjectionMatrix(int width, int height)
 {
-    float aspectRatio = (float) width / (float) height;
+	m_iViewportWidth = width;
+	m_iViewportHeight = height;
+    float aspectRatio = (float)m_iViewportWidth / (float)m_iViewportHeight;
     m_mProjectionMatrix = glm::perspective(m_fFOVY, aspectRatio, m_fNearClip, m_fFarClip); 
     return m_mProjectionMatrix;
 }

@@ -6,7 +6,7 @@
 class CelestialBody : public MoveableEntity
 {
 private :
-	CelestialBody* m_eParent; // If we're orbiting another body, which one?
+	CelestialBody* m_pParent; // If orbiting another body, which one?
 	glm::vec3 m_vParentOldPosition; // Parent's previous position
     float m_fRotationRate; // Rate in seconds for full rotation
 	glm::mat3 m_mRotation; // Axis rotation matrix

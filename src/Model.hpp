@@ -6,16 +6,18 @@
 class Model
 {
 private:
-	char* m_cModelFile;
-	int m_iVertices;
+	char* m_cModelFile; // Model file name
+	int m_iVertices; // Number of vertices
 	GLuint* m_gliVAO;
 	GLuint* m_gliBuffer;
 	GLuint* m_gliShaderProgram;
 	GLuint* m_gliPosition;
 	GLuint* m_gliColor;
 	GLuint* m_gliNormal;
-	float m_fBoundingRadius;
-	// Not sure if Scale is needed
+	float m_fBoundingRadius; // Bounding radius of model
+
+	// Initialize and load model
+	void Init();
 
 public:
 	Model(char* modelFile, int vertices,
@@ -24,7 +26,6 @@ public:
 
 	~Model();
 
-	void Init();
 	int Vertices() { return m_iVertices; }
 	GLuint* VAO() { return m_gliVAO; }
 	GLuint* Buffer() { return m_gliBuffer; }
