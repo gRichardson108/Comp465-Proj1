@@ -70,17 +70,18 @@ WarbirdSimulation.cpp
 #include "Scene.hpp"
 #include "CelestialBody.hpp"
 #include "Ship.hpp"
+#include "Missile.hpp"
 #include "DynamicCamera.hpp"
 #include <time.h>
 
 // constants for models:  file names, vertex count, model display size
 const int nModels = 8;  // number of models in this scene
 Model* models[nModels];  // Models
-char * modelFile [nModels] = {"src/axes-r100.tri", "src/obelisk-10-20-10.tri", "src/Warbird.tri",
+char * modelFile [nModels] = {"src/axes-r100.tri", "src/Missile.tri", "src/Warbird.tri",
     "src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri"};
 float modelBR[nModels];       // model's bounding radius
 float scaleValue[nModels];    // model's scaling "size" value
-const int nVertices[nModels] = { 120 * 3, 14 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3};
+const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3};
 char * vertexShaderFile   = "src/simpleVertex.glsl";     
 char * fragmentShaderFile = "src/simpleFragment.glsl";    
 GLuint shaderProgram; 
@@ -97,8 +98,8 @@ glm::mat4 projectionMatrix;     // set in reshape()
 glm::mat4 ModelViewProjectionMatrix; // set in display();
 
 // constants for entities
-const int nEntities = 6;  // Number of entities
-const int nUpdateable = 6;  // Number of updateable entities
+const int nEntities = 7;  // Number of entities
+const int nUpdateable = 7;  // Number of updateable entities
 BaseEntity* entities[nEntities];  // Entities
 MoveableEntity* updateableEntities[nUpdateable]; // Updateable entities
 bool showAxes = false, idleTimerFlag = true;
@@ -325,6 +326,12 @@ void init()
 	target = glm::vec3(0.0f, 0.0f, -1.0f);
 	updateableEntities[5] = new Ship(models[2], pos, glm::vec3(100.0f), pos + target);
 	entities[5] = updateableEntities[5];
+
+	printf("\tMissile drawn\n");
+	pos = glm::vec3(4900.0f, 1000.0f, 4850.0f);
+	target = glm::vec3(0.0f, 0.0f, -1.0f);
+	updateableEntities[6] = new Missile(models[1], pos, glm::vec3(25.0f), pos + target);
+	entities[6] = updateableEntities[6];
 
 	// Set entities in scene
 	Scene::Instance()->SetEntities(entities, nEntities);
