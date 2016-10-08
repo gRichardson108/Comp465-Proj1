@@ -1,3 +1,15 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+Scene.hpp
+10/08/2016
+
+Scene singleton, stores information about what is in the scene,
+update delay, entities.
+
+*/
+
 #ifndef SCENE_H
 #define SCENE_H
 

@@ -1,3 +1,14 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+BaseEntity.hpp
+10/08/2016
+
+Base entity class, used for displaying static objects in the scene.
+
+*/
+
 #ifndef BASE_ENTITY_H
 #define BASE_ENTITY_H
 

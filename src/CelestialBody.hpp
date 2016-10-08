@@ -1,3 +1,16 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+CelestialBody.hpp
+10/08/2016
+
+Extends MovableEntity for creating suns, planets and moons or
+any orbiting type body, can orbit parent CelestialBody and
+rotate on up axis.
+
+*/
+
 #ifndef CELESTIAL_BODY_H
 #define CELESTIAL_BODY_H
 

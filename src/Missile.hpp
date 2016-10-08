@@ -1,3 +1,16 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+Missile.hpp
+10/08/2016
+
+Handles any missile object in the scene, will know what
+object spawned it and have a lifetime. Can be affected by
+gravity.
+
+*/
+
 #ifndef MISSILE_H
 #define MISSILE_H
 

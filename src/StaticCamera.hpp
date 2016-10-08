@@ -1,3 +1,14 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+StaticCamera.hpp
+10/08/2016
+
+Static camera class handles non moving cameras.
+
+*/
+
 #ifndef STATIC_CAMERA_H
 #define STATIC_CAMERA_H
 

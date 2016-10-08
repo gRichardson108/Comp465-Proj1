@@ -3,8 +3,12 @@ Kory Dondzila
 Garret Richardson
 
 WarbirdSimulation.cpp
-
 10/05/2016
+
+Main file that initializes the scene, loads model files, scene entities,
+performs update and display methods. Takes user input for changing cameras,
+update speed, toggle axes, and toggle idle function.
+
 */
 
 #include "../includes465/include465.hpp"
