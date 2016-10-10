@@ -1,3 +1,15 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+Ship.hpp
+10/08/2016
+
+Ship class that handles any input for movement and
+can have missiles to shoot. Can be affected by gravity.
+
+*/
+
 #ifndef SHIP_H
 #define SHIP_H
 

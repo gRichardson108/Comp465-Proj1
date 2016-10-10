@@ -1,3 +1,15 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+DynamicCamera.hpp
+10/08/2016
+
+Used for moving cameras in the scene, can be attached
+to any MoveableEntity.
+
+*/
+
 #ifndef DYNAMIC_CAMERA_H
 #define DYNAMIC_CAMERA_H
 

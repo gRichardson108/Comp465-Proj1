@@ -1,3 +1,16 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+Model.hpp
+10/08/2016
+
+Model class, used for keeping track of models used in the
+scene, entities have a pointer to a model to know what it
+will render.
+
+*/
+
 #ifndef MODEL_H
 #define MODEL_H
 

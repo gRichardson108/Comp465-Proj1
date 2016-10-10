@@ -1,3 +1,15 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+MoveableEntity.hpp
+10/08/2016
+
+Moveable entity class, used for displaying moveable objects in the scene.
+This is meant to be an abstract class.
+
+*/
+
 #ifndef MOVEABLE_ENTITY_H
 #define MOVEABLE_ENTITY_H
 

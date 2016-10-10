@@ -28,10 +28,12 @@ CelestialBody::CelestialBody(Model* model, CelestialBody* parent, const glm::vec
 	{
 		m_fOrbitDistance = m_vPosition.length();
 	}
+
+	CreateObjectMatrix();
 	
 	// Rates are in seconds for full rotation/orbit
 	// multiplied by 40 because that's timeDelay
-	m_mRotation = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (m_fRotationRate * 1000.0f), m_vUp));
+	m_mAxisRotation = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (m_fRotationRate * 1000.0f), m_vUp));
 	m_mOrbit = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (m_fOrbitRate * 1000.0f), m_vOrbitAxis));
 }
 
@@ -60,6 +62,8 @@ void CelestialBody::SetPosition(const glm::vec3& position)
 	{
 		m_fOrbitDistance = m_vPosition.length();
 	}
+
+	CreateObjectMatrix();
 }
 
 void CelestialBody::Update()
@@ -67,9 +71,11 @@ void CelestialBody::Update()
 	// Rotate forward and left vectors
 	if (m_fRotationRate > 0.0f)
 	{
-		m_vForward = glm::normalize(m_mRotation * m_vForward);
-		m_vLeft = glm::normalize(m_mRotation * m_vLeft);
+		m_vForward = glm::normalize(m_mAxisRotation * m_vForward);
+		m_vLeft = glm::normalize(m_mAxisRotation * m_vLeft);
 	}
+
+	RotateToForward();
 
 	// Old position is due to the parent being
 	// updated before child, need to at least remember this
@@ -94,4 +100,6 @@ void CelestialBody::Update()
 
 		m_vHeading = glm::normalize(m_mOrbit * m_vHeading);
 	}
+
+	CreateObjectMatrix();
 }
