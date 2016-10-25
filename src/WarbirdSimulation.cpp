@@ -133,7 +133,7 @@ DynamicCamera* dynamicCameras[nDynamicCameras];  // Dynamic cameras
 
 // window title string
 char titleStr[160];
-char baseStr [76] = "Warbird Simulation {a - Idle, x - Prev Cam, v - Next Cam, t - Axes, u - TQ}";
+char baseStr [76] = "Warbird Simulation {a - Idle, x - Prev Cam, v - Next Cam, u - Axes, t - TQ}";
 char shipCountStr[12] = "  Warbird ?";
 char unumCountStr[9] = "  Unum ?";
 char secundusCountStr[13] = "  Secundus ?";
@@ -384,7 +384,7 @@ void keyboard(unsigned char key, int x, int y)
 			idleTimerFlag = true;
 		}
 		break;
-	case 't': case 'T':  // Toggle axes
+	case 'u': case 'U':  // Toggle axes
 		showAxes = !showAxes;
 		break;
 	case 'v': case 'V':  // Next camera
@@ -399,7 +399,7 @@ void keyboard(unsigned char key, int x, int y)
 		viewMatrix = viewingCamera->ViewMatrix();
 		sprintf(viewStr, "  View %s", viewingCamera->Name());
 		break;
-	case 'u': case 'U':  // Change time quantum
+	case 't': case 'T':  // Change time quantum
 		tq = (tq + 1) % 4;
 		switch (tq)
 		{
