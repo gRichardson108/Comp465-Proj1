@@ -1,9 +1,10 @@
 #include "Missile.hpp"
 
-Missile::Missile(Model* model, const glm::vec3& pos = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f), 
-	const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f)) : 
+Missile::Missile(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target, 
+	const glm::vec3& up, float velocity) : 
 	MoveableEntity(model, pos, scale, target, up),
-	m_iLifeTime(m_iTotalLifeTime)
+	m_iLifeTime(m_iTotalLifeTime),
+	m_fVelocity(velocity)
 {
 	m_vHeading = m_vForward * m_fVelocity;
 	m_iNumTargets = 0;
@@ -17,7 +18,7 @@ void Missile::Update()
 	{
 		if (m_pCurrentTarget != NULL)
 		{
-			// Call Missile movement
+			MissileGuidance();
 
 			float distance = glm::distance(m_vPosition, m_pCurrentTarget->Position());
 			if (distance > 5000.0f)
@@ -40,7 +41,11 @@ void Missile::Update()
 
 			if (m_pCurrentTarget != NULL)
 			{
-				// Call Missile movement
+				MissileGuidance();
+			}
+			else
+			{
+				m_vPosition += m_vForward * m_fVelocity;
 			}
 		}
 	}
@@ -50,6 +55,7 @@ void Missile::Update()
 	}
 
 	m_iLifeTime--;
+
 	if (m_iLifeTime == 0)
 	{
 		delete this;
@@ -58,4 +64,9 @@ void Missile::Update()
 	{
 		m_bLive = true;
 	}
+}
+
+void Missile::MissileGuidance()
+{
+
 }

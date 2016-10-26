@@ -27,9 +27,12 @@ private:
 	int m_iNumTargets; // Number of  targets
 	float m_fVelocity; // Velocity of the missile
 
+	void MissileGuidance(); // Method to move the missile towards a target
+
 public:
 	Missile(Model* model, const glm::vec3& pos = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f), 
-		const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f));
+		const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f), 
+		float velocity = 5.0f);
 
 	~Missile()
 	{
