@@ -36,38 +36,6 @@ update speed, toggle axes, and toggle idle function.
 	}
 
 	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
-#elif defined __linux__
-#include "../includes465/glxext.h"
-	bool checkGLXExtension(const char* extName)
-	{
-		/*
-		Search for extName in the extensions string.  Use of strstr()
-		is not sufficient because extension names can be prefixes of
-		other extension names.  Could use strtok() but the constant
-		string returned by glGetString can be in read-only memory.
-		*/
-		Display* dpy = glXGetCurrentDisplay();
-		int screen = glXGetCurrentDrawable();
-		char* list = (char*)glXQueryExtensionsString(dpy, screen);
-		char* end;
-		int extNameLen;
-
-		extNameLen = strlen(extName);
-		end = list + strlen(list);
-
-		while (list < end)
-		{
-			int n = strcspn(list, " ");
-
-			if ((extNameLen == n) && (strncmp(extName, list, n) == 0))
-				return true;
-
-			list += (n + 1);
-		};
-		return false;
-	};
-
-	void(*)(int) glXSwapIntervalEXT = NULL;
 #endif
 
 
@@ -464,12 +432,6 @@ int main(int argc, char* argv[]) {
 	wglSwapIntervalEXT(0);
 #elif defined __linux__
 	printf("LINUX\n");
-	if (checkGLXExtension("GLX_EXT_swap_control"))
-	{
-		glXSwapIntervalEXT = (void(*)(int))glXGetProcAddress((const GLubyte*) "glXSwapIntervalEXT");
-	}
-
-	glXSwapIntervalEXT(0);
 #endif
 
     // initialize scene
