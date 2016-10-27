@@ -55,9 +55,9 @@ char * modelFile [nModels] = {"src/axes-r100.tri", "src/Missile.tri", "src/Warbi
 float modelBR[nModels];       // model's bounding radius
 float scaleValue[nModels];    // model's scaling "size" value
 const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3};
-char * vertexShaderFile   = "src/simpleVertex.glsl";     
-char * fragmentShaderFile = "src/simpleFragment.glsl";    
-GLuint shaderProgram; 
+char * vertexShaderFile   = "src/simpleVertex.glsl";
+char * fragmentShaderFile = "src/simpleFragment.glsl";
+GLuint shaderProgram;
 GLuint VAO[nModels];      // Vertex Array Objects
 GLuint buffer[nModels];   // Vertex Buffer Objects
 
@@ -75,6 +75,7 @@ const int nEntities = 7;  // Number of entities
 const int nUpdateable = 7;  // Number of updateable entities
 BaseEntity* entities[nEntities];  // Entities
 MoveableEntity* updateableEntities[nUpdateable]; // Updateable entities
+Ship* ship;
 bool showAxes = false, idleTimerFlag = true;
 
 // Constants for scene
@@ -115,7 +116,7 @@ void reshape(int width, int height) {
 	projectionMatrix = viewingCamera->updateProjectionMatrix(width, height);
     float aspectRatio = (float)width / (float)height;
     glViewport(0, 0, width, height);
-    printf("reshape: FOVY = %5.2f, width = %4d height = %4d aspect = %5.2f \n + nearclip = %5f farclip = %5f \n", 
+    printf("reshape: FOVY = %5.2f, width = %4d height = %4d aspect = %5.2f \n + nearclip = %5f farclip = %5f \n",
 		viewingCamera->FOVY(), width, height, aspectRatio, viewingCamera->NearClip(), viewingCamera->FarClip());
 }
 
@@ -132,22 +133,22 @@ void updateTitle()
 	glutSetWindowTitle(titleStr);
 }
 
-void display() 
+void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // update model matrix
-    for(int e = 0; e < nEntities; e++) 
+    for(int e = 0; e < nEntities; e++)
     {
-        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entities[e]->ObjectMatrix(); 
+        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entities[e]->ObjectMatrix();
         glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
         glBindVertexArray(*(entities[e]->ModelFile()->VAO()));
-        glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() ); 
+        glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() );
     }
 
     if (showAxes)
     {
         // Local axis for each entity
-        for (int e = 0; e < nEntities; e++) 
+        for (int e = 0; e < nEntities; e++)
         {
             modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
                 glm::rotate(glm::mat4(), glm::pi<float>(), entities[e]->Up()) *
@@ -297,7 +298,8 @@ void init()
 	printf("\tWarbird drawn\n");
 	pos = glm::vec3(5000.0f, 1000.0f, 5000.0f);
 	target = glm::vec3(0.0f, 0.0f, -1.0f);
-	updateableEntities[5] = new Ship(models[2], pos, glm::vec3(100.0f), pos + target);
+	ship = new Ship(models[2], pos, glm::vec3(100.0f), pos + target);
+	updateableEntities[5] = ship;
 	entities[5] = updateableEntities[5];
 
 	printf("\tMissile drawn\n");
@@ -342,7 +344,7 @@ void keyboard(unsigned char key, int x, int y)
 		exit(EXIT_SUCCESS);
 		break;
 	case 'a': case 'A':  // change animation timer
-		if (idleTimerFlag) // switch to interval timer  
+		if (idleTimerFlag) // switch to interval timer
 		{
 			glutIdleFunc(NULL);
 			idleTimerFlag = false;
@@ -391,7 +393,20 @@ void keyboard(unsigned char key, int x, int y)
 	updateTitle();
 	glutPostRedisplay();
 }
+void specialKeys(int key, int x, int y)
+{
+    switch (key)
+    {
+        case GLUT_KEY_UP:
+            printf("movementRate set");
+            ship->movementRate = -2.0;
+            break;
+        case GLUT_KEY_DOWN:
+            ship->movementRate = 0.0;
+            break;
 
+    }
+}
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
 # ifdef __Mac__
@@ -410,13 +425,13 @@ int main(int argc, char* argv[]) {
     glutCreateWindow("");
 	updateTitle();
     // initialize and verify glew
-    glewExperimental = GL_TRUE;  // needed my home system 
-    GLenum err = glewInit();  
-    if (GLEW_OK != err) 
-        printf("GLEW Error: %s \n", glewGetErrorString(err));      
+    glewExperimental = GL_TRUE;  // needed my home system
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+        printf("GLEW Error: %s \n", glewGetErrorString(err));
     else {
         printf("Using GLEW %s \n", glewGetString(GLEW_VERSION));
-        printf("OpenGL %s, GLSL %s\n", 
+        printf("OpenGL %s, GLSL %s\n",
                 glGetString(GL_VERSION),
                 glGetString(GL_SHADING_LANGUAGE_VERSION));
     }
@@ -440,6 +455,7 @@ int main(int argc, char* argv[]) {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
+    glutSpecialFunc(specialKeys);
     glutTimerFunc(scene->TimerDelay(), update, 1);
     glutIdleFunc(display);
     glutMainLoop();
