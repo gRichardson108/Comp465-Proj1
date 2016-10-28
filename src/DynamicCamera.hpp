@@ -18,7 +18,7 @@ to any MoveableEntity.
 
 class DynamicCamera : public StaticCamera
 {
-private :
+protected :
 	MoveableEntity* m_pParent; // Moving entity camera is attached to
 	glm::vec3 m_vEyeOffset; // Postion offset from parent
 	glm::vec3 m_vAtOffset; // Target offset from parent
@@ -26,12 +26,12 @@ private :
 	float m_fHeadingOffset; // Heading vector offset
 
 public :
-	DynamicCamera(char* name, const glm::mat4& cameraMatrix, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, 
+	DynamicCamera(char* name, const glm::mat4& cameraMatrix, float FOVY = glm::radians(60.0f), float nearClip = 1.0f,
 		float farClip = 10000000.0f) : StaticCamera(name, cameraMatrix, FOVY, nearClip, farClip)
 	{}
 
 	DynamicCamera(char* name, const glm::vec3& eye, const glm::vec3& at, const glm::vec3& up, float FOVY = glm::radians(60.0f),
-		float nearClip = 1.0f, float farClip = 10000000.0f) : 
+		float nearClip = 1.0f, float farClip = 10000000.0f) :
 		StaticCamera(name, eye, at, up, FOVY, nearClip, farClip)
 	{}
 
@@ -41,10 +41,10 @@ public :
 		float nearClip = 1.0f, float farClip = 10000000.0f);
 
 	~DynamicCamera() {}
-	
+
 	void Update();
 	bool UsesHeading() { return m_bUsesHeading; }
-	
+
 	float HeadingOffset() { return m_fHeadingOffset; }
 	void SetHeadingOffset(float offset) { m_fHeadingOffset = offset; }
 };

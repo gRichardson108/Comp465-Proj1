@@ -26,6 +26,8 @@ class Ship : public MoveableEntity
 
         void keypress(unsigned char key, int x, int y);
 
+        void rotateYaw(float degrees);
+
 		void Update();
 };
 

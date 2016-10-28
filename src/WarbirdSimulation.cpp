@@ -45,6 +45,7 @@ update speed, toggle axes, and toggle idle function.
 #include "Ship.hpp"
 #include "Missile.hpp"
 #include "DynamicCamera.hpp"
+#include "ChaseCamera.hpp"
 #include <time.h>
 
 // constants for models:  file names, vertex count, model display size
@@ -313,7 +314,7 @@ void init()
 	Scene::Instance()->SetMoveables(updateableEntities, nUpdateable);
 
 	// Create dynamic cameras
-	dynamicCameras[0] = new DynamicCamera("Ship", (MoveableEntity*)updateableEntities[5], false, 0.0f,
+	dynamicCameras[0] = new ChaseCamera("Ship", (MoveableEntity*)updateableEntities[5], 0.0f,
 		glm::vec3(0.0f, 300.0f, 1000.0f), glm::vec3(0.0f, 300.0f, 0.0f));
 	availableCameras[2] = dynamicCameras[0];
 
@@ -398,18 +399,36 @@ void specialKeys(int key, int x, int y)
     switch (key)
     {
         case GLUT_KEY_UP:
-            printf("movementRate set\n");
             ship->movementRate = 8.0;
+            break;
+        case GLUT_KEY_DOWN:
+            ship->movementRate = -8.0;
+            break;
+        case GLUT_KEY_LEFT:
+            ship->rotateYaw(1.0);
+            break;
+        case GLUT_KEY_RIGHT:
+            ship->rotateYaw(-1.0);
             break;
         case GLUT_KEY_F1:
             showVec3("Ship Position", ship->Position());
             break;
+
+    }
+}
+
+void specialUpFunc(int key, int x, int y)
+{
+    switch (key)
+    {
+        case GLUT_KEY_UP:
         case GLUT_KEY_DOWN:
             ship->movementRate = 0.0;
             break;
 
     }
 }
+
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
 # ifdef __Mac__
@@ -459,6 +478,7 @@ int main(int argc, char* argv[]) {
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(specialKeys);
+    glutSpecialUpFunc(specialUpFunc);
     glutTimerFunc(scene->TimerDelay(), update, 1);
     glutIdleFunc(display);
     glutMainLoop();
