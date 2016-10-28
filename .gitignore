@@ -1,6 +1,7 @@
 Makefile
 
 manyModelsStatic
+WarbirdSimulation
 
 *.sdf
 *.sln

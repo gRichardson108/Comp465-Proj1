@@ -398,8 +398,11 @@ void specialKeys(int key, int x, int y)
     switch (key)
     {
         case GLUT_KEY_UP:
-            printf("movementRate set");
-            ship->movementRate = -2.0;
+            printf("movementRate set\n");
+            ship->movementRate = 8.0;
+            break;
+        case GLUT_KEY_F1:
+            showVec3("Ship Position", ship->Position());
             break;
         case GLUT_KEY_DOWN:
             ship->movementRate = 0.0;

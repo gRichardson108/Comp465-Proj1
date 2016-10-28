@@ -11,4 +11,5 @@ void Ship::keypress(unsigned char key, int x, int y)
 void Ship::Update()
 {
     m_vPosition = m_vPosition + (m_vHeading * movementRate);
+    CreateObjectMatrix();
 }
