@@ -42,39 +42,30 @@ update speed, toggle axes, and toggle idle function.
 #include "Scene.hpp"
 #include "CelestialBody.hpp"
 #include "Ship.hpp"
+#include "MissileBattery.hpp"
 #include "Missile.hpp"
 #include "DynamicCamera.hpp"
 #include <time.h>
 
 // constants for models:  file names, vertex count, model display size
 const int nModels = 8;  // number of models in this scene
-Model* models[nModels];  // Models
 char * modelFile [nModels] = {"src/axes-r100.tri", "src/Missile.tri", "src/Warbird.tri",
     "src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri"};
-float modelBR[nModels];       // model's bounding radius
-float scaleValue[nModels];    // model's scaling "size" value
 const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3};
-char * vertexShaderFile   = "src/simpleVertex.glsl";     
-char * fragmentShaderFile = "src/simpleFragment.glsl";    
-GLuint shaderProgram; 
-GLuint VAO[nModels];      // Vertex Array Objects
-GLuint buffer[nModels];   // Vertex Buffer Objects
+char * vertexShaderFile   = "src/simpleVertex.glsl";
+char * fragmentShaderFile = "src/simpleFragment.glsl";
 
 // Shader handles, matrices, etc
 GLuint MVP;  // Model View Projection matrix's handle
-GLuint vPosition[nModels], vColor[nModels], vNormal[nModels];   // vPosition, vColor, vNormal handles for models
+GLuint VAO[nModels], buffer[nModels];
 
 // model, view, projection matrices and values to create modelMatrix.
 glm::mat4 modelMatrix;          // set in display()
 glm::mat4 projectionMatrix;     // set in reshape()
 glm::mat4 ModelViewProjectionMatrix; // set in display();
 
-// constants for entities
-const int nEntities = 7;  // Number of entities
-const int nUpdateable = 7;  // Number of updateable entities
-BaseEntity* entities[nEntities];  // Entities
-MoveableEntity* updateableEntities[nUpdateable]; // Updateable entities
-bool showAxes = false, idleTimerFlag = true;
+// flags
+bool showAxesFlag = false, idleTimerFlag = true;
 
 // Constants for scene
 Scene* Scene::s_pInstance = NULL;
@@ -83,21 +74,8 @@ int tq = 0, frameCount = 0, updateCount = 0;
 double currentTime, lastTime, timeInterval, ulastTime, utimeInterval;
 
 // Constants for cameras
-int currentCamera = 0;
-const int nCameras = 5, nDynamicCameras = 3;  // Number of cameras
 glm::mat4 viewMatrix;  // Current view matrix
 StaticCamera* viewingCamera;  // Current camera
-StaticCamera* availableCameras[nCameras] = {
-    new StaticCamera("Front", glm::lookAt(
-                glm::vec3(0.0f, 10000.0f, 20000.0f),
-                glm::vec3(0),
-                glm::vec3(0.0f, 1.0f, 0.0f))),
-    new StaticCamera("Top", glm::lookAt(
-                glm::vec3(0.0f, 20000.0f, 0.0f),
-                glm::vec3(0),
-                glm::vec3(0.0f, 0.0f, -1.0f)))
-};
-DynamicCamera* dynamicCameras[nDynamicCameras];  // Dynamic cameras
 
 // window title string
 char titleStr[160];
@@ -135,27 +113,30 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // update model matrix
-    for(int e = 0; e < nEntities; e++) 
+    for(std::vector<BaseEntity*>::iterator it = scene->Entities()->begin(); 
+		it != scene->Entities()->end(); it++)
     {
-        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entities[e]->ObjectMatrix(); 
+        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * (*it)->ObjectMatrix(); 
         glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-        glBindVertexArray(*(entities[e]->ModelFile()->VAO()));
-        glDrawArrays(GL_TRIANGLES, 0, entities[e]->ModelFile()->Vertices() ); 
+        glBindVertexArray(*((*it)->ModelFile()->VAO()));
+        glDrawArrays(GL_TRIANGLES, 0, (*it)->ModelFile()->Vertices());
     }
 
-    if (showAxes)
-    {
+	if (showAxesFlag)
+	{
+		Model* axis = scene->GetModel("axes-r100");
         // Local axis for each entity
-        for (int e = 0; e < nEntities; e++) 
-        {
-            modelMatrix = glm::translate(glm::mat4(), entities[e]->Position()) *
-                glm::rotate(glm::mat4(), glm::pi<float>(), entities[e]->Up()) *
-                entities[e]->RotationMatrix() *
-                glm::scale(glm::mat4(), entities[e]->Scale() * entities[e]->ModelFile()->BoundingRadius() * 1.5f / models[0]->BoundingRadius());
+		for (std::vector<BaseEntity*>::iterator it = scene->Entities()->begin();
+			it != scene->Entities()->end(); it++)
+		{
+            modelMatrix = glm::translate(glm::mat4(), (*it)->Position()) *
+                glm::rotate(glm::mat4(), glm::pi<float>(), (*it)->Up()) *
+				(*it)->RotationMatrix() *
+                glm::scale(glm::mat4(), (*it)->Scale() * (*it)->ModelFile()->BoundingRadius() * 1.5f / axis->BoundingRadius());
             ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
             glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-            glBindVertexArray(*(models[0]->VAO()));
-            glDrawArrays(GL_TRIANGLES, 0, models[0]->Vertices());
+            glBindVertexArray(*(axis->VAO()));
+            glDrawArrays(GL_TRIANGLES, 0, axis->Vertices());
         }
     }
 
@@ -179,15 +160,17 @@ void update(int value)
 	glutTimerFunc(scene->TimerDelay(), update, 1);
 
 	// Update entities
-    for (int e = 0; e < nUpdateable; e++)
+    for (std::vector<MoveableEntity*>::iterator it = scene->MoveableEntities()->begin(); 
+		it != scene->MoveableEntities()->end(); it++)
 	{
-        updateableEntities[e]->Update();
+        (*it)->Update();
     }
 
 	// Update cameras
-	for (int i = 0; i < nDynamicCameras; i++)
+	for (std::vector<DynamicCamera*>::iterator it = scene->DynamicCameras()->begin();
+		it != scene->DynamicCameras()->end(); it++)
 	{
-		dynamicCameras[i]->Update();
+		(*it)->Update();
 	}
 
 	viewMatrix = viewingCamera->ViewMatrix();
@@ -212,7 +195,7 @@ void update(int value)
 void init()
 {
     // load the shader programs
-    shaderProgram = loadShaders(vertexShaderFile,fragmentShaderFile);
+    GLuint shaderProgram = loadShaders(vertexShaderFile,fragmentShaderFile);
     glUseProgram(shaderProgram);
 
     // generate VAOs and VBOs
@@ -222,8 +205,7 @@ void init()
     // Load models
     for (int i = 0; i < nModels; i++)
 	{
-        models[i] = new Model(modelFile[i], nVertices[i], &VAO[i], &buffer[i], &shaderProgram,
-                &vPosition[i], &vColor[i], &vNormal[i]);
+        new Model(modelFile[i], nVertices[i], &VAO[i], &buffer[i], &shaderProgram);
     }
 
     srand(time(NULL));
@@ -241,9 +223,8 @@ void init()
     {
         up = glm::vec3(-1, 0, 0);
     }
-    updateableEntities[0] = new CelestialBody(models[3], NULL, pos, glm::vec3(2000), pos + target,
+    new CelestialBody(scene->GetModel("Ruber"), NULL, pos, glm::vec3(2000), pos + target,
 		up, 60.0f);
-	entities[0] = updateableEntities[0];
 
 	printf("\tUnum drawn\n");
 	pos = glm::vec3(4000.0f, 0.0f, 0.0f);
@@ -253,9 +234,8 @@ void init()
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[1] = new CelestialBody(models[4], (CelestialBody*)entities[0], pos,
+	new CelestialBody(scene->GetModel("Unum"), (CelestialBody*)scene->GetEntity(0), pos,
 		glm::vec3(200), pos + target, up, 5.0f, 8.0f);
-	entities[1] = updateableEntities[1];
 
 	printf("\tDuo drawn\n");
 	pos = glm::vec3(9000.0f, 0.0f, 0.0f);
@@ -265,9 +245,8 @@ void init()
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[2] = new CelestialBody(models[5], (CelestialBody*)entities[0], pos,
+	new CelestialBody(scene->GetModel("Duo"), (CelestialBody*)scene->GetEntity(0), pos,
 		glm::vec3(400), pos + target, up, 5.0f, 16.0f);
-	entities[2] = updateableEntities[2];
 
 	printf("\tPrimus drawn\n");
 	pos = glm::vec3(-900.0f, 0.0f, 0.0f);
@@ -277,9 +256,8 @@ void init()
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[3] = new CelestialBody(models[6], (CelestialBody*)entities[2], pos,
+	new CelestialBody(scene->GetModel("Primus"), (CelestialBody*)scene->GetEntity(2), pos,
 		glm::vec3(100), pos + target, up, 5.0f, 8.0f);
-	entities[3] = updateableEntities[3];
 
 	printf("\tSecundus drawn\n");
 	pos = glm::vec3(-1750.0f, 0.0f, 0.0f);
@@ -289,42 +267,27 @@ void init()
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	updateableEntities[4] = new CelestialBody(models[7], (CelestialBody*)entities[2], pos,
+	new CelestialBody(scene->GetModel("Secundus"), (CelestialBody*)scene->GetEntity(2), pos,
 		glm::vec3(150), pos + target, up, 5.0f, 16.0f);
-	entities[4] = updateableEntities[4];
 
 	printf("\tWarbird drawn\n");
 	pos = glm::vec3(5000.0f, 1000.0f, 5000.0f);
 	target = glm::vec3(0.0f, 0.0f, -1.0f);
-	updateableEntities[5] = new Ship(models[2], pos, glm::vec3(100.0f), pos + target);
-	entities[5] = updateableEntities[5];
+	new Ship(scene->GetModel("Warbird"), pos, glm::vec3(100.0f), pos + target);
 
-	printf("\tMissile drawn\n");
-	pos = glm::vec3(4900.0f, 1000.0f, 4850.0f);
-	target = glm::vec3(0.0f, 0.0f, -1.0f);
-	updateableEntities[6] = new Missile(models[1], pos, glm::vec3(25.0f), pos + target);
-	entities[6] = updateableEntities[6];
-
-	// Set entities in scene
-	Scene::Instance()->SetEntities(entities, nEntities);
-	Scene::Instance()->SetMoveables(updateableEntities, nUpdateable);
-
-	// Create dynamic cameras
-	dynamicCameras[0] = new DynamicCamera("Ship", (MoveableEntity*)updateableEntities[5], false, 0.0f,
-		glm::vec3(0.0f, 300.0f, 1000.0f), glm::vec3(0.0f, 300.0f, 0.0f));
-	availableCameras[2] = dynamicCameras[0];
-
-	dynamicCameras[1] = new DynamicCamera("Unum", (MoveableEntity*)updateableEntities[1], true, 8000.0f);
-	availableCameras[3] = dynamicCameras[1];
-
-	dynamicCameras[2] = new DynamicCamera("Duo", (MoveableEntity*)updateableEntities[2], true, 8000.0f);
-	availableCameras[4] = dynamicCameras[2];
+	// Create cameras
+	new StaticCamera("Front", glm::vec3(0.0f, 10000.0f, 20000.0f), glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));
+	new StaticCamera("Top",  glm::vec3(0.0f, 20000.0f, 0.0f), glm::vec3(0), glm::vec3(0.0f, 0.0f, -1.0f));
+	new DynamicCamera("Ship", scene->GetMoveableEntity(5), false, 0.0f, glm::vec3(0.0f, 300.0f, 1000.0f), 
+		glm::vec3(0.0f, 300.0f, 0.0f));
+	new DynamicCamera("Unum", scene->GetMoveableEntity(1), true, 8000.0f);
+	new DynamicCamera("Duo", scene->GetMoveableEntity(2), true, 8000.0f);
 
 	// Initialize display info
     lastTime = glutGet(GLUT_ELAPSED_TIME);
 	ulastTime = lastTime;
     MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
-    viewingCamera = availableCameras[0];
+	viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
 
     // set render state values
@@ -353,17 +316,15 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case 'u': case 'U':  // Toggle axes
-		showAxes = !showAxes;
+		showAxesFlag = !showAxesFlag;
 		break;
 	case 'v': case 'V':  // Next camera
-		currentCamera = (currentCamera + 1) % nCameras;
-		viewingCamera = availableCameras[currentCamera];
+		viewingCamera = scene->NextCamera();
 		viewMatrix = viewingCamera->ViewMatrix();
 		sprintf(viewStr, "  View %s", viewingCamera->Name());
 		break;
 	case 'x': case 'X':  // Prev camera
-		currentCamera = (nCameras + currentCamera - 1) % nCameras;
-		viewingCamera = availableCameras[currentCamera];
+		viewingCamera = scene->PrevCamera();
 		viewMatrix = viewingCamera->ViewMatrix();
 		sprintf(viewStr, "  View %s", viewingCamera->Name());
 		break;

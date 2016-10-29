@@ -26,14 +26,12 @@ private :
 	float m_fHeadingOffset; // Heading vector offset
 
 public :
-	DynamicCamera(char* name, const glm::mat4& cameraMatrix, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, 
-		float farClip = 10000000.0f) : StaticCamera(name, cameraMatrix, FOVY, nearClip, farClip)
-	{}
-
 	DynamicCamera(char* name, const glm::vec3& eye, const glm::vec3& at, const glm::vec3& up, float FOVY = glm::radians(60.0f),
 		float nearClip = 1.0f, float farClip = 10000000.0f) : 
 		StaticCamera(name, eye, at, up, FOVY, nearClip, farClip)
-	{}
+	{
+		Scene::Instance()->AddDynamicCamera(this);
+	}
 
 	DynamicCamera(char* name, MoveableEntity* parent, bool useHeading = false, float headingOffset = 0.0f,
 		const glm::vec3& eyeOffset = glm::vec3(0.0f), const glm::vec3& atOffset = glm::vec3(0.0f),

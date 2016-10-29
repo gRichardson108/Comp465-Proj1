@@ -23,8 +23,7 @@ private:
 	int m_iLifeTime; // Number of updates the missile has to live
 	bool m_bLive; // Is missile live?
 	MoveableEntity* m_pCurrentTarget; // Current tracked target
-	MoveableEntity** m_pTargets; // Targets that can be tracked (passed in from what is firing)
-	int m_iNumTargets; // Number of  targets
+	std::vector<MoveableEntity*>* m_pTargets; // Targets that can be tracked (passed in from what is firing)
 	float m_fVelocity; // Velocity of the missile
 
 	void MissileGuidance(); // Method to move the missile towards a target
@@ -36,13 +35,13 @@ public:
 
 	~Missile()
 	{
-		delete* m_pTargets;
+		delete m_pTargets;
 	}
 
-	void Update() {}
+	void Update();
 	MoveableEntity* CurrentTarget() { return m_pCurrentTarget; }
-	MoveableEntity** Targets() { return m_pTargets; }
-	void SetTargets(MoveableEntity** targets, int numTargets)
+	std::vector<MoveableEntity*>* Targets() { return m_pTargets; }
+	void SetTargets(std::vector<MoveableEntity*>* targets)
 	{
 		m_pTargets = targets;
 		m_pCurrentTarget = NULL;

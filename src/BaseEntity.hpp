@@ -35,27 +35,8 @@ protected:
 	void CreateObjectMatrix();
 
 public:
-	BaseEntity(Model* model) :
-		m_vPosition(glm::vec3()),
-		m_vScale(glm::vec3(1.0, 1.0, 1.0)),
-		m_vForward(glm::vec3(0.0, 0.0, -1.0)),
-		m_vLeft(glm::vec3(-1.0, 0.0, 0.0)),
-		m_vUp(glm::vec3(0.0, 1.0, 0.0)),
-		m_pModel(model)
-	{}
-
-	BaseEntity(Model* model, const glm::vec3& pos) :
-		m_vPosition(pos),
-		m_vScale(glm::vec3(1.0, 1.0, 1.0)),
-		m_vForward(glm::vec3(0.0, 0.0, -1.0)),
-		m_vLeft(glm::vec3(-1.0, 0.0, 0.0)),
-		m_vUp(glm::vec3(0.0, 1.0, 0.0)),
-		m_pModel(model)
-	{}
-
-	BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale);
-
-	BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target, const glm::vec3& up);
+	BaseEntity(Model* model, const glm::vec3& pos = glm::vec3(), const glm::vec3& scale = glm::vec3(1.0, 1.0, 1.0), 
+		const glm::vec3& target = glm::vec3(0.0, 0.0, -1.0), const glm::vec3& up = glm::vec3(0.0, 1.0, 0.0));
 
 	virtual ~BaseEntity() {}
 

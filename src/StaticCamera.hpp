@@ -13,6 +13,7 @@ Static camera class handles non moving cameras.
 #define STATIC_CAMERA_H
 
 #include "../includes465/include465.hpp"
+#include "Scene.hpp"
 
 class StaticCamera
 {
@@ -33,8 +34,8 @@ protected :
 	char* m_cName; // Name of camera
 
 public :
-    StaticCamera(char* name, glm::mat4 cameraMatrix, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, float farClip = 10000000.0f);
-    StaticCamera(char* name, glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY = glm::radians(60.0f), float nearClip = 1.0f, float farClip = 10000000.0f);
+    StaticCamera(char* name, glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY = glm::radians(60.0f), 
+		float nearClip = 1.0f, float farClip = 10000000.0f);
 
 	glm::mat4 ViewMatrix() { return m_mViewMatrix; }
 

@@ -38,6 +38,9 @@ public :
     void Update();
 	void SetPosition(const glm::vec3& position);
 	void SetPosition(float x, float y, float z) { SetPosition(glm::vec3(x, y, z)); }
+
+	float RotationRate() { return m_fRotationRate; }
+	glm::mat3 AxisRotation() { return m_mAxisRotation; }
 };
 
 #endif

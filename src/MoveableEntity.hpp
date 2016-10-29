@@ -20,25 +20,14 @@ class MoveableEntity : public BaseEntity
 protected :
 	glm::vec3 m_vHeading; // The direction Entity is moving
 
-public : 
-
-    MoveableEntity(Model* model) : BaseEntity(model),
+public :
+    MoveableEntity(Model* model, const glm::vec3& pos = glm::vec3(), const glm::vec3& scale = glm::vec3(1.0f), 
+		const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f)) :
+		BaseEntity(model, pos, scale, target, up),
 		m_vHeading(glm::vec3(0.0f, 0.0f, -1.0f))
-	{}
-
-    MoveableEntity(Model* model, const glm::vec3& pos) : BaseEntity(model, pos),
-		m_vHeading(glm::vec3(0.0f, 0.0f, -1.0f))
-	{}
-
-    MoveableEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale) 
-		: BaseEntity(model, pos, scale),
-		m_vHeading(glm::vec3(0.0f, 0.0f, -1.0f))
-	{}
-
-    MoveableEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target, const glm::vec3& up) 
-		: BaseEntity(model, pos, scale, target, up),
-		m_vHeading(glm::vec3(0.0f, 0.0f, -1.0f))
-	{}
+	{
+		Scene::Instance()->AddMoveable(this);
+	}
 
     virtual ~MoveableEntity(){}
 	virtual void Update() = 0;

@@ -1,17 +1,5 @@
 #include "BaseEntity.hpp"
 
-BaseEntity::BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale) :
-	m_vPosition(pos),
-	m_vForward(glm::vec3(0.0, 0.0, -1.0)),
-	m_vLeft(glm::vec3(-1.0, 0.0, 0.0)),
-	m_vUp(glm::vec3(0.0, 1.0, 0.0)),
-	m_pModel(model)
-{
-	SetScale(scale);
-	RotateToForward();
-	CreateObjectMatrix();
-}
-
 BaseEntity::BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target, const glm::vec3& up) :
 	m_vPosition(pos),
 	m_pModel(model)
@@ -22,6 +10,7 @@ BaseEntity::BaseEntity(Model* model, const glm::vec3& pos, const glm::vec3& scal
 	m_vUp = glm::normalize(glm::cross(m_vForward, m_vLeft));
 	RotateToForward();
 	CreateObjectMatrix();
+	Scene::Instance()->AddEntity(this);
 }
 
 void BaseEntity::RotateToForward()
