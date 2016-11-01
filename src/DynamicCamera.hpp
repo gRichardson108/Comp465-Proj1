@@ -30,7 +30,7 @@ public :
 		float nearClip = 1.0f, float farClip = 10000000.0f) : 
 		StaticCamera(name, eye, at, up, FOVY, nearClip, farClip)
 	{
-		Scene::Instance()->AddDynamicCamera(this);
+		Scene::Instance()->AddToDynamicQueue(this);
 	}
 
 	DynamicCamera(char* name, MoveableEntity* parent, bool useHeading = false, float headingOffset = 0.0f,

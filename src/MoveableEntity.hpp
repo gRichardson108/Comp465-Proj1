@@ -26,7 +26,7 @@ public :
 		BaseEntity(model, pos, scale, target, up),
 		m_vHeading(glm::vec3(0.0f, 0.0f, -1.0f))
 	{
-		Scene::Instance()->AddMoveable(this);
+		Scene::Instance()->AddToMoveableQueue(this);
 	}
 
     virtual ~MoveableEntity(){}

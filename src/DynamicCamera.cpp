@@ -13,7 +13,7 @@ DynamicCamera::DynamicCamera(char* name, MoveableEntity* parent, bool useHeading
 	m_vEye = m_fHeadingOffset * m_pParent->Heading() + m_pParent->Position() + m_vEyeOffset;
 	m_vAt = m_pParent->Position() + m_vAtOffset;
 	m_mViewMatrix = glm::lookAt(m_vEye, m_vAt, m_vUp);
-	Scene::Instance()->AddDynamicCamera(this);
+	Scene::Instance()->AddToDynamicQueue(this);
 }
 
 void DynamicCamera::Update()

@@ -26,7 +26,7 @@ void BaseEntity::RotateToForward()
 
 	// Get cross which determines direction to rotate
 	glm::vec3 cross = glm::cross(adjustedUp, m_vUp);
-	if (cross.length() != 0.0f)
+	if (glm::length(cross) != 0.0f)
 	{
 		cross = glm::normalize(cross);
 	}

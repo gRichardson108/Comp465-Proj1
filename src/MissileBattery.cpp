@@ -7,6 +7,15 @@ MissileBattery::MissileBattery(Model* model, CelestialBody* parent, const glm::v
 {
 	m_iNumMissiles = 5;
 	m_pTargets = new std::vector<MoveableEntity*>();
+
+	// Update position using parent
+	if (m_pParent != NULL)
+	{
+		m_vParentOldPosition = m_pParent->Position();
+		m_vPosition += m_vParentOldPosition;
+	}
+
+	CreateObjectMatrix();
 }
 
 void MissileBattery::Update()
@@ -39,7 +48,8 @@ void MissileBattery::Update()
 	{
 		for (std::vector<MoveableEntity*>::iterator it = m_pTargets->begin(); it != m_pTargets->end(); it++)
 		{
-			if (glm::distance(m_vPosition, (*it)->Position()) <= 5000.0f)
+			if (glm::distance(m_vPosition, (*it)->Position()) <= 5000.0f && 
+				glm::dot(m_vForward, (*it)->Position() - m_vPosition) > 0.0f)
 			{
 				FireMissile();
 				break;
@@ -50,7 +60,7 @@ void MissileBattery::Update()
 
 void MissileBattery::FireMissile()
 {
-	m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(25.0f), 
+	m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(100.0f), 
 		m_vPosition + m_vForward);
 	m_pActiveMissile->SetTargets(m_pTargets);
 	m_iNumMissiles--;

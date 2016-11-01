@@ -32,6 +32,7 @@ Mike Barnes
 # include <stdio.h>  // My examples use printf, I'm not a fan of cin, cout...
 # include <stdlib.h>
 # include <vector>
+# include <queue>
 # include <sys/stat.h>
 # include <cstring>
 

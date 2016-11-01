@@ -160,6 +160,9 @@ void update(int value)
 {
 	glutTimerFunc(scene->TimerDelay(), update, 1);
 
+	scene->UnloadMoveableQueue();
+	scene->UnloadDynamicQueue();
+
 	// Update entities
     for (std::vector<MoveableEntity*>::iterator it = scene->MoveableEntities()->begin(); 
 		it != scene->MoveableEntities()->end(); it++)
@@ -276,6 +279,16 @@ void init()
 	target = glm::vec3(0.0f, 0.0f, -1.0f);
 	new Ship(scene->GetModel("Warbird"), pos, glm::vec3(100.0f), pos + target);
 
+	pos = glm::vec3(0.0f, 0.0f, -scene->GetEntity(1)->BoundingRadius());
+	MissileBattery* m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntity(1),
+		pos, glm::vec3(30.0f), pos + target);
+	m->AddTarget(scene->GetMoveableEntity(5));
+
+	pos = glm::vec3(0.0f, 0.0f, -scene->GetEntity(4)->BoundingRadius());
+	m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntity(4),
+		pos, glm::vec3(30.0f), pos + target);
+	m->AddTarget(scene->GetMoveableEntity(5));
+
 	// Create cameras
 	new StaticCamera("Front", glm::vec3(0.0f, 10000.0f, 20000.0f), glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));
 	new StaticCamera("Top",  glm::vec3(0.0f, 20000.0f, 0.0f), glm::vec3(0), glm::vec3(0.0f, 0.0f, -1.0f));
@@ -294,6 +307,9 @@ void init()
     // set render state values
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
+
+	// Finalize scene
+	scene->InitDone();
 }
 
 // Keyboard input

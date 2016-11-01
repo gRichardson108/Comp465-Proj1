@@ -25,24 +25,30 @@ class Scene
 {
 private:
 	int m_iTimerDelay; // Delay in miliseconds
+	bool m_bInit;
 	static Scene* s_pInstance; // Singleton
 	std::vector<Model*>* m_pModels; // Pointer to vector of models
 	std::vector<BaseEntity*>* m_pEntities; // Pointer to vector of scene entities
 	std::vector<MoveableEntity*>* m_pMoveableEntities; // Pointer to vector of moveable scene entities
+	std::queue<MoveableEntity*>* m_pMoveableEntitesQueue; // Moveables to add to vector
 	std::vector<StaticCamera*>* m_pStaticCameras; // Pointer to vector of static cameras
 	std::vector<DynamicCamera*>* m_pDynamicCameras; // Pointer to vector of dynamic cameras
+	std::queue<DynamicCamera*>* m_pDynamicCamerasQueue; // Cameras to add to vector
 	std::vector<StaticCamera*>::iterator m_itViewingCamera;
 
 public:
 	Scene(int delay = 5) :
-		m_iTimerDelay(delay)
+		m_iTimerDelay(delay),
+		m_bInit(true)
 	{
 		s_pInstance = this;
 		m_pModels = new std::vector<Model*>();
 		m_pEntities = new std::vector<BaseEntity*>();
 		m_pMoveableEntities = new std::vector<MoveableEntity*>();
+		m_pMoveableEntitesQueue = new std::queue<MoveableEntity*>();
 		m_pStaticCameras = new std::vector<StaticCamera*>();
 		m_pDynamicCameras = new std::vector<DynamicCamera*>();
+		m_pDynamicCamerasQueue = new std::queue<DynamicCamera*>();
 	}
 
 	~Scene()
@@ -50,8 +56,10 @@ public:
 		delete m_pModels;
 		delete m_pEntities;
 		delete m_pMoveableEntities;
+		delete m_pMoveableEntitesQueue;
 		delete m_pStaticCameras;
 		delete m_pDynamicCameras;
+		delete m_pDynamicCamerasQueue;
 		delete s_pInstance;
 	}
 
@@ -64,6 +72,7 @@ public:
 
 	int TimerDelay() { return m_iTimerDelay; }
 	void SetTimerDelay(int delay) { m_iTimerDelay = delay; }
+	void InitDone() { m_bInit = false; }
 
 	std::vector<Model*>* Models() { return m_pModels; }
 	void AddModel(Model* model)
@@ -119,6 +128,26 @@ public:
 	}
 	MoveableEntity* GetMoveableEntity(int i) { return m_pMoveableEntities->at(i); }
 
+	void AddToMoveableQueue(MoveableEntity* entity)
+	{
+		if (!m_bInit)
+		{
+			m_pMoveableEntitesQueue->push(entity);
+		}
+		else
+		{
+			m_pMoveableEntities->push_back(entity);
+		}
+	}
+	void UnloadMoveableQueue()
+	{
+		while (!m_pMoveableEntitesQueue->empty())
+		{
+			m_pMoveableEntities->push_back(m_pMoveableEntitesQueue->front());
+			m_pMoveableEntitesQueue->pop();
+		}
+	}
+
 	std::vector<StaticCamera*>* StaticCameras() { return m_pStaticCameras; }
 	void AddStaticCamera(StaticCamera* entity)
 	{
@@ -172,6 +201,26 @@ public:
 				m_pDynamicCameras->erase(it);
 				break;
 			}
+		}
+	}
+
+	void AddToDynamicQueue(DynamicCamera* entity)
+	{
+		if (!m_bInit)
+		{
+			m_pDynamicCamerasQueue->push(entity);
+		}
+		else
+		{
+			m_pDynamicCameras->push_back(entity);
+		}
+	}
+	void UnloadDynamicQueue()
+	{
+		while (!m_pDynamicCamerasQueue->empty())
+		{
+			m_pDynamicCameras->push_back(m_pDynamicCamerasQueue->front());
+			m_pDynamicCamerasQueue->pop();
 		}
 	}
 };
