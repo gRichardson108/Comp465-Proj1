@@ -48,10 +48,11 @@ update speed, toggle axes, and toggle idle function.
 #include <time.h>
 
 // constants for models:  file names, vertex count, model display size
-const int nModels = 8;  // number of models in this scene
+const int nModels = 9;  // number of models in this scene
 char * modelFile [nModels] = {"src/axes-r100.tri", "src/Missile.tri", "src/Warbird.tri",
-    "src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri"};
-const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3};
+    "src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri", 
+	"src/MissileBattery.tri"};
+const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 112 * 3};
 char * vertexShaderFile   = "src/simpleVertex.glsl";
 char * fragmentShaderFile = "src/simpleFragment.glsl";
 
