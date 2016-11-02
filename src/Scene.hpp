@@ -30,11 +30,15 @@ private:
 	std::vector<Model*>* m_pModels; // Pointer to vector of models
 	std::vector<BaseEntity*>* m_pEntities; // Pointer to vector of scene entities
 	std::vector<MoveableEntity*>* m_pMoveableEntities; // Pointer to vector of moveable scene entities
+	std::vector<MoveableEntity*>::iterator m_itMoveableEntity; // Moveable entities iterator
 	std::queue<MoveableEntity*>* m_pMoveableEntitesQueue; // Moveables to add to vector
 	std::vector<StaticCamera*>* m_pStaticCameras; // Pointer to vector of static cameras
 	std::vector<DynamicCamera*>* m_pDynamicCameras; // Pointer to vector of dynamic cameras
+	std::vector<DynamicCamera*>::iterator m_itDynamicCamera; // Dynamic cameras iterator
 	std::queue<DynamicCamera*>* m_pDynamicCamerasQueue; // Cameras to add to vector
-	std::vector<StaticCamera*>::iterator m_itViewingCamera;
+	std::vector<StaticCamera*>::iterator m_itViewingCamera; // Current camera iterator
+
+	void UnloadQueues();
 
 public:
 	Scene(int delay = 5) :
@@ -69,6 +73,8 @@ public:
 			s_pInstance = new Scene;
 		return s_pInstance;
 	}
+
+	void Update();
 
 	int TimerDelay() { return m_iTimerDelay; }
 	void SetTimerDelay(int delay) { m_iTimerDelay = delay; }
@@ -114,6 +120,7 @@ public:
 	void AddMoveable(MoveableEntity* entity)
 	{
 		m_pMoveableEntities->push_back(entity);
+		m_itMoveableEntity = m_pMoveableEntities->begin();
 	}
 	void RemoveEntity(MoveableEntity* entity)
 	{
@@ -137,14 +144,6 @@ public:
 		else
 		{
 			m_pMoveableEntities->push_back(entity);
-		}
-	}
-	void UnloadMoveableQueue()
-	{
-		while (!m_pMoveableEntitesQueue->empty())
-		{
-			m_pMoveableEntities->push_back(m_pMoveableEntitesQueue->front());
-			m_pMoveableEntitesQueue->pop();
 		}
 	}
 
@@ -191,6 +190,7 @@ public:
 	void AddDynamicCamera(DynamicCamera* entity)
 	{
 		m_pDynamicCameras->push_back(entity);
+		m_itDynamicCamera = m_pDynamicCameras->begin();
 	}
 	void RemoveDynamicCamera(DynamicCamera* entity)
 	{
@@ -213,14 +213,6 @@ public:
 		else
 		{
 			m_pDynamicCameras->push_back(entity);
-		}
-	}
-	void UnloadDynamicQueue()
-	{
-		while (!m_pDynamicCamerasQueue->empty())
-		{
-			m_pDynamicCameras->push_back(m_pDynamicCamerasQueue->front());
-			m_pDynamicCamerasQueue->pop();
 		}
 	}
 };

@@ -160,22 +160,7 @@ void update(int value)
 {
 	glutTimerFunc(scene->TimerDelay(), update, 1);
 
-	scene->UnloadMoveableQueue();
-	scene->UnloadDynamicQueue();
-
-	// Update entities
-    for (std::vector<MoveableEntity*>::iterator it = scene->MoveableEntities()->begin(); 
-		it != scene->MoveableEntities()->end(); it++)
-	{
-        (*it)->Update();
-    }
-
-	// Update cameras
-	for (std::vector<DynamicCamera*>::iterator it = scene->DynamicCameras()->begin();
-		it != scene->DynamicCameras()->end(); it++)
-	{
-		(*it)->Update();
-	}
+	scene->Update();
 
 	viewMatrix = viewingCamera->ViewMatrix();
 

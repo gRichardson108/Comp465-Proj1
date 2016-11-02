@@ -1,5 +1,40 @@
 #include "Scene.hpp"
 #include "Model.hpp"
+#include "MoveableEntity.hpp"
+#include "DynamicCamera.hpp"
+
+void Scene::Update()
+{
+	UnloadQueues();
+
+	// Update entities
+	m_itMoveableEntity = m_pMoveableEntities->begin();
+	do
+	{
+		(*m_itMoveableEntity)->Update();
+	} while (++m_itMoveableEntity != m_pMoveableEntities->end());
+
+	// Update cameras
+	m_itDynamicCamera = m_pDynamicCameras->begin();
+	do
+	{
+		(*m_itDynamicCamera)->Update();
+	} while (++m_itDynamicCamera != m_pDynamicCameras->end());
+}
+
+void Scene::UnloadQueues()
+{
+	while (!m_pMoveableEntitesQueue->empty())
+	{
+		m_pMoveableEntities->push_back(m_pMoveableEntitesQueue->front());
+		m_pMoveableEntitesQueue->pop();
+	}
+	while (!m_pDynamicCamerasQueue->empty())
+	{
+		m_pDynamicCameras->push_back(m_pDynamicCamerasQueue->front());
+		m_pDynamicCamerasQueue->pop();
+	}
+}
 
 Model* Scene::GetModel(char* name)
 {
