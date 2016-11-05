@@ -1,4 +1,5 @@
 #include "Model.hpp"
+#include "Scene.hpp"
 
 Model::Model(char* modelFile, int vertices,
 	GLuint* VAO, GLuint* buffer, GLuint* shaderProgram) :
@@ -13,11 +14,6 @@ Model::Model(char* modelFile, int vertices,
 	strncpy(m_cModelFile, modelFile, size);
 	Init();
 	Scene::Instance()->AddModel(this);
-}
-
-Model::~Model()
-{
-	delete[] m_cModelFile;
 }
 
 void Model::Init()

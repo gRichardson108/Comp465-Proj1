@@ -13,9 +13,9 @@ Static camera class handles non moving cameras.
 #define STATIC_CAMERA_H
 
 #include "../includes465/include465.hpp"
-#include "Scene.hpp"
+#include "BaseEntity.hpp"
 
-class StaticCamera
+class StaticCamera : public BaseEntity
 {
 protected :
     glm::mat4 m_mViewMatrix; // Camera view matrix
@@ -37,20 +37,29 @@ public :
     StaticCamera(char* name, glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY = glm::radians(60.0f), 
 		float nearClip = 1.0f, float farClip = 10000000.0f);
 
-	glm::mat4 ViewMatrix() { return m_mViewMatrix; }
+	virtual ~StaticCamera()
+	{
+		delete []m_cName;
+	}
 
-    glm::mat4 updateProjectionMatrix(int width, int height);
+	virtual const char* GetType() { return "StaticCamera"; }
+	virtual bool  HandleMsg(const Message& msg);
 
-	float NearClip() { return m_fNearClip; }
+	glm::mat4 ViewMatrix() const { return m_mViewMatrix; }
+
+	glm::mat4 ProjectionMatrix() const { return m_mProjectionMatrix; }
+    glm::mat4 UpdateProjectionMatrix(int width, int height);
+
+	float NearClip() const { return m_fNearClip; }
 	void SetNearClip(float nearClip) { m_fNearClip = nearClip; }
 
-	float FarClip() { return m_fFarClip; }
+	float FarClip() const { return m_fFarClip; }
 	void SetFarClip(float farClip) { m_fFarClip = farClip; }
 
-	float FOVY() { return m_fFOVY; }
+	float FOVY() const { return m_fFOVY; }
 	void SetFOVY(float newFOVY) { m_fFOVY = newFOVY; }
 
-	char* Name() { return m_cName; }
+	char* Name() const { return m_cName; }
 };
 
 #endif

@@ -15,7 +15,6 @@ will render.
 #define MODEL_H
 
 #include "../includes465/include465.hpp"
-#include "Scene.hpp"
 
 class Model
 {
@@ -33,14 +32,17 @@ private:
 public:
 	Model(char* modelFile, int vertices, GLuint* VAO, GLuint* buffer, GLuint* shaderProgram);
 
-	~Model();
+	~Model()
+	{
+		delete []m_cModelFile;
+	}
 
-	char* ModelFile() { return m_cModelFile; }
-	int Vertices() { return m_iVertices; }
-	GLuint* VAO() { return m_gliVAO; }
-	GLuint* Buffer() { return m_gliBuffer; }
-	GLuint* ShaderProgram() { return m_gliShaderProgram; }
-	float BoundingRadius() { return m_fBoundingRadius; }
+	char* ModelFile() const { return m_cModelFile; }
+	int Vertices() const { return m_iVertices; }
+	GLuint* VAO() const { return m_gliVAO; }
+	GLuint* Buffer() const { return m_gliBuffer; }
+	GLuint* ShaderProgram() const { return m_gliShaderProgram; }
+	float BoundingRadius() const { return m_fBoundingRadius; }
 };
 
 #endif

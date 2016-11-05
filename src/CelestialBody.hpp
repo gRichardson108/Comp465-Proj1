@@ -35,12 +35,16 @@ public :
 		const glm::vec3& orbitAxis = glm::vec3(0.0f, 1.0f, 0.0f));
 
     virtual ~CelestialBody() {}
+
+	virtual const char* GetType() { return "CelestialBody"; }
+	virtual bool HandleMsg(const Message& message);
+
     void Update();
 	void SetPosition(const glm::vec3& position);
 	void SetPosition(float x, float y, float z) { SetPosition(glm::vec3(x, y, z)); }
 
-	float RotationRate() { return m_fRotationRate; }
-	glm::mat3 AxisRotation() { return m_mAxisRotation; }
+	float RotationRate() const { return m_fRotationRate; }
+	glm::mat3 AxisRotation() const { return m_mAxisRotation; }
 };
 
 #endif

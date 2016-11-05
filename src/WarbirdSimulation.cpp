@@ -45,7 +45,6 @@ update speed, toggle axes, and toggle idle function.
 #include "MissileBattery.hpp"
 #include "Missile.hpp"
 #include "DynamicCamera.hpp"
-#include <time.h>
 
 // constants for models:  file names, vertex count, model display size
 const int nModels = 9;  // number of models in this scene
@@ -69,8 +68,7 @@ glm::mat4 ModelViewProjectionMatrix; // set in display();
 bool showAxesFlag = false, idleTimerFlag = true;
 
 // Constants for scene
-Scene* Scene::s_pInstance = NULL;
-Scene* scene = new Scene();  // Scene object
+Scene* scene = Scene::Instance();  // Scene object
 int tq = 0, frameCount = 0, updateCount = 0;
 double currentTime, lastTime, timeInterval, ulastTime, utimeInterval;
 
@@ -90,7 +88,7 @@ char viewStr[13] = "  View Front";
 
 // Update window display and projection matrix
 void reshape(int width, int height) {
-	projectionMatrix = viewingCamera->updateProjectionMatrix(width, height);
+	projectionMatrix = viewingCamera->UpdateProjectionMatrix(width, height);
     float aspectRatio = (float)width / (float)height;
     glViewport(0, 0, width, height);
     printf("reshape: FOVY = %5.2f, width = %4d height = %4d aspect = %5.2f \n + nearclip = %5f farclip = %5f \n", 
@@ -114,26 +112,26 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // update model matrix
-    for(std::vector<BaseEntity*>::iterator it = scene->Entities()->begin(); 
-		it != scene->Entities()->end(); it++)
-    {
-        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * (*it)->ObjectMatrix(); 
+	for each (int id in *scene->DrawableObjects())
+	{
+		StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
+        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entity->ObjectMatrix();
         glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
-        glBindVertexArray(*((*it)->ModelFile()->VAO()));
-        glDrawArrays(GL_TRIANGLES, 0, (*it)->ModelFile()->Vertices());
+        glBindVertexArray(*(entity->ModelFile()->VAO()));
+        glDrawArrays(GL_TRIANGLES, 0, entity->ModelFile()->Vertices());
     }
 
 	if (showAxesFlag)
 	{
 		Model* axis = scene->GetModel("axes-r100");
         // Local axis for each entity
-		for (std::vector<BaseEntity*>::iterator it = scene->Entities()->begin();
-			it != scene->Entities()->end(); it++)
+		for each (int id in *scene->DrawableObjects())
 		{
-            modelMatrix = glm::translate(glm::mat4(), (*it)->Position()) *
-                glm::rotate(glm::mat4(), glm::pi<float>(), (*it)->Up()) *
-				(*it)->RotationMatrix() *
-                glm::scale(glm::mat4(), (*it)->Scale() * (*it)->ModelFile()->BoundingRadius() * 1.5f / axis->BoundingRadius());
+			StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
+            modelMatrix = glm::translate(glm::mat4(), entity->Position()) *
+                glm::rotate(glm::mat4(), glm::pi<float>(), entity->Up()) *
+				entity->RotationMatrix() *
+                glm::scale(glm::mat4(), entity->Scale() * entity->ModelFile()->BoundingRadius() * 1.5f / axis->BoundingRadius());
             ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
             glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
             glBindVertexArray(*(axis->VAO()));
@@ -162,7 +160,9 @@ void update(int value)
 
 	scene->Update();
 
+	viewingCamera = scene->ViewingCamera();
 	viewMatrix = viewingCamera->ViewMatrix();
+	projectionMatrix = viewingCamera->ProjectionMatrix();
 
 	updateCount++;
 	currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -197,7 +197,7 @@ void init()
         new Model(modelFile[i], nVertices[i], &VAO[i], &buffer[i], &shaderProgram);
     }
 
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     glm::vec3 pos; // Position of entity
     glm::vec3 target; // Direction vector
 	glm::vec3 up; // Up vector
@@ -223,7 +223,7 @@ void init()
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	new CelestialBody(scene->GetModel("Unum"), (CelestialBody*)scene->GetEntity(0), pos,
+	new CelestialBody(scene->GetModel("Unum"), (CelestialBody*)scene->GetEntityFromID(0), pos,
 		glm::vec3(200), pos + target, up, 5.0f, 8.0f);
 
 	printf("\tDuo drawn\n");
@@ -234,7 +234,7 @@ void init()
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	new CelestialBody(scene->GetModel("Duo"), (CelestialBody*)scene->GetEntity(0), pos,
+	new CelestialBody(scene->GetModel("Duo"), (CelestialBody*)scene->GetEntityFromID(0), pos,
 		glm::vec3(400), pos + target, up, 5.0f, 16.0f);
 
 	printf("\tPrimus drawn\n");
@@ -245,7 +245,7 @@ void init()
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	new CelestialBody(scene->GetModel("Primus"), (CelestialBody*)scene->GetEntity(2), pos,
+	new CelestialBody(scene->GetModel("Primus"), (CelestialBody*)scene->GetEntityFromID(2), pos,
 		glm::vec3(100), pos + target, up, 5.0f, 8.0f);
 
 	printf("\tSecundus drawn\n");
@@ -256,7 +256,7 @@ void init()
 	{
 		up = glm::vec3(-1, 0, 0);
 	}
-	new CelestialBody(scene->GetModel("Secundus"), (CelestialBody*)scene->GetEntity(2), pos,
+	new CelestialBody(scene->GetModel("Secundus"), (CelestialBody*)scene->GetEntityFromID(2), pos,
 		glm::vec3(150), pos + target, up, 5.0f, 16.0f);
 
 	printf("\tWarbird drawn\n");
@@ -264,23 +264,23 @@ void init()
 	target = glm::vec3(0.0f, 0.0f, -1.0f);
 	new Ship(scene->GetModel("Warbird"), pos, glm::vec3(100.0f), pos + target);
 
-	pos = glm::vec3(0.0f, 0.0f, -scene->GetEntity(1)->BoundingRadius());
-	MissileBattery* m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntity(1),
+	pos = glm::vec3(0.0f, 0.0f, -((StaticEntity*)scene->GetEntityFromID(1))->BoundingRadius());
+	MissileBattery* m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntityFromID(1),
 		pos, glm::vec3(30.0f), pos + target);
-	m->AddTarget(scene->GetMoveableEntity(5));
+	m->SetTargets("Ship");
 
-	pos = glm::vec3(0.0f, 0.0f, -scene->GetEntity(4)->BoundingRadius());
-	m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntity(4),
+	pos = glm::vec3(0.0f, 0.0f, -((StaticEntity*)scene->GetEntityFromID(1))->BoundingRadius());
+	m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntityFromID(4),
 		pos, glm::vec3(30.0f), pos + target);
-	m->AddTarget(scene->GetMoveableEntity(5));
+	m->SetTargets("Ship");
 
 	// Create cameras
 	new StaticCamera("Front", glm::vec3(0.0f, 10000.0f, 20000.0f), glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));
 	new StaticCamera("Top",  glm::vec3(0.0f, 20000.0f, 0.0f), glm::vec3(0), glm::vec3(0.0f, 0.0f, -1.0f));
-	new DynamicCamera("Ship", scene->GetMoveableEntity(5), false, 0.0f, glm::vec3(0.0f, 300.0f, 1000.0f), 
+	new DynamicCamera("Ship", (MoveableEntity*)scene->GetEntityFromID(5), false, 0.0f, glm::vec3(0.0f, 300.0f, 1000.0f), 
 		glm::vec3(0.0f, 300.0f, 0.0f));
-	new DynamicCamera("Unum", scene->GetMoveableEntity(1), true, 8000.0f);
-	new DynamicCamera("Duo", scene->GetMoveableEntity(2), true, 8000.0f);
+	new DynamicCamera("Unum", (MoveableEntity*)scene->GetEntityFromID(1), true, 8000.0f);
+	new DynamicCamera("Duo", (MoveableEntity*)scene->GetEntityFromID(2), true, 8000.0f);
 
 	// Initialize display info
     lastTime = glutGet(GLUT_ELAPSED_TIME);
@@ -407,5 +407,6 @@ int main(int argc, char* argv[]) {
     glutIdleFunc(display);
     glutMainLoop();
     printf("done\n");
+	delete scene;
     return 0;
 }

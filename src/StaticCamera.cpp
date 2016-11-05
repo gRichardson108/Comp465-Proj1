@@ -1,7 +1,11 @@
 #include "StaticCamera.hpp"
 
 StaticCamera::StaticCamera(char* name, glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY, float nearClip,
-	float farClip) : m_fFOVY(FOVY), m_fNearClip(nearClip), m_fFarClip(farClip)
+	float farClip) :
+	BaseEntity(),
+	m_fFOVY(FOVY),
+	m_fNearClip(nearClip),
+	m_fFarClip(farClip)
 {
 	size_t size = strlen(name) + 1;
 	m_cName = new char[size];
@@ -13,10 +17,17 @@ StaticCamera::StaticCamera(char* name, glm::vec3 eye, glm::vec3 at, glm::vec3 up
 	m_vAt = at;
 	m_vUp = up;
 
-	Scene::Instance()->AddStaticCamera(this);
+	UpdateProjectionMatrix(m_iViewportWidth, m_iViewportHeight);
+
+	Scene::Instance()->AddStaticCamera(m_iID);
 }
 
-glm::mat4 StaticCamera::updateProjectionMatrix(int width, int height)
+bool StaticCamera::HandleMsg(const Message& message)
+{
+	return false;
+}
+
+glm::mat4 StaticCamera::UpdateProjectionMatrix(int width, int height)
 {
 	m_iViewportWidth = width;
 	m_iViewportHeight = height;

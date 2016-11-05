@@ -18,6 +18,11 @@ MissileBattery::MissileBattery(Model* model, CelestialBody* parent, const glm::v
 	CreateObjectMatrix();
 }
 
+bool MissileBattery::HandleMsg(const Message& message)
+{
+	return false;
+}
+
 void MissileBattery::Update()
 {
 	if (m_pParent != NULL)

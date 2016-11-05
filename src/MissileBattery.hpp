@@ -26,12 +26,26 @@ public:
 		delete m_pTargets;
 	}
 
+	virtual const char* GetType() { return "MissileBattery"; }
+	virtual bool HandleMsg(const Message& message);
+
 	void Update();
 
-	int NumMissiles() { return m_iNumMissiles; }
+	int NumMissiles() const { return m_iNumMissiles; }
 	void SetTargets(std::vector<MoveableEntity*>* targets)
 	{
 		m_pTargets = targets;
+	}
+	void SetTargets(const char* type)
+	{
+		for each (auto entity in *Scene::Instance()->Entities())
+		{
+			// Can't use stricmp on VS what's best option?
+			if (_stricmp(type, entity.second->GetType()) == 0)
+			{
+				AddTarget((MoveableEntity*)entity.second);
+			}
+		}
 	}
 	void AddTarget(MoveableEntity* target)
 	{

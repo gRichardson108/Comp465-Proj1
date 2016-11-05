@@ -17,60 +17,61 @@ update delay, entities.
 
 class Model;
 class BaseEntity;
+class StaticEntity;
 class MoveableEntity;
 class StaticCamera;
 class DynamicCamera;
+
+typedef std::map<int, BaseEntity*> EntityMap;
+typedef std::set<int> Set;
 
 class Scene
 {
 private:
 	int m_iTimerDelay; // Delay in miliseconds
 	bool m_bInit;
-	static Scene* s_pInstance; // Singleton
-	std::vector<Model*>* m_pModels; // Pointer to vector of models
-	std::vector<BaseEntity*>* m_pEntities; // Pointer to vector of scene entities
-	std::vector<MoveableEntity*>* m_pMoveableEntities; // Pointer to vector of moveable scene entities
-	std::vector<MoveableEntity*>::iterator m_itMoveableEntity; // Moveable entities iterator
+	static Scene* s_pInstance;
+	std::map<std::string, Model*>* m_pModels; // Pointer to map of models
+	EntityMap* m_pEntities;
+	Set* m_pStaticEntities; // Pointer to set of static entity IDs
+	Set* m_pMoveableEntities; // Pointer to set of moveable entity IDs
 	std::queue<MoveableEntity*>* m_pMoveableEntitesQueue; // Moveables to add to vector
-	std::vector<StaticCamera*>* m_pStaticCameras; // Pointer to vector of static cameras
-	std::vector<DynamicCamera*>* m_pDynamicCameras; // Pointer to vector of dynamic cameras
-	std::vector<DynamicCamera*>::iterator m_itDynamicCamera; // Dynamic cameras iterator
+	Set* m_pStaticCameras; // Pointer to vector of static cameras
+	Set* m_pDynamicCameras; // Pointer to vector of dynamic cameras
 	std::queue<DynamicCamera*>* m_pDynamicCamerasQueue; // Cameras to add to vector
-	std::vector<StaticCamera*>::iterator m_itViewingCamera; // Current camera iterator
+	Set::iterator m_itViewingCamera; // Current camera iterator
+	Set* m_pDestroyedEntities; // Entities that are to be destroyed
 
-	void UnloadQueues();
+	void Preprocess();
+
+	Scene(const Scene&) = delete;
+	Scene& operator=(const Scene&) = delete;
 
 public:
-	Scene(int delay = 5) :
-		m_iTimerDelay(delay),
-		m_bInit(true)
+	Scene()
 	{
-		s_pInstance = this;
-		m_pModels = new std::vector<Model*>();
-		m_pEntities = new std::vector<BaseEntity*>();
-		m_pMoveableEntities = new std::vector<MoveableEntity*>();
+		m_iTimerDelay = 5;
+		m_bInit = true;
+		m_pModels = new std::map<std::string, Model*>();
+		m_pEntities = new EntityMap();
+		m_pStaticEntities = new Set();
+		m_pMoveableEntities = new Set();
 		m_pMoveableEntitesQueue = new std::queue<MoveableEntity*>();
-		m_pStaticCameras = new std::vector<StaticCamera*>();
-		m_pDynamicCameras = new std::vector<DynamicCamera*>();
+		m_pStaticCameras = new Set();
+		m_pDynamicCameras = new Set();
 		m_pDynamicCamerasQueue = new std::queue<DynamicCamera*>();
+		m_pDestroyedEntities = new Set();
+		m_itViewingCamera = m_pStaticCameras->begin();
 	}
 
-	~Scene()
-	{
-		delete m_pModels;
-		delete m_pEntities;
-		delete m_pMoveableEntities;
-		delete m_pMoveableEntitesQueue;
-		delete m_pStaticCameras;
-		delete m_pDynamicCameras;
-		delete m_pDynamicCamerasQueue;
-		delete s_pInstance;
-	}
+	~Scene();
 
 	static Scene* Instance()
 	{
 		if (!s_pInstance)
-			s_pInstance = new Scene;
+		{
+			s_pInstance = new Scene();
+		}
 		return s_pInstance;
 	}
 
@@ -80,91 +81,34 @@ public:
 	void SetTimerDelay(int delay) { m_iTimerDelay = delay; }
 	void InitDone() { m_bInit = false; }
 
-	std::vector<Model*>* Models() { return m_pModels; }
-	void AddModel(Model* model)
-	{
-		m_pModels->push_back(model);
-	}
-	void RemoveEntity(Model* model)
-	{
-		for (std::vector<Model*>::iterator it = m_pModels->begin(); it != m_pModels->end(); it++)
-		{
-			if (model == *it)
-			{
-				m_pModels->erase(it);
-				break;
-			}
-		}
-	}
-	Model* GetModel(char* name);
+	Model* GetModel(const std::string name) const { return m_pModels->at(name); }
+	void AddModel(Model* model);
+
+	EntityMap* Entities() const { return m_pEntities; }
+	BaseEntity* GetEntityFromID(int id) const { return m_pEntities->at(id); }
+	void AddEntity(BaseEntity* entity);
 	
-	std::vector<BaseEntity*>* Entities() { return m_pEntities; }
-	void AddEntity(BaseEntity* entity)
-	{
-		m_pEntities->push_back(entity);
-	}
-	void RemoveEntity(BaseEntity* entity)
-	{
-		for (std::vector<BaseEntity*>::iterator it = m_pEntities->begin(); it != m_pEntities->end(); it++)
-		{
-			if (entity == *it)
-			{
-				m_pEntities->erase(it);
-				break;
-			}
-		}
-	}
-	BaseEntity* GetEntity(int i) { return m_pEntities->at(i); }
+	Set* DrawableObjects() { return m_pStaticEntities; }
+	void AddStaticEntity(int id) { m_pStaticEntities->insert(id); }
 
-	std::vector<MoveableEntity*>* MoveableEntities() { return m_pMoveableEntities; }
-	void AddMoveable(MoveableEntity* entity)
-	{
-		m_pMoveableEntities->push_back(entity);
-		m_itMoveableEntity = m_pMoveableEntities->begin();
-	}
-	void RemoveEntity(MoveableEntity* entity)
-	{
-		for (std::vector<MoveableEntity*>::iterator it = m_pMoveableEntities->begin(); it != m_pMoveableEntities->end(); it++)
-		{
-			if (entity == *it)
-			{
-				m_pMoveableEntities->erase(it);
-				break;
-			}
-		}
-	}
-	MoveableEntity* GetMoveableEntity(int i) { return m_pMoveableEntities->at(i); }
+	void AddMoveableEntity(int id) { m_pMoveableEntities->insert(id); }
+	void AddToMoveableQueue(MoveableEntity* entity);
 
-	void AddToMoveableQueue(MoveableEntity* entity)
+	void AddStaticCamera(int id)
 	{
-		if (!m_bInit)
+		if (m_bInit)
 		{
-			m_pMoveableEntitesQueue->push(entity);
+			m_pStaticCameras->insert(id);
+			m_itViewingCamera = m_pStaticCameras->begin();
 		}
 		else
 		{
-			m_pMoveableEntities->push_back(entity);
+			int temp = *m_itViewingCamera;
+			m_pStaticCameras->insert(id);
+			m_itViewingCamera = m_pStaticCameras->find(temp);
 		}
 	}
-
-	std::vector<StaticCamera*>* StaticCameras() { return m_pStaticCameras; }
-	void AddStaticCamera(StaticCamera* entity)
-	{
-		m_pStaticCameras->push_back(entity);
-		m_itViewingCamera = m_pStaticCameras->begin();
-	}
-	void RemoveStaticCamera(StaticCamera* entity)
-	{
-		for (std::vector<StaticCamera*>::iterator it = m_pStaticCameras->begin(); it != m_pStaticCameras->end(); it++)
-		{
-			if (entity == *it)
-			{
-				m_pStaticCameras->erase(it);
-				break;
-			}
-		}
-	}
-	StaticCamera* ViewingCamera() { return *m_itViewingCamera; }
+	StaticCamera* ViewingCamera() const { return (StaticCamera*)m_pEntities->at(*m_itViewingCamera); }
 	StaticCamera* NextCamera()
 	{
 		m_itViewingCamera++;
@@ -173,7 +117,7 @@ public:
 			m_itViewingCamera = m_pStaticCameras->begin();
 		}
 
-		return *m_itViewingCamera;
+		return ViewingCamera();
 	}
 	StaticCamera* PrevCamera()
 	{
@@ -183,38 +127,13 @@ public:
 		}
 
 		m_itViewingCamera--;
-		return *m_itViewingCamera;
+		return ViewingCamera();
 	}
 
-	std::vector<DynamicCamera*>* DynamicCameras() { return m_pDynamicCameras; }
-	void AddDynamicCamera(DynamicCamera* entity)
-	{
-		m_pDynamicCameras->push_back(entity);
-		m_itDynamicCamera = m_pDynamicCameras->begin();
-	}
-	void RemoveDynamicCamera(DynamicCamera* entity)
-	{
-		for (std::vector<DynamicCamera*>::iterator it = m_pDynamicCameras->begin(); it != m_pDynamicCameras->end(); it++)
-		{
-			if (entity == *it)
-			{
-				m_pDynamicCameras->erase(it);
-				break;
-			}
-		}
-	}
+	void AddDynamicCamera(int id) { m_pDynamicCameras->insert(id); }
+	void AddToDynamicQueue(DynamicCamera* entity);
 
-	void AddToDynamicQueue(DynamicCamera* entity)
-	{
-		if (!m_bInit)
-		{
-			m_pDynamicCamerasQueue->push(entity);
-		}
-		else
-		{
-			m_pDynamicCameras->push_back(entity);
-		}
-	}
+	void DestroyEntity(int id) { m_pDestroyedEntities->insert(id); }
 };
 
 #endif

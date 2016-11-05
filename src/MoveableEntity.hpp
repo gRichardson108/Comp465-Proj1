@@ -13,9 +13,9 @@ This is meant to be an abstract class.
 #ifndef MOVEABLE_ENTITY_H
 #define MOVEABLE_ENTITY_H
 
-#include "BaseEntity.hpp"
+#include "StaticEntity.hpp"
 
-class MoveableEntity : public BaseEntity
+class MoveableEntity : public StaticEntity
 {
 protected :
 	glm::vec3 m_vHeading; // The direction Entity is moving
@@ -23,15 +23,19 @@ protected :
 public :
     MoveableEntity(Model* model, const glm::vec3& pos = glm::vec3(), const glm::vec3& scale = glm::vec3(1.0f), 
 		const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f)) :
-		BaseEntity(model, pos, scale, target, up),
+		StaticEntity(model, pos, scale, target, up),
 		m_vHeading(glm::vec3(0.0f, 0.0f, -1.0f))
 	{
 		Scene::Instance()->AddToMoveableQueue(this);
 	}
 
     virtual ~MoveableEntity(){}
+
+	virtual const char* GetType() { return "MoveableEntity"; }
+	virtual bool HandleMsg(const Message& message) { return false; }
+
 	virtual void Update() = 0;
-	virtual glm::vec3 Heading() { return m_vHeading; }
+	virtual glm::vec3 Heading() const { return m_vHeading; }
 	virtual void SetHeading(const glm::vec3& heading) { m_vHeading = heading; }
 };
 

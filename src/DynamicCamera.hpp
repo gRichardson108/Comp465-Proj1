@@ -14,7 +14,7 @@ to any MoveableEntity.
 #define DYNAMIC_CAMERA_H
 
 #include "StaticCamera.hpp"
-#include "MoveableEntity.hpp"
+class MoveableEntity;
 
 class DynamicCamera : public StaticCamera
 {
@@ -39,11 +39,14 @@ public :
 		float nearClip = 1.0f, float farClip = 10000000.0f);
 
 	~DynamicCamera() {}
+
+	virtual const char* GetType() { return "DynamicCamera"; }
+	virtual bool HandleMsg(const Message& message);
 	
 	void Update();
-	bool UsesHeading() { return m_bUsesHeading; }
+	bool UsesHeading() const { return m_bUsesHeading; }
 	
-	float HeadingOffset() { return m_fHeadingOffset; }
+	float HeadingOffset() const { return m_fHeadingOffset; }
 	void SetHeadingOffset(float offset) { m_fHeadingOffset = offset; }
 };
 

@@ -13,6 +13,11 @@ Missile::Missile(Model* model, const glm::vec3& pos, const glm::vec3& scale, con
 	new DynamicCamera("Missile", this, false, 0.0f, glm::vec3(0.0, 0.0, 400.0f));
 }
 
+bool Missile::HandleMsg(const Message& message)
+{
+	return false;
+}
+
 void Missile::Update()
 {
 	if (m_bLive)
