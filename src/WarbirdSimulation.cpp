@@ -162,7 +162,6 @@ void update(int value)
 
 	viewingCamera = scene->ViewingCamera();
 	viewMatrix = viewingCamera->ViewMatrix();
-	projectionMatrix = viewingCamera->ProjectionMatrix();
 
 	updateCount++;
 	currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -269,7 +268,7 @@ void init()
 		pos, glm::vec3(30.0f), pos + target);
 	m->SetTargets("Ship");
 
-	pos = glm::vec3(0.0f, 0.0f, -((StaticEntity*)scene->GetEntityFromID(1))->BoundingRadius());
+	pos = glm::vec3(0.0f, 0.0f, -((StaticEntity*)scene->GetEntityFromID(4))->BoundingRadius());
 	m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntityFromID(4),
 		pos, glm::vec3(30.0f), pos + target);
 	m->SetTargets("Ship");

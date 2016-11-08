@@ -20,7 +20,24 @@ DynamicCamera::DynamicCamera(char* name, MoveableEntity* parent, bool useHeading
 
 bool DynamicCamera::HandleMsg(const Message& message)
 {
-	return false;
+	bool hasMsg = false;
+
+	switch (message.Msg)
+	{
+	case Msg_DestroySource:
+		hasMsg = true;
+		if (m_pParent != NULL && message.Sender == m_pParent->ID())
+		{
+			m_pParent = NULL;
+			Scene::Instance()->DestroyEntity(m_iID);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	return hasMsg;
 }
 
 void DynamicCamera::Update()

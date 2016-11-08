@@ -36,7 +36,7 @@ public :
 
     virtual ~CelestialBody() {}
 
-	virtual const char* GetType() { return "CelestialBody"; }
+	virtual const std::string GetType() const { return "CelestialBody"; }
 	virtual bool HandleMsg(const Message& message);
 
     void Update();

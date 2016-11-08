@@ -26,7 +26,7 @@ public:
 		delete m_pTargets;
 	}
 
-	virtual const char* GetType() { return "MissileBattery"; }
+	virtual const std::string GetType() const { return "MissileBattery"; }
 	virtual bool HandleMsg(const Message& message);
 
 	void Update();
@@ -36,12 +36,11 @@ public:
 	{
 		m_pTargets = targets;
 	}
-	void SetTargets(const char* type)
+	void SetTargets(const std::string& type)
 	{
 		for each (auto entity in *Scene::Instance()->Entities())
 		{
-			// Can't use stricmp on VS what's best option?
-			if (_stricmp(type, entity.second->GetType()) == 0)
+			if (StringICompare(type, entity.second->GetType()))
 			{
 				AddTarget((MoveableEntity*)entity.second);
 			}

@@ -31,7 +31,7 @@ public :
 
     virtual ~MoveableEntity(){}
 
-	virtual const char* GetType() { return "MoveableEntity"; }
+	virtual const std::string GetType() const { return "MoveableEntity"; }
 	virtual bool HandleMsg(const Message& message) { return false; }
 
 	virtual void Update() = 0;

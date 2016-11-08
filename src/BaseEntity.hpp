@@ -13,7 +13,8 @@ Base entity class
 #define BASE_ENTITY_H
 
 #include "Scene.hpp"
-#include "Message.hpp"
+#include "MessageDispatcher.hpp"
+#include "MessageTypes.hpp"
 
 class BaseEntity
 {
@@ -29,9 +30,9 @@ public:
 	virtual ~BaseEntity(){};
 
 	int ID() const { return m_iID; }
-	virtual const char* GetType() { return "BaseEntity"; }
+	virtual const std::string GetType() const { return "BaseEntity"; }
 
-	virtual bool  HandleMsg(const Message& msg) = 0;
+	virtual bool HandleMsg(const Message& msg) = 0;
 };
 
 #endif

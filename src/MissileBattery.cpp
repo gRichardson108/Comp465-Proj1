@@ -20,7 +20,45 @@ MissileBattery::MissileBattery(Model* model, CelestialBody* parent, const glm::v
 
 bool MissileBattery::HandleMsg(const Message& message)
 {
-	return false;
+	bool hasMsg = false;
+
+	switch (message.Msg)
+	{
+		case Msg_DestroySource :
+			hasMsg = true;
+			if (!m_pActiveMissile && message.Sender == m_pActiveMissile->ID())
+			{
+				m_pActiveMissile = NULL;
+			}
+			else if (!m_pParent && message.Sender == m_pParent->ID())
+			{
+				m_pParent = NULL;
+				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+				m_pActiveMissile = NULL;
+				m_pTargets->clear();
+				Scene::Instance()->DestroyEntity(m_iID);
+			}
+			else
+			{
+				if (!m_pTargets && m_pTargets->size() > 0)
+				{
+					for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+					{
+						if (message.Sender == (*it)->ID())
+						{
+							m_pTargets->erase(it);
+							break;
+						}
+					}
+				}
+			}
+			break;
+
+		default :
+			break;
+	}
+
+	return hasMsg;
 }
 
 void MissileBattery::Update()
@@ -51,13 +89,16 @@ void MissileBattery::Update()
 	// Attempt to launch missile
 	if (!m_pActiveMissile && m_iNumMissiles > 0)
 	{
-		for (std::vector<MoveableEntity*>::iterator it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+		if (!m_pTargets && m_pTargets->size() > 0)
 		{
-			if (glm::distance(m_vPosition, (*it)->Position()) <= 5000.0f && 
-				glm::dot(m_vForward, (*it)->Position() - m_vPosition) > 0.0f)
+			for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
 			{
-				FireMissile();
-				break;
+				if (glm::distance(m_vPosition, (*it)->Position()) <= 5000.0f &&
+					glm::dot(m_vForward, (*it)->Position() - m_vPosition) > 0.0f)
+				{
+					FireMissile();
+					break;
+				}
 			}
 		}
 	}

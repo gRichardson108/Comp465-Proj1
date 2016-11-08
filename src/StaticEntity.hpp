@@ -41,7 +41,7 @@ public:
 
 	virtual ~StaticEntity(){}
 
-	virtual const char* GetType() { return "StaticEntity"; }
+	virtual const std::string GetType() const { return "StaticEntity"; }
 	virtual bool  HandleMsg(const Message& msg);
 
 	glm::vec3 Position() const { return m_vPosition; }

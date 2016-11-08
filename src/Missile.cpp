@@ -15,14 +15,44 @@ Missile::Missile(Model* model, const glm::vec3& pos, const glm::vec3& scale, con
 
 bool Missile::HandleMsg(const Message& message)
 {
-	return false;
+	bool hasMsg = false;
+
+	switch (message.Msg)
+	{
+	case Msg_DestroySource:
+		hasMsg = true;
+		if (!m_pCurrentTarget && message.Sender == m_pCurrentTarget->ID())
+		{
+			m_pCurrentTarget = NULL;
+		}
+		else
+		{
+			if (!m_pTargets && m_pTargets->size() > 0)
+			{
+				for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+				{
+					if (message.Sender == (*it)->ID())
+					{
+						m_pTargets->erase(it);
+						break;
+					}
+				}
+			}
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	return hasMsg;
 }
 
 void Missile::Update()
 {
 	if (m_bLive)
 	{
-		if (m_pCurrentTarget != NULL)
+		if (!m_pCurrentTarget)
 		{
 			MissileGuidance();
 
@@ -33,24 +63,28 @@ void Missile::Update()
 			}
 			else if (distance <= m_fVelocity)
 			{
-				m_fVelocity = 0;
+				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
 				m_pCurrentTarget = NULL;
+				Scene::Instance()->DestroyEntity(m_iID);
 			}
 		}
 		else
 		{
 			float targetDistance = -1.0f;
-			for (std::vector<MoveableEntity*>::iterator it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+			if (!m_pTargets && m_pTargets->size() > 0)
 			{
-				float distance = glm::distance(m_vPosition, (*it)->Position());
-				if (distance <= 5000.0f && (distance < targetDistance || targetDistance < 0))
+				for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
 				{
-					targetDistance = distance;
-					m_pCurrentTarget = (*it);
+					float distance = glm::distance(m_vPosition, (*it)->Position());
+					if (distance <= 5000.0f && (distance < targetDistance || targetDistance < 0))
+					{
+						targetDistance = distance;
+						m_pCurrentTarget = (*it);
+					}
 				}
 			}
 
-			if (m_pCurrentTarget != NULL)
+			if (!m_pCurrentTarget)
 			{
 				MissileGuidance();
 			}
@@ -72,7 +106,9 @@ void Missile::Update()
 
 	if (m_iLifeTime == 0)
 	{
-		//delete this;
+		MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+		m_pCurrentTarget = NULL;
+		Scene::Instance()->DestroyEntity(m_iID);
 	}
 	else if (m_iTotalLifeTime - m_iLifeTime >= 200)
 	{

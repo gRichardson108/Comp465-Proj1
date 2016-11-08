@@ -33,12 +33,9 @@ public:
 		const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f), 
 		float velocity = 5.0f);
 
-	~Missile()
-	{
-		delete m_pTargets;
-	}
+	~Missile() {}
 
-	virtual const char* GetType() { return "Missile"; }
+	virtual const std::string GetType() const { return "Missile"; }
 	virtual bool HandleMsg(const Message& message);
 
 	void Update();

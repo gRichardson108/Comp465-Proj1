@@ -81,7 +81,7 @@ public:
 	void SetTimerDelay(int delay) { m_iTimerDelay = delay; }
 	void InitDone() { m_bInit = false; }
 
-	Model* GetModel(const std::string name) const { return m_pModels->at(name); }
+	Model* GetModel(const std::string& name) const { return m_pModels->at(name); }
 	void AddModel(Model* model);
 
 	EntityMap* Entities() const { return m_pEntities; }

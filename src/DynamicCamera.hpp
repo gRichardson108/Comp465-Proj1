@@ -40,7 +40,7 @@ public :
 
 	~DynamicCamera() {}
 
-	virtual const char* GetType() { return "DynamicCamera"; }
+	virtual const std::string GetType() const { return "DynamicCamera"; }
 	virtual bool HandleMsg(const Message& message);
 	
 	void Update();

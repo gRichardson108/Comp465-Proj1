@@ -42,7 +42,7 @@ public :
 		delete []m_cName;
 	}
 
-	virtual const char* GetType() { return "StaticCamera"; }
+	virtual const std::string GetType() const { return "StaticCamera"; }
 	virtual bool  HandleMsg(const Message& msg);
 
 	glm::mat4 ViewMatrix() const { return m_mViewMatrix; }
