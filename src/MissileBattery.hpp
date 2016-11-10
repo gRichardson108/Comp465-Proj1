@@ -52,7 +52,7 @@ public:
 	}
 	void RemoveTarget(MoveableEntity* target)
 	{
-		for (std::vector<MoveableEntity*>::iterator it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+		for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
 		{
 			if (target == *it)
 			{

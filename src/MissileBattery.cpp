@@ -101,10 +101,10 @@ void MissileBattery::Update()
 	{
 		if (m_pTargets->size() > 0)
 		{
-			for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+			for (auto e : *m_pTargets)
 			{
-				if (glm::distance(m_vPosition, (*it)->Position()) <= 5000.0f &&
-					glm::dot(m_vForward, (*it)->Position() - m_vPosition) > 0.0f)
+				if (glm::distance(m_vPosition, e->Position()) <= 5000.0f &&
+					glm::dot(m_vForward, e->Position() - m_vPosition) > 0.0f)
 				{
 					FireMissile();
 					break;

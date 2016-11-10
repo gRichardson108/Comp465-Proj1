@@ -70,13 +70,13 @@ void Missile::Update()
 			float targetDistance = -1.0f;
 			if (m_pTargets->size() > 0)
 			{
-				for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+				for (auto e : *m_pTargets)
 				{
-					float distance = glm::distance(m_vPosition, (*it)->Position());
+					float distance = glm::distance(m_vPosition, e->Position());
 					if (distance <= 5000.0f && (distance < targetDistance || targetDistance < 0))
 					{
 						targetDistance = distance;
-						m_pCurrentTarget = (*it);
+						m_pCurrentTarget = e;
 					}
 				}
 			}
@@ -236,12 +236,11 @@ void Missile::CheckCollisions()
 		}
 	}
 
-	for (auto it = Scene::Instance()->CollidableObjects()->begin(); !m_bDestroyed &&
-		it != Scene::Instance()->CollidableObjects()->end(); it++)
+	for (int id : *Scene::Instance()->CollidableObjects())
 	{
-		if (m_iID == *it) continue;
+		if (m_iID == id) continue;
 
-		MoveableEntity* obj = (MoveableEntity*)Scene::Instance()->GetEntityFromID(*it);
+		MoveableEntity* obj = (MoveableEntity*)Scene::Instance()->GetEntityFromID(id);
 		float boundingOffset = 10;
 		std::string type = obj->GetType();
 
