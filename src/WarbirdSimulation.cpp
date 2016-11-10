@@ -405,6 +405,40 @@ void keyboard(unsigned char key, int x, int y)
 	updateTitle();
 	glutPostRedisplay();
 }
+//void specialKeys(int key, int x, int y)
+//{
+//    switch (key)
+//    {
+//        case GLUT_KEY_UP:
+//            ship->movementRate = 8.0;
+//            break;
+//        case GLUT_KEY_DOWN:
+//            ship->movementRate = -8.0;
+//            break;
+//        case GLUT_KEY_LEFT:
+//            ship->rotateYaw(1.0);
+//            break;
+//        case GLUT_KEY_RIGHT:
+//            ship->rotateYaw(-1.0);
+//            break;
+//        case GLUT_KEY_F1:
+//            showVec3("Ship Position", ship->Position());
+//            break;
+//
+//    }
+//}
+
+//void specialUpFunc(int key, int x, int y)
+//{
+//    switch (key)
+//    {
+//        case GLUT_KEY_UP:
+//        case GLUT_KEY_DOWN:
+//            ship->movementRate = 0.0;
+//            break;
+//
+//    }
+//}
 
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
