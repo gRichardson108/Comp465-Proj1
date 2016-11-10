@@ -65,7 +65,7 @@ glm::mat4 projectionMatrix;     // set in reshape()
 glm::mat4 ModelViewProjectionMatrix; // set in display();
 
 // flags
-bool showAxesFlag = false, idleTimerFlag = true;
+bool showAxesFlag = false, idleTimerFlag = true, mb1 = true, mb2 = true, ship = true;
 
 // Constants for scene
 Scene* scene = Scene::Instance();  // Scene object
@@ -98,13 +98,25 @@ void reshape(int width, int height) {
 // Update window title
 void updateTitle()
 {
-	strcpy(titleStr, baseStr);
-	strcat(titleStr, shipCountStr);
-	strcat(titleStr, unumCountStr);
-	strcat(titleStr, secundusCountStr);
-	strcat(titleStr, upsStr);
-	strcat(titleStr, fpsStr);
-	strcat(titleStr, viewStr);
+	if (!ship)
+	{
+		strcpy(titleStr, "Cadet resigns from War College");
+	}
+	else if (!mb1 && !mb2)
+	{
+		strcpy(titleStr, "Cadet passes flight training");
+	}
+	else
+	{
+		strcpy(titleStr, baseStr);
+		strcat(titleStr, shipCountStr);
+		strcat(titleStr, unumCountStr);
+		strcat(titleStr, secundusCountStr);
+		strcat(titleStr, upsStr);
+		strcat(titleStr, fpsStr);
+		strcat(titleStr, viewStr);
+	}
+
 	glutSetWindowTitle(titleStr);
 }
 
@@ -159,6 +171,45 @@ void update(int value)
 	glutTimerFunc(scene->TimerDelay(), update, 1);
 
 	scene->Update();
+
+	if (mb1)
+	{
+		auto e = (MissileBattery*)scene->GetEntityFromID(6);
+		if (e)
+		{
+			sprintf(unumCountStr, " Unum %d", e->NumMissiles());
+		}
+		else
+		{
+			mb1 = false;
+		}
+	}
+
+	if (mb2)
+	{
+		auto e = (MissileBattery*)scene->GetEntityFromID(7);
+		if (e)
+		{
+			sprintf(secundusCountStr, " Secundus %d", e->NumMissiles());
+		}
+		else
+		{
+			mb2 = false;
+		}
+	}
+
+	if (ship)
+	{
+		auto e = (Ship*)scene->GetEntityFromID(5);
+		if (e)
+		{
+			//sprintf(shipCountStr, " Warbird %d", e->NumMissiles());
+		}
+		else
+		{
+			ship = false;
+		}
+	}
 
 	viewingCamera = scene->ViewingCamera();
 	viewMatrix = viewingCamera->ViewMatrix();
@@ -267,11 +318,13 @@ void init()
 	MissileBattery* m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntityFromID(1),
 		pos, glm::vec3(30.0f), pos + target);
 	m->SetTargets("Ship");
+	sprintf(unumCountStr, " Unum %d", m->NumMissiles());
 
 	pos = glm::vec3(0.0f, 0.0f, -((StaticEntity*)scene->GetEntityFromID(4))->BoundingRadius());
 	m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntityFromID(4),
 		pos, glm::vec3(30.0f), pos + target);
 	m->SetTargets("Ship");
+	sprintf(secundusCountStr, " Secundus %d", m->NumMissiles());
 
 	// Create cameras
 	new StaticCamera("Front", glm::vec3(0.0f, 10000.0f, 20000.0f), glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));

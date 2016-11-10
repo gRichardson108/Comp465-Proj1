@@ -5,10 +5,12 @@ Missile::Missile(Model* model, const glm::vec3& pos, const glm::vec3& scale, con
 	const glm::vec3& up, float velocity) : 
 	MoveableEntity(model, pos, scale, target, up),
 	m_iLifeTime(m_iTotalLifeTime),
+	m_bDestroyed(false),
+	m_bLive(false),
 	m_fVelocity(velocity)
 {
 	m_vHeading = m_vForward * m_fVelocity;
-	m_pTargets = NULL;
+	m_pTargets = new std::vector<MoveableEntity*>();
 	m_pCurrentTarget = NULL;
 	new DynamicCamera("Missile", this, false, 0.0f, glm::vec3(0.0, 0.0, 400.0f));
 }
@@ -21,13 +23,13 @@ bool Missile::HandleMsg(const Message& message)
 	{
 	case Msg_DestroySource:
 		hasMsg = true;
-		if (!m_pCurrentTarget && message.Sender == m_pCurrentTarget->ID())
+		if (m_pCurrentTarget && message.Sender == m_pCurrentTarget->ID())
 		{
 			m_pCurrentTarget = NULL;
 		}
 		else
 		{
-			if (!m_pTargets && m_pTargets->size() > 0)
+			if (m_pTargets->size() > 0)
 			{
 				for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
 				{
@@ -41,6 +43,13 @@ bool Missile::HandleMsg(const Message& message)
 		}
 		break;
 
+	case Msg_TargetDestroyed:
+		hasMsg = true;
+		m_pCurrentTarget = NULL;
+		m_pTargets->clear();
+		MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+		break;
+
 	default:
 		break;
 	}
@@ -52,26 +61,14 @@ void Missile::Update()
 {
 	if (m_bLive)
 	{
-		if (!m_pCurrentTarget)
+		if (m_pCurrentTarget)
 		{
 			MissileGuidance();
-
-			float distance = glm::distance(m_vPosition, m_pCurrentTarget->Position());
-			if (distance > 5000.0f)
-			{
-				m_pCurrentTarget = NULL;
-			}
-			else if (distance <= m_fVelocity)
-			{
-				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
-				m_pCurrentTarget = NULL;
-				Scene::Instance()->DestroyEntity(m_iID);
-			}
 		}
 		else
 		{
 			float targetDistance = -1.0f;
-			if (!m_pTargets && m_pTargets->size() > 0)
+			if (m_pTargets->size() > 0)
 			{
 				for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
 				{
@@ -84,35 +81,40 @@ void Missile::Update()
 				}
 			}
 
-			if (!m_pCurrentTarget)
+			if (m_pCurrentTarget)
 			{
 				MissileGuidance();
 			}
-			else
-			{
-				m_vHeading = m_vForward * m_fVelocity;
-				m_vPosition += m_vHeading;
-			}
 		}
 	}
-	else
+
+	m_vHeading = m_vForward * m_fVelocity;
+
+	// Gravity here
+
+	m_vPosition += m_vHeading;
+
+	if (m_bLive)
 	{
-		m_vPosition += m_vHeading;
+		CheckCollisions();
 	}
 
-	CreateObjectMatrix();
-
-	m_iLifeTime--;
-
-	if (m_iLifeTime == 0)
+	if (!m_bDestroyed)
 	{
-		MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
-		m_pCurrentTarget = NULL;
-		Scene::Instance()->DestroyEntity(m_iID);
-	}
-	else if (m_iTotalLifeTime - m_iLifeTime >= 200)
-	{
-		m_bLive = true;
+		CreateObjectMatrix();
+
+		m_iLifeTime--;
+
+		if (m_iLifeTime == 0)
+		{
+			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+			m_pCurrentTarget = NULL;
+			Scene::Instance()->DestroyEntity(m_iID);
+		}
+		else if (m_iTotalLifeTime - m_iLifeTime >= 200)
+		{
+			m_bLive = true;
+		}
 	}
 }
 
@@ -207,7 +209,58 @@ void Missile::MissileGuidance()
 		m_vUp = localRotation * m_vUp;
 		RotateToForward();
 	}
+}
 
-	m_vHeading = m_vForward * m_fVelocity;
-	m_vPosition += m_vHeading;
+void Missile::CheckCollisions()
+{
+	if (m_pCurrentTarget)
+	{
+		float boundingOffset = 10;
+		if ("Ship" != m_pCurrentTarget->GetType())
+		{
+			boundingOffset = 0;
+		}
+
+		float distance = glm::distance(m_vPosition, m_pCurrentTarget->Position());
+		if (distance > 5000.0f)
+		{
+			m_pCurrentTarget = NULL;
+		}
+		else if (distance <= m_fBoundingRadius + 10 + m_pCurrentTarget->BoundingRadius() + boundingOffset)
+		{
+			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, m_pCurrentTarget->ID(), Msg_TargetDestroyed, NULL);
+			m_pCurrentTarget = NULL;
+			Scene::Instance()->DestroyEntity(m_iID);
+			m_bDestroyed = true;
+		}
+	}
+
+	for (auto it = Scene::Instance()->CollidableObjects()->begin(); !m_bDestroyed &&
+		it != Scene::Instance()->CollidableObjects()->end(); it++)
+	{
+		if (m_iID == *it) continue;
+
+		MoveableEntity* obj = (MoveableEntity*)Scene::Instance()->GetEntityFromID(*it);
+		float boundingOffset = 10;
+		std::string type = obj->GetType();
+
+		if ("Ship" != type && "Missile" != type)
+		{
+			boundingOffset = 0;
+		}
+
+		float distance = glm::distance(m_vPosition, obj->Position());
+		if (distance <= m_fBoundingRadius + 10 + obj->BoundingRadius() + boundingOffset)
+		{
+			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+			if ("Ship" == type || "Missile" == type || "MissileBattery" == type)
+			{
+				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, m_pCurrentTarget->ID(), Msg_TargetDestroyed, NULL);
+			}
+			m_pCurrentTarget = NULL;
+			Scene::Instance()->DestroyEntity(m_iID);
+			m_bDestroyed = true;
+		}
+	}
 }

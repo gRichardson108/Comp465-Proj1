@@ -3,7 +3,8 @@
 
 enum MessageTypes
 {
-	Msg_DestroySource
+	Msg_DestroySource,
+	Msg_TargetDestroyed
 };
 
 #endif

@@ -85,12 +85,22 @@ public:
 	void AddModel(Model* model);
 
 	EntityMap* Entities() const { return m_pEntities; }
-	BaseEntity* GetEntityFromID(int id) const { return m_pEntities->at(id); }
+	BaseEntity* GetEntityFromID(int id) const
+	{
+		auto e = m_pEntities->find(id);
+		if (e != m_pEntities->end())
+		{
+			return e->second;
+		}
+
+		return NULL;
+	}
 	void AddEntity(BaseEntity* entity);
 	
 	Set* DrawableObjects() { return m_pStaticEntities; }
 	void AddStaticEntity(int id) { m_pStaticEntities->insert(id); }
 
+	Set* CollidableObjects() { return m_pMoveableEntities; }
 	void AddMoveableEntity(int id) { m_pMoveableEntities->insert(id); }
 	void AddToMoveableQueue(MoveableEntity* entity);
 

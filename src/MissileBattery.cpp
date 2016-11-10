@@ -7,9 +7,10 @@ MissileBattery::MissileBattery(Model* model, CelestialBody* parent, const glm::v
 {
 	m_iNumMissiles = 5;
 	m_pTargets = new std::vector<MoveableEntity*>();
+	m_pActiveMissile = NULL;
 
 	// Update position using parent
-	if (m_pParent != NULL)
+	if (m_pParent)
 	{
 		m_vParentOldPosition = m_pParent->Position();
 		m_vPosition += m_vParentOldPosition;
@@ -26,11 +27,11 @@ bool MissileBattery::HandleMsg(const Message& message)
 	{
 		case Msg_DestroySource :
 			hasMsg = true;
-			if (!m_pActiveMissile && message.Sender == m_pActiveMissile->ID())
+			if (m_pActiveMissile && message.Sender == m_pActiveMissile->ID())
 			{
 				m_pActiveMissile = NULL;
 			}
-			else if (!m_pParent && message.Sender == m_pParent->ID())
+			else if (m_pParent && message.Sender == m_pParent->ID())
 			{
 				m_pParent = NULL;
 				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
@@ -40,7 +41,7 @@ bool MissileBattery::HandleMsg(const Message& message)
 			}
 			else
 			{
-				if (!m_pTargets && m_pTargets->size() > 0)
+				if (m_pTargets->size() > 0)
 				{
 					for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
 					{
@@ -54,6 +55,15 @@ bool MissileBattery::HandleMsg(const Message& message)
 			}
 			break;
 
+		case Msg_TargetDestroyed:
+			hasMsg = true;
+			m_pActiveMissile = NULL;
+			m_pParent = NULL;
+			m_pTargets->clear();
+			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+			Scene::Instance()->DestroyEntity(m_iID);
+			break;
+
 		default :
 			break;
 	}
@@ -63,7 +73,7 @@ bool MissileBattery::HandleMsg(const Message& message)
 
 void MissileBattery::Update()
 {
-	if (m_pParent != NULL)
+	if (m_pParent)
 	{
 		// Move to origin
 		m_vPosition = m_vPosition - m_vParentOldPosition;
@@ -89,7 +99,7 @@ void MissileBattery::Update()
 	// Attempt to launch missile
 	if (!m_pActiveMissile && m_iNumMissiles > 0)
 	{
-		if (!m_pTargets && m_pTargets->size() > 0)
+		if (m_pTargets->size() > 0)
 		{
 			for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
 			{
