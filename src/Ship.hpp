@@ -24,12 +24,13 @@ class Ship : public MoveableEntity
 		Ship(Model* model, const glm::vec3& pos = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f),
 			const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f));
 
-        void keypress(unsigned char key, int x, int y);
+        void keypress(unsigned char key);
 
-        void rotateYaw(float degrees);
+        void rotateYaw(float rotationRate);
+        void rotatePitch(float rotationRate);
 
 		virtual const std::string GetType() const { return "Ship"; }
-		virtual bool HandleMsg(const Message& message) { return false; };
+		virtual bool HandleMsg(const Message& message);
 
 		void Update();
 };

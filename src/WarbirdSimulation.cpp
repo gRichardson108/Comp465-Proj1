@@ -405,40 +405,66 @@ void keyboard(unsigned char key, int x, int y)
 	updateTitle();
 	glutPostRedisplay();
 }
-//void specialKeys(int key, int x, int y)
-//{
-//    switch (key)
-//    {
-//        case GLUT_KEY_UP:
-//            ship->movementRate = 8.0;
-//            break;
-//        case GLUT_KEY_DOWN:
-//            ship->movementRate = -8.0;
-//            break;
-//        case GLUT_KEY_LEFT:
-//            ship->rotateYaw(1.0);
-//            break;
-//        case GLUT_KEY_RIGHT:
-//            ship->rotateYaw(-1.0);
-//            break;
-//        case GLUT_KEY_F1:
-//            showVec3("Ship Position", ship->Position());
-//            break;
-//
-//    }
-//}
+void specialKeys(int key, int x, int y)
+{
+    int modifiers = glutGetModifiers();
+    switch (modifiers)
+    {
+        case GLUT_ACTIVE_CTRL:
+            switch (key)
+                {
+                    case GLUT_KEY_UP:
+                        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_ShipPitchDown, NULL);
+                        break;
+                    case GLUT_KEY_DOWN:
+                        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_ShipPitchUp, NULL);
+                        break;
+                    case GLUT_KEY_LEFT:
+                        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_ShipRollLeft, NULL);
+                        break;
+                    case GLUT_KEY_RIGHT:
+                        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_ShipRollRight, NULL);
+                        break;
+                }
+            break;
+            default:
+            switch (key)
+                {
+                    case GLUT_KEY_UP:
+                        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeypressUpArrow, NULL);
+                        break;
+                    case GLUT_KEY_DOWN:
+                        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeypressDownArrow, NULL);
+                        break;
+                    case GLUT_KEY_LEFT:
+                        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeypressLeftArrow, NULL);
+                        break;
+                    case GLUT_KEY_RIGHT:
+                        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeypressRightArrow, NULL);
+                        break;
+                    case GLUT_KEY_F1:
+                        //showVec3("Ship Position", ship->Position());
+                        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeypressF1, NULL);
+                        break;
 
-//void specialUpFunc(int key, int x, int y)
-//{
-//    switch (key)
-//    {
-//        case GLUT_KEY_UP:
-//        case GLUT_KEY_DOWN:
-//            ship->movementRate = 0.0;
-//            break;
-//
-//    }
-//}
+                }
+    }
+
+}
+
+void specialUpFunc(int key, int x, int y)
+{
+    switch (key)
+    {
+        case GLUT_KEY_UP:
+            MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeyreleaseUpArrow, NULL);
+            break;
+        case GLUT_KEY_DOWN:
+            MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeyreleaseDownArrow, NULL);
+            break;
+
+    }
+}
 
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
@@ -489,6 +515,8 @@ int main(int argc, char* argv[]) {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
+    glutSpecialFunc(specialKeys);
+    glutSpecialUpFunc(specialUpFunc);
     glutTimerFunc(scene->TimerDelay(), update, 1);
     glutIdleFunc(display);
     glutMainLoop();

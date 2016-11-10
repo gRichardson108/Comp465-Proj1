@@ -1,7 +1,7 @@
 #ifndef CHASECAMERA_HPP
 #define CHASECAMERA_HPP
 
-#include <DynamicCamera.hpp>
+#include "DynamicCamera.hpp"
 
 
 class ChaseCamera : public DynamicCamera
