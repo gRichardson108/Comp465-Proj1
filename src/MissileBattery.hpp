@@ -38,7 +38,7 @@ public:
 	}
 	void SetTargets(const std::string& type)
 	{
-		for each (auto entity in *Scene::Instance()->Entities())
+		for (auto entity : *Scene::Instance()->Entities())
 		{
 			if (StringICompare(type, entity.second->GetType()))
 			{

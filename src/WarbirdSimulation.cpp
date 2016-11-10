@@ -49,7 +49,7 @@ update speed, toggle axes, and toggle idle function.
 // constants for models:  file names, vertex count, model display size
 const int nModels = 9;  // number of models in this scene
 char * modelFile [nModels] = {"src/axes-r100.tri", "src/Missile.tri", "src/Warbird.tri",
-    "src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri", 
+    "src/Ruber.tri", "src/Unum.tri", "src/Duo.tri", "src/Primus.tri", "src/Secundus.tri",
 	"src/MissileBattery.tri"};
 const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 112 * 3};
 char * vertexShaderFile   = "src/simpleVertex.glsl";
@@ -91,7 +91,7 @@ void reshape(int width, int height) {
 	projectionMatrix = viewingCamera->UpdateProjectionMatrix(width, height);
     float aspectRatio = (float)width / (float)height;
     glViewport(0, 0, width, height);
-    printf("reshape: FOVY = %5.2f, width = %4d height = %4d aspect = %5.2f \n + nearclip = %5f farclip = %5f \n", 
+    printf("reshape: FOVY = %5.2f, width = %4d height = %4d aspect = %5.2f \n + nearclip = %5f farclip = %5f \n",
 		viewingCamera->FOVY(), width, height, aspectRatio, viewingCamera->NearClip(), viewingCamera->FarClip());
 }
 
@@ -120,11 +120,11 @@ void updateTitle()
 	glutSetWindowTitle(titleStr);
 }
 
-void display() 
+void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // update model matrix
-	for each (int id in *scene->DrawableObjects())
+	for (int id : *scene->DrawableObjects())
 	{
 		StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
         ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entity->ObjectMatrix();
@@ -137,7 +137,7 @@ void display()
 	{
 		Model* axis = scene->GetModel("axes-r100");
         // Local axis for each entity
-		for each (int id in *scene->DrawableObjects())
+		for (int id : *scene->DrawableObjects())
 		{
 			StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
             modelMatrix = glm::translate(glm::mat4(), entity->Position()) *
@@ -329,7 +329,7 @@ void init()
 	// Create cameras
 	new StaticCamera("Front", glm::vec3(0.0f, 10000.0f, 20000.0f), glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));
 	new StaticCamera("Top",  glm::vec3(0.0f, 20000.0f, 0.0f), glm::vec3(0), glm::vec3(0.0f, 0.0f, -1.0f));
-	new DynamicCamera("Ship", (MoveableEntity*)scene->GetEntityFromID(5), false, 0.0f, glm::vec3(0.0f, 300.0f, 1000.0f), 
+	new DynamicCamera("Ship", (MoveableEntity*)scene->GetEntityFromID(5), false, 0.0f, glm::vec3(0.0f, 300.0f, 1000.0f),
 		glm::vec3(0.0f, 300.0f, 0.0f));
 	new DynamicCamera("Unum", (MoveableEntity*)scene->GetEntityFromID(1), true, 8000.0f);
 	new DynamicCamera("Duo", (MoveableEntity*)scene->GetEntityFromID(2), true, 8000.0f);
@@ -358,7 +358,7 @@ void keyboard(unsigned char key, int x, int y)
 		exit(EXIT_SUCCESS);
 		break;
 	case 'a': case 'A':  // change animation timer
-		if (idleTimerFlag) // switch to interval timer  
+		if (idleTimerFlag) // switch to interval timer
 		{
 			glutIdleFunc(NULL);
 			idleTimerFlag = false;
@@ -424,13 +424,13 @@ int main(int argc, char* argv[]) {
     glutCreateWindow("");
 	updateTitle();
     // initialize and verify glew
-    glewExperimental = GL_TRUE;  // needed my home system 
-    GLenum err = glewInit();  
-    if (GLEW_OK != err) 
-        printf("GLEW Error: %s \n", glewGetErrorString(err));      
+    glewExperimental = GL_TRUE;  // needed my home system
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+        printf("GLEW Error: %s \n", glewGetErrorString(err));
     else {
         printf("Using GLEW %s \n", glewGetString(GLEW_VERSION));
-        printf("OpenGL %s, GLSL %s\n", 
+        printf("OpenGL %s, GLSL %s\n",
                 glGetString(GL_VERSION),
                 glGetString(GL_SHADING_LANGUAGE_VERSION));
     }

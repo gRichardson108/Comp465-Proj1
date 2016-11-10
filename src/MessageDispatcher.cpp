@@ -14,7 +14,7 @@ MessageDispatcher* MessageDispatcher::Instance()
 }
 
 //----------------------------- Dispatch ---------------------------------
-//  
+//
 //  see description in header
 //------------------------------------------------------------------------
 void MessageDispatcher::Discharge(BaseEntity* pReceiver,
@@ -44,7 +44,7 @@ void MessageDispatcher::DispatchMsg(double  delay,
 
 	if (receiver < 0)
 	{
-		for each (auto entity in *Scene::Instance()->Entities())
+		for (auto entity : *Scene::Instance()->Entities())
 		{
 			if (pSender != entity.second)
 			{
@@ -66,7 +66,7 @@ void MessageDispatcher::DispatchMsg(double  delay,
 		//create the messsage
 		Message message(0, sender, receiver, msg, ExtraInfo);
 
-		//if there is no delay, route message immediately                       
+		//if there is no delay, route message immediately
 		if (delay <= 0.0f)
 		{
 			//send the telegram to the recipient

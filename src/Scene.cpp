@@ -25,7 +25,7 @@ Scene::~Scene()
 		m_pDynamicCamerasQueue->pop();
 	}
 	delete m_pDynamicCamerasQueue;
-	
+
 	while (!m_pMoveableEntitesQueue->empty())
 	{
 		delete m_pMoveableEntitesQueue->front();
@@ -33,14 +33,14 @@ Scene::~Scene()
 	}
 	delete m_pMoveableEntitesQueue;
 
-	for each (auto i in *m_pEntities)
+	for (auto i : *m_pEntities)
 	{
 		delete i.second;
 	}
 	m_pEntities->clear();
 	delete m_pEntities;
 
-	for each (auto i in *m_pModels)
+	for (auto i : *m_pModels)
 	{
 		delete i.second;
 	}
@@ -84,7 +84,7 @@ void Scene::Update()
 	Preprocess();
 
 	// Update entities
-	for each (int id in *m_pMoveableEntities)
+	for (int id : *m_pMoveableEntities)
 	{
 		if (m_pDestroyedEntities->find(id) == m_pDestroyedEntities->end())
 		{
@@ -93,7 +93,7 @@ void Scene::Update()
 	}
 
 	// Update cameras
-	for each (int id in *m_pDynamicCameras)
+	for (int id : *m_pDynamicCameras)
 	{
 		if (m_pDestroyedEntities->find(id) == m_pDestroyedEntities->end())
 		{
@@ -107,7 +107,7 @@ void Scene::Preprocess()
 	// Remove all destroyed entities
 	if (m_pDestroyedEntities->size() > 0)
 	{
-		for each (int id in *m_pDestroyedEntities)
+		for (int id : *m_pDestroyedEntities)
 		{
 			m_pStaticEntities->erase(id);
 			m_pMoveableEntities->erase(id);
