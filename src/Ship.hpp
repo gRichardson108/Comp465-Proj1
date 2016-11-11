@@ -28,6 +28,7 @@ class Ship : public MoveableEntity
 
         void rotateYaw(float rotationRate);
         void rotatePitch(float rotationRate);
+        void rotateRoll(float rotationRate);
 
 		virtual const std::string GetType() const { return "Ship"; }
 		virtual bool HandleMsg(const Message& message);

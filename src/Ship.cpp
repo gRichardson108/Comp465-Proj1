@@ -10,17 +10,22 @@ void Ship::keypress(unsigned char key)
 
 void Ship::rotateYaw(float rotationRate)
 {
-    m_vForward = glm::normalize(glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vUp)) * m_vForward);
-    //m_vLeft = glm::normalize(m_vUp * m_vLeft);
-    RotateToForward();
+    m_mRotation = glm::rotate(RotationMatrix(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), glm::vec3(0, 1, 0));
+
     SetHeading(m_vForward);
 }
 
 void Ship::rotatePitch(float rotationRate)
 {
-    m_vForward = glm::normalize(glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vLeft)) * m_vForward);
-    //m_vLeft = glm::normalize(m_vUp * m_vLeft);
-    RotateToForward();
+    //m_vForward = glm::normalize(glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vLeft)) * m_vForward);
+    m_mRotation = glm::rotate(RotationMatrix(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), glm::vec3(1, 0, 0));
+    SetHeading(m_vForward);
+}
+
+void Ship::rotateRoll(float rotationRate)
+{
+    //m_vForward = glm::normalize(glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vLeft)) * m_vForward);
+    m_mRotation = glm::rotate(RotationMatrix(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), glm::vec3(0, 0, 1));
     SetHeading(m_vForward);
 }
 
@@ -54,8 +59,10 @@ bool Ship::HandleMsg(const Message& message){
             rotatePitch(-1.0);
             break;
         case Msg_ShipRollLeft:
+            rotateRoll(1.0);
             break;
         case Msg_ShipRollRight:
+            rotateRoll(-1.0);
             break;
         case Msg_KeyreleaseUpArrow:
         case Msg_KeyreleaseDownArrow:
