@@ -10,22 +10,28 @@ void Ship::keypress(unsigned char key)
 
 void Ship::rotateYaw(float rotationRate)
 {
-    m_mRotation = glm::rotate(RotationMatrix(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), glm::vec3(0, 1, 0));
-
+    glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vUp));
+    m_vForward = glm::normalize(rot * m_vForward);
+    m_vLeft = glm::normalize(rot * m_vLeft);
+    RotateToForward();
     SetHeading(m_vForward);
 }
 
 void Ship::rotatePitch(float rotationRate)
 {
-    //m_vForward = glm::normalize(glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vLeft)) * m_vForward);
-    m_mRotation = glm::rotate(RotationMatrix(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), glm::vec3(1, 0, 0));
+    glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vLeft));
+    m_vForward = glm::normalize(rot * m_vForward);
+    m_vUp = glm::normalize(rot * m_vUp);
+    RotateToForward();
     SetHeading(m_vForward);
 }
 
 void Ship::rotateRoll(float rotationRate)
 {
-    //m_vForward = glm::normalize(glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vLeft)) * m_vForward);
-    m_mRotation = glm::rotate(RotationMatrix(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), glm::vec3(0, 0, 1));
+    glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vForward));
+    m_vLeft= glm::normalize(rot * m_vLeft);
+    m_vUp = glm::normalize(rot * m_vUp);
+    RotateToForward();
     SetHeading(m_vForward);
 }
 
@@ -59,10 +65,10 @@ bool Ship::HandleMsg(const Message& message){
             rotatePitch(-1.0);
             break;
         case Msg_ShipRollLeft:
-            rotateRoll(1.0);
+            rotateRoll(-1.0);
             break;
         case Msg_ShipRollRight:
-            rotateRoll(-1.0);
+            rotateRoll(1.0);
             break;
         case Msg_KeyreleaseUpArrow:
         case Msg_KeyreleaseDownArrow:
