@@ -10,7 +10,7 @@ void Ship::keypress(unsigned char key)
 
 void Ship::rotateYaw(float rotationRate)
 {
-    glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vUp));
+    glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), rotationRate, m_vUp));
     m_vForward = glm::normalize(rot * m_vForward);
     m_vLeft = glm::normalize(rot * m_vLeft);
     RotateToForward();
@@ -19,7 +19,7 @@ void Ship::rotateYaw(float rotationRate)
 
 void Ship::rotatePitch(float rotationRate)
 {
-    glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vLeft));
+    glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), rotationRate, m_vLeft));
     m_vForward = glm::normalize(rot * m_vForward);
     m_vUp = glm::normalize(rot * m_vUp);
     RotateToForward();
@@ -28,7 +28,7 @@ void Ship::rotatePitch(float rotationRate)
 
 void Ship::rotateRoll(float rotationRate)
 {
-    glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (rotationRate * 1000.0f), m_vForward));
+    glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), rotationRate, m_vForward));
     m_vLeft= glm::normalize(rot * m_vLeft);
     m_vUp = glm::normalize(rot * m_vUp);
     RotateToForward();
@@ -47,28 +47,31 @@ bool Ship::HandleMsg(const Message& message){
 	switch (message.Msg)
 	{
         case Msg_KeypressUpArrow:
-            movementRate = 8.0;
+            movementRate = currentMaxSpeed;
             break;
         case Msg_KeypressDownArrow:
-            movementRate = -8.0;
+            movementRate = -currentMaxSpeed;
             break;
         case Msg_KeypressLeftArrow:
-            rotateYaw(1.0);
+            rotateYaw(TURN_RATE);
             break;
         case Msg_KeypressRightArrow:
-            rotateYaw(-1.0);
+            rotateYaw(-TURN_RATE);
             break;
         case Msg_ShipPitchDown:
-            rotatePitch(1.0);
+            rotatePitch(TURN_RATE);
             break;
         case Msg_ShipPitchUp:
-            rotatePitch(-1.0);
+            rotatePitch(-TURN_RATE);
             break;
         case Msg_ShipRollLeft:
-            rotateRoll(-1.0);
+            rotateRoll(-TURN_RATE);
             break;
         case Msg_ShipRollRight:
-            rotateRoll(1.0);
+            rotateRoll(TURN_RATE);
+            break;
+        case Msg_ShipSpeedChange:
+            nextShipSpeed();
             break;
         case Msg_KeyreleaseUpArrow:
         case Msg_KeyreleaseDownArrow:

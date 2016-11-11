@@ -15,7 +15,8 @@ enum MessageTypes
 	Msg_ShipPitchDown,
 	Msg_ShipPitchUp,
 	Msg_ShipRollLeft,
-	Msg_ShipRollRight
+	Msg_ShipRollRight,
+	Msg_ShipSpeedChange
 };
 
 #endif

@@ -400,6 +400,9 @@ void keyboard(unsigned char key, int x, int y)
 				break;
 		}
 		break;
+    case 's': case 'S':
+        MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_ShipSpeedChange, NULL);
+        break;
 	}
 
 	updateTitle();
