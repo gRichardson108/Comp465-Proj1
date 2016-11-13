@@ -12,7 +12,7 @@ Missile::Missile(Model* model, const glm::vec3& pos, const glm::vec3& scale, con
 	m_vHeading = m_vForward * m_fVelocity;
 	m_pTargets = new std::vector<MoveableEntity*>();
 	m_pCurrentTarget = NULL;
-	new DynamicCamera("Missile", this, false, 0.0f, glm::vec3(0.0, 0.0, 400.0f));
+	new DynamicCamera("Missile", this, false, 0.0f, glm::vec3(0.0, 100.0, 400.0f), glm::vec3(0.0, 100.0f, 0.0));
 }
 
 bool Missile::HandleMsg(const Message& message)
@@ -207,7 +207,7 @@ void Missile::MissileGuidance()
 		m_vForward = localRotation * m_vForward;
 		m_vLeft = localRotation * m_vLeft;
 		m_vUp = localRotation * m_vUp;
-		RotateToForward();
+		CreateRotationMatrix();
 	}
 }
 
@@ -255,7 +255,7 @@ void Missile::CheckCollisions()
 			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
 			if ("Ship" == type || "Missile" == type || "MissileBattery" == type)
 			{
-				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, m_pCurrentTarget->ID(), Msg_TargetDestroyed, NULL);
+				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, obj->ID(), Msg_TargetDestroyed, NULL);
 			}
 			m_pCurrentTarget = NULL;
 			Scene::Instance()->DestroyEntity(m_iID);

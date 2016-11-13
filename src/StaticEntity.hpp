@@ -30,7 +30,7 @@ protected:
 
 	// Sets rotation matrix for rotating the
 	// model to face the forward vector
-	void RotateToForward();
+	void CreateRotationMatrix();
 
 	// Sets the object matrix
 	void CreateObjectMatrix();

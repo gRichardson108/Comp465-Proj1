@@ -80,7 +80,7 @@ void CelestialBody::Update()
 		m_vLeft = glm::normalize(m_mAxisRotation * m_vLeft);
 	}
 
-	RotateToForward();
+	CreateRotationMatrix();
 
 	// Old position is due to the parent being
 	// updated before child, need to at least remember this

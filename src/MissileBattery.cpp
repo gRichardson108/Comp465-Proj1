@@ -92,7 +92,7 @@ void MissileBattery::Update()
 		m_vPosition += m_vParentOldPosition;
 
 		// Create new matrices
-		RotateToForward();
+		CreateRotationMatrix();
 		CreateObjectMatrix();
 	}
 
