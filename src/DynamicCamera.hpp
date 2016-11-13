@@ -14,6 +14,8 @@ to any MoveableEntity.
 #define DYNAMIC_CAMERA_H
 
 #include "StaticCamera.hpp"
+#include "MoveableEntity.hpp"
+
 class MoveableEntity;
 
 class DynamicCamera : public StaticCamera

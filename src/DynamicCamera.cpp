@@ -48,13 +48,16 @@ void DynamicCamera::Update()
 		if (m_bUsesHeading) // Uses parent's heading vector
 		{
 			m_vEye = m_fHeadingOffset * m_pParent->Heading() + m_pParent->Position() + m_vEyeOffset;
+			m_vAt = m_pParent->Position() + m_vAtOffset;
 		}
 		else
 		{
-			m_vEye = m_pParent->Position() + m_vEyeOffset;
+			m_vEye = m_pParent->Position() + (glm::mat3(m_pParent->RotationMatrix()) * m_vEyeOffset);
+			m_vAt = m_pParent->Position() + (glm::mat3(m_pParent->RotationMatrix()) * m_vAtOffset);
+			m_vUp = m_pParent->Up();
 		}
 
-		m_vAt = m_pParent->Position() + m_vAtOffset;
+
 		m_mViewMatrix = glm::lookAt(m_vEye, m_vAt, m_vUp);
 	}
 }
