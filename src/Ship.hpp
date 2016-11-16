@@ -18,6 +18,10 @@ can have missiles to shoot. Can be affected by gravity.
 class Ship : public MoveableEntity
 {
     private:
+        int pitchRotation = 0;
+        int yawRotation = 0;
+        int rollRotation = 0;
+        int thrust = 0;
 	public:
         enum shipSpeedSettings {
             SPEED_DEFAULT,
@@ -25,7 +29,6 @@ class Ship : public MoveableEntity
             SPEED_DEBUG
         };
 
-        float movementRate = 0.0;
         shipSpeedSettings speedSetting = SPEED_DEFAULT;
         float currentMaxSpeed = 10.0;
 
@@ -39,22 +42,7 @@ class Ship : public MoveableEntity
         void rotatePitch(float rotationRate);
         void rotateRoll(float rotationRate);
 
-        void nextShipSpeed(){
-            switch (speedSetting){
-                case SPEED_DEFAULT:
-                    speedSetting = SPEED_FAST;
-                    currentMaxSpeed = 50;
-                    break;
-                case SPEED_FAST:
-                    speedSetting = SPEED_DEBUG;
-                    currentMaxSpeed = 200;
-                    break;
-                case SPEED_DEBUG:
-                    speedSetting = SPEED_DEFAULT;
-                    currentMaxSpeed = 10;
-                    break;
-            }
-        }
+        void nextShipSpeed();
 
 		virtual const std::string GetType() const { return "Ship"; }
 		virtual bool HandleMsg(const Message& message);

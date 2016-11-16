@@ -465,6 +465,12 @@ void specialUpFunc(int key, int x, int y)
         case GLUT_KEY_DOWN:
             MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeyreleaseDownArrow, NULL);
             break;
+        case GLUT_KEY_LEFT:
+            MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeyreleaseLeftArrow, NULL);
+            break;
+        case GLUT_KEY_RIGHT:
+            MessageDispatcher::Instance()->DispatchMsg(0, 0, -1, Msg_KeyreleaseRightArrow, NULL);
+            break;
 
     }
 }
