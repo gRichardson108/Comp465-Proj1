@@ -19,20 +19,26 @@ Base entity class
 class BaseEntity
 {
 protected:
-	int m_iID; // Unique ID
-	static int s_iNextValidID; // Next valid ID
+    int m_iID; // Unique ID
+    static int s_iNextValidID; // Next valid ID
 
-	void SetID();
+    void SetID();
 
 public:
-	BaseEntity();
+    BaseEntity();
 
-	virtual ~BaseEntity(){};
+    virtual ~BaseEntity() {};
 
-	int ID() const { return m_iID; }
-	virtual const std::string GetType() const { return "BaseEntity"; }
+    int ID() const
+    {
+        return m_iID;
+    }
+    virtual const std::string GetType() const
+    {
+        return "BaseEntity";
+    }
 
-	virtual bool HandleMsg(const Message& msg) = 0;
+    virtual bool HandleMsg(const Message& msg) = 0;
 };
 
 #endif

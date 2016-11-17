@@ -5,7 +5,7 @@
 //  Name:   Telegram.h
 //
 //  Desc:   This defines a telegram. A telegram is a data structure that
-//          records information required to dispatch messages. Messages 
+//          records information required to dispatch messages. Messages
 //          are used by game agents to communicate with each other.
 //
 //  Author: Mat Buckland (fup@ai-junkie.com)
@@ -15,38 +15,38 @@
 
 struct Message
 {
-	//the entity that sent this telegram
-	int Sender;
+    //the entity that sent this telegram
+    int Sender;
 
-	//the entity that is to receive this telegram
-	int Receiver;
+    //the entity that is to receive this telegram
+    int Receiver;
 
-	//the message itself. These are all enumerated in the file
-	//"MessageTypes.h"
-	int Msg;
+    //the message itself. These are all enumerated in the file
+    //"MessageTypes.h"
+    int Msg;
 
-	//messages can be dispatched immediately or delayed for a specified amount
-	//of time. If a delay is necessary this field is stamped with the time 
-	//the message should be dispatched.
-	double DispatchTime;
+    //messages can be dispatched immediately or delayed for a specified amount
+    //of time. If a delay is necessary this field is stamped with the time
+    //the message should be dispatched.
+    double DispatchTime;
 
-	//any additional information that may accompany the message
-	void* ExtraInfo;
+    //any additional information that may accompany the message
+    void* ExtraInfo;
 
-	Message() : DispatchTime(-1),
-		Sender(-1),
-		Receiver(-1),
-		Msg(-1)
-	{}
+    Message() : DispatchTime(-1),
+        Sender(-1),
+        Receiver(-1),
+        Msg(-1)
+    {}
 
 
-	Message(double time, int sender, int receiver, int msg, void* info = NULL) : 
-		DispatchTime(time),
-		Sender(sender),
-		Receiver(receiver),
-		Msg(msg),
-		ExtraInfo(info)
-	{}
+    Message(double time, int sender, int receiver, int msg, void* info = NULL) :
+        DispatchTime(time),
+        Sender(sender),
+        Receiver(receiver),
+        Msg(msg),
+        ExtraInfo(info)
+    {}
 
 };
 
@@ -58,30 +58,30 @@ const double SmallestDelay = 0.25;
 
 inline bool operator==(const Message& t1, const Message& t2)
 {
-	return (fabs(t1.DispatchTime - t2.DispatchTime) < SmallestDelay) &&
-		(t1.Sender == t2.Sender) &&
-		(t1.Receiver == t2.Receiver) &&
-		(t1.Msg == t2.Msg);
+    return (fabs(t1.DispatchTime - t2.DispatchTime) < SmallestDelay) &&
+           (t1.Sender == t2.Sender) &&
+           (t1.Receiver == t2.Receiver) &&
+           (t1.Msg == t2.Msg);
 }
 
 inline bool operator<(const Message& t1, const Message& t2)
 {
-	if (t1 == t2)
-	{
-		return false;
-	}
-	else
-	{
-		return  (t1.DispatchTime < t2.DispatchTime);
-	}
+    if (t1 == t2)
+    {
+        return false;
+    }
+    else
+    {
+        return  (t1.DispatchTime < t2.DispatchTime);
+    }
 }
 
-//handy helper function for dereferencing the ExtraInfo field of the Telegram 
+//handy helper function for dereferencing the ExtraInfo field of the Telegram
 //to the required type.
 template <class T>
 inline T DereferenceToType(void* p)
 {
-	return *(T*)(p);
+    return *(T*)(p);
 }
 
 #endif

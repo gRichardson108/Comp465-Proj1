@@ -27,37 +27,37 @@ class MessageDispatcher
 {
 private:
 
-	//a std::set is used as the container for the delayed messages
-	//because of the benefit of automatic sorting and avoidance
-	//of duplicates. Messages are sorted by their dispatch time.
-	std::set<Message> PriorityQ;
+    //a std::set is used as the container for the delayed messages
+    //because of the benefit of automatic sorting and avoidance
+    //of duplicates. Messages are sorted by their dispatch time.
+    std::set<Message> PriorityQ;
 
-	//this method is utilized by DispatchMessage or DispatchDelayedMessages.
-	//This method calls the message handling member function of the receiving
-	//entity, pReceiver, with the newly created telegram
-	void Discharge(BaseEntity* pReceiver, const Message& msg);
+    //this method is utilized by DispatchMessage or DispatchDelayedMessages.
+    //This method calls the message handling member function of the receiving
+    //entity, pReceiver, with the newly created telegram
+    void Discharge(BaseEntity* pReceiver, const Message& msg);
 
-	MessageDispatcher(){}
+    MessageDispatcher() {}
 
-	//copy ctor and assignment should be private
-	MessageDispatcher(const MessageDispatcher&);
-	MessageDispatcher& operator=(const MessageDispatcher&) {}
+    //copy ctor and assignment should be private
+    MessageDispatcher(const MessageDispatcher&);
+    MessageDispatcher& operator=(const MessageDispatcher&) {}
 
 public:
 
-	//this class is a singleton
-	static MessageDispatcher* Instance();
+    //this class is a singleton
+    static MessageDispatcher* Instance();
 
-	//send a message to another agent. Receiving agent is referenced by ID.
-	void DispatchMsg(double  delay,
-		int    sender,
-		int    receiver,
-		int    msg,
-		void*  ExtraInfo);
+    //send a message to another agent. Receiving agent is referenced by ID.
+    void DispatchMsg(double  delay,
+                     int    sender,
+                     int    receiver,
+                     int    msg,
+                     void*  ExtraInfo);
 
-	//send out any delayed messages. This method is called each time through   
-	//the main game loop.
-	void DispatchDelayedMsgs();
+    //send out any delayed messages. This method is called each time through
+    //the main game loop.
+    void DispatchDelayedMsgs();
 };
 
 #endif

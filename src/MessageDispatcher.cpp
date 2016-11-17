@@ -48,7 +48,7 @@ void MessageDispatcher::DispatchMsg(double  delay,
 		{
 			if (pSender != entity.second)
 			{
-				DispatchMsg(delay, sender, entity.second->ID(), msg, ExtraInfo);
+                DispatchMsg(delay, sender, entity.second->ID(), msg, ExtraInfo);
 			}
 		}
 	}

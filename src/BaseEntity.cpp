@@ -4,11 +4,11 @@ int BaseEntity::s_iNextValidID = 0;
 
 BaseEntity::BaseEntity()
 {
-	SetID();
-	Scene::Instance()->AddEntity(this);
+    SetID();
+    Scene::Instance()->AddEntity(this);
 }
 
 void BaseEntity::SetID()
 {
-	m_iID = s_iNextValidID++;
+    m_iID = s_iNextValidID++;
 }
