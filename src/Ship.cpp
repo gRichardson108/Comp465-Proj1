@@ -13,7 +13,7 @@ void Ship::rotateYaw(float rotationRate)
     glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), rotationRate, m_vUp));
     m_vForward = glm::normalize(rot * m_vForward);
     m_vLeft = glm::normalize(rot * m_vLeft);
-    RotateToForward();
+	CreateRotationMatrix();
     SetHeading();
 }
 
@@ -22,7 +22,7 @@ void Ship::rotatePitch(float rotationRate)
     glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), rotationRate, m_vLeft));
     m_vForward = glm::normalize(rot * m_vForward);
     m_vUp = glm::normalize(rot * m_vUp);
-    RotateToForward();
+	CreateRotationMatrix();
     SetHeading();
 }
 
@@ -31,7 +31,7 @@ void Ship::rotateRoll(float rotationRate)
     glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), rotationRate, m_vForward));
     m_vLeft= glm::normalize(rot * m_vLeft);
     m_vUp = glm::normalize(rot * m_vUp);
-    RotateToForward();
+    CreateRotationMatrix();
     SetHeading();
 }
 
