@@ -63,51 +63,71 @@ void Ship::Update()
 bool Ship::HandleMsg(const Message& message)
 {
     bool hasMsg = true;
-
     switch (message.Msg)
     {
-    case Msg_KeypressUpArrow:
-        thrust = 1;
-        break;
-    case Msg_KeypressDownArrow:
-        thrust = -1;
-        break;
-    case Msg_KeypressLeftArrow:
-        yawRotation = 1;
-        break;
-    case Msg_KeypressRightArrow:
-        yawRotation = -1;
-        break;
-    case Msg_ShipPitchDown:
-        pitchRotation = 1;
-        break;
-    case Msg_ShipPitchUp:
-        pitchRotation = -1;
-        break;
-    case Msg_ShipRollLeft:
-        rollRotation = -1;
-        break;
-    case Msg_ShipRollRight:
-        rollRotation = 1;
-        break;
-    case Msg_ShipSpeedChange:
-        nextShipSpeed();
-        break;
-    case Msg_KeyreleaseUpArrow:
-    case Msg_KeyreleaseDownArrow:
-        thrust = 0;
-        pitchRotation = 0;
-        break;
-    case Msg_KeyreleaseLeftArrow:
-    case Msg_KeyreleaseRightArrow:
-        rollRotation = 0;
-        yawRotation = 0;
-        break;
-    default:
-        hasMsg = false;
-        break;
-    }
+        case Msg_CtrlMod_SpecialKeyPress:
+            switch (*static_cast<int*>(message.ExtraInfo)){
+                case GLUT_KEY_UP:
+                    pitchRotation = 1;
+                    break;
+                case GLUT_KEY_DOWN:
+                    pitchRotation = -1;
+                    break;
+                case GLUT_KEY_LEFT:
+                    rollRotation = -1;
+                    break;
+                case GLUT_KEY_RIGHT:
+                    rollRotation = 1;
+                    break;
+            }
+            break;
+        case Msg_SpecialKeyPress:
+            switch (*static_cast<int*>(message.ExtraInfo)){
+                case GLUT_KEY_UP:
+                    thrust = 1;
+                    break;
+                case GLUT_KEY_DOWN:
+                    thrust = -1;
+                    break;
+                case GLUT_KEY_LEFT:
+                    yawRotation = 1;
+                    break;
+                case GLUT_KEY_RIGHT:
+                    yawRotation = -1;
+                    break;
+            }
+            break;
+        case Msg_SpecialKeyRelease:
+            switch (*static_cast<int*>(message.ExtraInfo)){
+                case GLUT_KEY_UP:
+                case GLUT_KEY_DOWN:
+                    thrust = 0;
+                    break;
+                case GLUT_KEY_LEFT:
+                case GLUT_KEY_RIGHT:
+                    yawRotation = 0;
+                    break;
+            }
+        case Msg_CtrlMod_SpecialKeyRelease:
+            switch (*static_cast<int*>(message.ExtraInfo)){
+                case GLUT_KEY_UP:
+                case GLUT_KEY_DOWN:
+                    pitchRotation = 0;
+                    break;
+                case GLUT_KEY_LEFT:
+                case GLUT_KEY_RIGHT:
+                    rollRotation = 0;
+                    break;
+            }
+            break;
+        case Msg_ShipSpeedChange:
+            nextShipSpeed();
+            break;
+        default:
+            hasMsg = false;
+            break;
 
+    }
     return hasMsg;
 }
 

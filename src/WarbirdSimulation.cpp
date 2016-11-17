@@ -425,64 +425,78 @@ void specialKeys(int key, int x, int y)
     switch (modifiers)
     {
     case GLUT_ACTIVE_CTRL:
-        switch (key)
-        {
-        case GLUT_KEY_UP:
-            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipPitchDown, NULL);
-            break;
-        case GLUT_KEY_DOWN:
-            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipPitchUp, NULL);
-            break;
-        case GLUT_KEY_LEFT:
-            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipRollLeft, NULL);
-            break;
-        case GLUT_KEY_RIGHT:
-            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipRollRight, NULL);
-            break;
-        }
+//        switch (key)
+//        {
+//
+//        case GLUT_KEY_UP:
+//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipPitchDown, NULL);
+//            break;
+//        case GLUT_KEY_DOWN:
+//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipPitchUp, NULL);
+//            break;
+//        case GLUT_KEY_LEFT:
+//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipRollLeft, NULL);
+//            break;
+//        case GLUT_KEY_RIGHT:
+//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipRollRight, NULL);
+//            break;
+//        }
+        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_CtrlMod_SpecialKeyPress, &key);
         break;
     default:
-        switch (key)
-        {
-        case GLUT_KEY_UP:
-            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressUpArrow, NULL);
-            break;
-        case GLUT_KEY_DOWN:
-            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressDownArrow, NULL);
-            break;
-        case GLUT_KEY_LEFT:
-            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressLeftArrow, NULL);
-            break;
-        case GLUT_KEY_RIGHT:
-            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressRightArrow, NULL);
-            break;
-        case GLUT_KEY_F1:
-            //showVec3("Ship Position", ship->Position());
-            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressF1, NULL);
-            break;
-
-        }
+//        switch (key)
+//        {
+//        case GLUT_KEY_UP:
+//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressUpArrow, NULL);
+//            break;
+//        case GLUT_KEY_DOWN:
+//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressDownArrow, NULL);
+//            break;
+//        case GLUT_KEY_LEFT:
+//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressLeftArrow, NULL);
+//            break;
+//        case GLUT_KEY_RIGHT:
+//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressRightArrow, NULL);
+//            break;
+//        case GLUT_KEY_F1:
+//            //showVec3("Ship Position", ship->Position());
+//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressF1, NULL);
+//            break;
+//
+//        }
+        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_SpecialKeyPress, &key);
+        break;
     }
 
 }
 
 void specialUpFunc(int key, int x, int y)
 {
-    switch (key)
+//    switch (key)
+//    {
+//    case GLUT_KEY_UP:
+//        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseUpArrow, NULL);
+//        break;
+//    case GLUT_KEY_DOWN:
+//        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseDownArrow, NULL);
+//        break;
+//    case GLUT_KEY_LEFT:
+//        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseLeftArrow, NULL);
+//        break;
+//    case GLUT_KEY_RIGHT:
+//        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseRightArrow, NULL);
+//        break;
+//
+//    }
+    int modifiers = glutGetModifiers();
+    switch (modifiers)
     {
-    case GLUT_KEY_UP:
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseUpArrow, NULL);
+    case GLUT_ACTIVE_CTRL:
+        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_CtrlMod_SpecialKeyRelease, &key);
         break;
-    case GLUT_KEY_DOWN:
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseDownArrow, NULL);
+    default:
+        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_SpecialKeyRelease, &key);
         break;
-    case GLUT_KEY_LEFT:
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseLeftArrow, NULL);
-        break;
-    case GLUT_KEY_RIGHT:
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseRightArrow, NULL);
-        break;
-
     }
 }
 
