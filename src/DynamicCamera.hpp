@@ -27,8 +27,9 @@ protected :
     bool m_bUsesHeading; // If Camera uses the heading vector of parent
     float m_fHeadingOffset; // Heading vector offset
 
-public :
 
+public :
+    bool m_bWarpPoint;
     DynamicCamera(char* name, const glm::vec3& eye, const glm::vec3& at, const glm::vec3& up, float FOVY = glm::radians(60.0f),
                   float nearClip = 1.0f, float farClip = 10000000.0f) :
         StaticCamera(name, eye, at, up, FOVY, nearClip, farClip)
@@ -36,7 +37,14 @@ public :
         Scene::Instance()->AddToDynamicQueue(this);
     }
 
+
+
     DynamicCamera(char* name, MoveableEntity* parent, bool useHeading = false, float headingOffset = 0.0f,
+                  const glm::vec3& eyeOffset = glm::vec3(0.0f), const glm::vec3& atOffset = glm::vec3(0.0f),
+                  const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f), float FOVY = glm::radians(60.0f),
+                  float nearClip = 1.0f, float farClip = 10000000.0f, bool warpPoint = false);
+
+    DynamicCamera(char* name, MoveableEntity* parent, bool useHeading = false, float headingOffset = 0.0f, bool warpPoint = false,
                   const glm::vec3& eyeOffset = glm::vec3(0.0f), const glm::vec3& atOffset = glm::vec3(0.0f),
                   const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f), float FOVY = glm::radians(60.0f),
                   float nearClip = 1.0f, float farClip = 10000000.0f);
@@ -47,7 +55,6 @@ public :
         return "DynamicCamera";
     }
     virtual bool HandleMsg(const Message& message);
-
     void Update();
     bool UsesHeading() const
     {

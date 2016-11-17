@@ -335,8 +335,8 @@ void init()
     new StaticCamera("Top",  glm::vec3(0.0f, 20000.0f, 0.0f), glm::vec3(0), glm::vec3(0.0f, 0.0f, -1.0f));
     new DynamicCamera("Ship", (MoveableEntity*)scene->GetEntityFromID(5), false, 0.0f, glm::vec3(0.0f, 300.0f, 1000.0f),
                       glm::vec3(0.0f, 300.0f, 0.0f));
-    new DynamicCamera("Unum", (MoveableEntity*)scene->GetEntityFromID(1), true, 8000.0f);
-    new DynamicCamera("Duo", (MoveableEntity*)scene->GetEntityFromID(2), true, 8000.0f);
+    new DynamicCamera("Unum", (MoveableEntity*)scene->GetEntityFromID(1), true, 8000.0f, true);
+    new DynamicCamera("Duo", (MoveableEntity*)scene->GetEntityFromID(2), true, 8000.0f, true);
 
     // Initialize display info
     lastTime = glutGet(GLUT_ELAPSED_TIME);
@@ -411,9 +411,6 @@ void keyboard(unsigned char key, int x, int y)
     case 'w':
     case 'W':
         warpCamera = scene->NextWarpCamera();
-        if (StringICompare(warpCamera->Name(), "Ship")){//skip the ship's dynamic camera
-            warpCamera = scene->NextWarpCamera();
-        }
         MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipWarp, warpCamera);
         printf("warping to camera at %s\n", warpCamera->Name());
         break;

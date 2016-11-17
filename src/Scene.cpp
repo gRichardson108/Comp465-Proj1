@@ -76,6 +76,10 @@ void Scene::AddToDynamicQueue(DynamicCamera* entity)
     {
         m_pDynamicCameras->insert(entity->ID());
         m_pEntities->insert(std::make_pair(entity->ID(), entity));
+        if (entity->m_bWarpPoint)
+        {
+            m_pWarpPoints->insert(entity->ID());
+        }
     }
 }
 

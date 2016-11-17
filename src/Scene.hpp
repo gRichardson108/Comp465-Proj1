@@ -38,6 +38,7 @@ private:
     std::queue<MoveableEntity*>* m_pMoveableEntitesQueue; // Moveables to add to vector
     Set* m_pStaticCameras; // Pointer to vector of static cameras
     Set* m_pDynamicCameras; // Pointer to vector of dynamic cameras
+    Set* m_pWarpPoints; // Pointer to vector of dynamic cameras that function as warp points
     std::queue<DynamicCamera*>* m_pDynamicCamerasQueue; // Cameras to add to vector
     Set::iterator m_itViewingCamera; // Current camera iterator
     Set::iterator m_itWarpCamera; // Current camera iterator
@@ -61,10 +62,11 @@ public:
         m_pMoveableEntitesQueue = new std::queue<MoveableEntity*>();
         m_pStaticCameras = new Set();
         m_pDynamicCameras = new Set();
+        m_pWarpPoints = new Set();
         m_pDynamicCamerasQueue = new std::queue<DynamicCamera*>();
         m_pDestroyedEntities = new Set();
         m_itViewingCamera = m_pStaticCameras->begin();
-        m_itWarpCamera = m_pDynamicCameras->begin();
+        m_itWarpCamera = m_pWarpPoints->begin();
     }
 
     ~Scene();
@@ -148,6 +150,22 @@ public:
             m_itViewingCamera = m_pStaticCameras->find(temp);
         }
     }
+
+    void AddWarpPoint(int id)
+    {
+        if (m_bInit)
+        {
+            m_pWarpPoints->insert(id);
+            m_itWarpCamera = m_pStaticCameras->begin();
+        }
+        else
+        {
+            int temp = *m_itWarpCamera;
+            m_pWarpPoints->insert(id);
+            m_itWarpCamera = m_pWarpPoints->find(temp);
+        }
+    }
+
     StaticCamera* ViewingCamera() const
     {
         return (StaticCamera*)m_pEntities->at(*m_itViewingCamera);
@@ -176,9 +194,9 @@ public:
     DynamicCamera* NextWarpCamera()
     {
         m_itWarpCamera++;
-        if (m_itWarpCamera == m_pDynamicCameras->end())
+        if (m_itWarpCamera == m_pWarpPoints->end())
         {
-            m_itWarpCamera = m_pDynamicCameras->begin();
+            m_itWarpCamera = m_pWarpPoints->begin();
         }
 
         return WarpCamera();
