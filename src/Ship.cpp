@@ -132,6 +132,9 @@ bool Ship::HandleMsg(const Message& message)
         case Msg_ShipWarp:
             warpToCamera((DynamicCamera*) message.ExtraInfo);
             break;
+        case Msg_ToggleGravity:
+            gravityStatus = !gravityStatus;
+            break;
         default:
             hasMsg = false;
             break;

@@ -10,7 +10,8 @@ enum MessageTypes
     Msg_SpecialKeyPress,
     Msg_SpecialKeyRelease,
     Msg_CtrlMod_SpecialKeyRelease,
-    Msg_ShipWarp
+    Msg_ShipWarp,
+    Msg_ToggleGravity
 };
 
 #endif
