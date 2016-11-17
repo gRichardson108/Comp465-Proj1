@@ -1,4 +1,5 @@
 #include "Ship.hpp"
+#include "DynamicCamera.hpp"
 
 Ship::Ship(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target,
            const glm::vec3& up) : MoveableEntity(model, pos, scale, target, up)
@@ -37,7 +38,10 @@ void Ship::rotateRoll(float rotationRate)
 
 void Ship::SetHeading()
 {
-    m_vHeading = m_vForward * (thrust * currentMaxSpeed) + gravityVector();
+    m_vHeading = m_vForward * (thrust * currentMaxSpeed);
+    if (gravityStatus){
+        m_vHeading += gravityVector();
+    }
 }
 
 void Ship::Update()
@@ -113,15 +117,20 @@ bool Ship::HandleMsg(const Message& message)
                 case GLUT_KEY_UP:
                 case GLUT_KEY_DOWN:
                     pitchRotation = 0;
+                    thrust = 0;
                     break;
                 case GLUT_KEY_LEFT:
                 case GLUT_KEY_RIGHT:
                     rollRotation = 0;
+                    yawRotation = 0;
                     break;
             }
             break;
         case Msg_ShipSpeedChange:
             nextShipSpeed();
+            break;
+        case Msg_ShipWarp:
+            warpToCamera((DynamicCamera*) message.ExtraInfo);
             break;
         default:
             hasMsg = false;
@@ -149,6 +158,16 @@ void Ship::nextShipSpeed()
         break;
     }
     printf("speed setting: %f\n", currentMaxSpeed);
+}
+
+void Ship::warpToCamera(DynamicCamera* warpPoint)
+{
+    m_vPosition = warpPoint->getEye();
+    m_vForward = glm::normalize(warpPoint->getAt() - warpPoint->getEye());
+    m_vUp = warpPoint->getUp();
+    m_vLeft = glm::normalize(glm::cross(m_vUp, m_vForward));
+    SetHeading();
+    CreateRotationMatrix();
 }
 
 glm::vec3 Ship::gravityVector()

@@ -40,6 +40,8 @@ private:
     Set* m_pDynamicCameras; // Pointer to vector of dynamic cameras
     std::queue<DynamicCamera*>* m_pDynamicCamerasQueue; // Cameras to add to vector
     Set::iterator m_itViewingCamera; // Current camera iterator
+    Set::iterator m_itWarpCamera; // Current camera iterator
+
     Set* m_pDestroyedEntities; // Entities that are to be destroyed
 
     void Preprocess();
@@ -62,6 +64,7 @@ public:
         m_pDynamicCamerasQueue = new std::queue<DynamicCamera*>();
         m_pDestroyedEntities = new Set();
         m_itViewingCamera = m_pStaticCameras->begin();
+        m_itWarpCamera = m_pDynamicCameras->begin();
     }
 
     ~Scene();
@@ -168,6 +171,21 @@ public:
 
         m_itViewingCamera--;
         return ViewingCamera();
+    }
+
+    DynamicCamera* NextWarpCamera()
+    {
+        m_itWarpCamera++;
+        if (m_itWarpCamera == m_pDynamicCameras->end())
+        {
+            m_itWarpCamera = m_pDynamicCameras->begin();
+        }
+
+        return WarpCamera();
+    }
+    DynamicCamera* WarpCamera() const
+    {
+        return (DynamicCamera*)m_pEntities->at(*m_itWarpCamera);
     }
 
     void AddDynamicCamera(int id)

@@ -35,6 +35,8 @@ public:
 
     const float TURN_RATE = 0.02;//radians
     const float GRAVITY = 90000000.0;
+    bool gravityStatus = false;
+
     Ship(Model* model, const glm::vec3& pos = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f),
          const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -45,6 +47,7 @@ public:
     void rotateRoll(float rotationRate);
 
     void nextShipSpeed();
+    void warpToCamera(DynamicCamera* warpPoint);
 
     virtual const std::string GetType() const
     {

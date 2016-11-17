@@ -77,6 +77,7 @@ int shipID;
 // Constants for cameras
 glm::mat4 viewMatrix;  // Current view matrix
 StaticCamera* viewingCamera;  // Current camera
+DynamicCamera* warpCamera; //current camera to warp to
 
 // window title string
 char titleStr[160];
@@ -362,6 +363,7 @@ void keyboard(unsigned char key, int x, int y)
     case 'Q':
         exit(EXIT_SUCCESS);
         break;
+
     case 'a':
     case 'A':  // change animation timer
         if (idleTimerFlag) // switch to interval timer
@@ -375,21 +377,9 @@ void keyboard(unsigned char key, int x, int y)
             idleTimerFlag = true;
         }
         break;
-    case 'u':
-    case 'U':  // Toggle axes
-        showAxesFlag = !showAxesFlag;
-        break;
-    case 'v':
-    case 'V':  // Next camera
-        viewingCamera = scene->NextCamera();
-        viewMatrix = viewingCamera->ViewMatrix();
-        sprintf(viewStr, "  View %s", viewingCamera->Name());
-        break;
-    case 'x':
-    case 'X':  // Prev camera
-        viewingCamera = scene->PrevCamera();
-        viewMatrix = viewingCamera->ViewMatrix();
-        sprintf(viewStr, "  View %s", viewingCamera->Name());
+    case 's':
+    case 'S':
+        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipSpeedChange, NULL);
         break;
     case 't':
     case 'T':  // Change time quantum
@@ -410,9 +400,30 @@ void keyboard(unsigned char key, int x, int y)
             break;
         }
         break;
-    case 's':
-    case 'S':
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipSpeedChange, NULL);
+    case 'u':
+    case 'U':  // Toggle axes
+        showAxesFlag = !showAxesFlag;
+        break;
+    case 'w':
+    case 'W':
+        warpCamera = scene->NextWarpCamera();
+        if (StringICompare(warpCamera->Name(), "Ship")){//skip the ship's dynamic camera
+            warpCamera = scene->NextWarpCamera();
+        }
+        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipWarp, warpCamera);
+        printf("warping to camera at %s\n", warpCamera->Name());
+        break;
+    case 'v':
+    case 'V':  // Next camera
+        viewingCamera = scene->NextCamera();
+        viewMatrix = viewingCamera->ViewMatrix();
+        sprintf(viewStr, "  View %s", viewingCamera->Name());
+        break;
+    case 'x':
+    case 'X':  // Prev camera
+        viewingCamera = scene->PrevCamera();
+        viewMatrix = viewingCamera->ViewMatrix();
+        sprintf(viewStr, "  View %s", viewingCamera->Name());
         break;
     }
 
@@ -425,45 +436,9 @@ void specialKeys(int key, int x, int y)
     switch (modifiers)
     {
     case GLUT_ACTIVE_CTRL:
-//        switch (key)
-//        {
-//
-//        case GLUT_KEY_UP:
-//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipPitchDown, NULL);
-//            break;
-//        case GLUT_KEY_DOWN:
-//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipPitchUp, NULL);
-//            break;
-//        case GLUT_KEY_LEFT:
-//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipRollLeft, NULL);
-//            break;
-//        case GLUT_KEY_RIGHT:
-//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipRollRight, NULL);
-//            break;
-//        }
         MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_CtrlMod_SpecialKeyPress, &key);
         break;
     default:
-//        switch (key)
-//        {
-//        case GLUT_KEY_UP:
-//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressUpArrow, NULL);
-//            break;
-//        case GLUT_KEY_DOWN:
-//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressDownArrow, NULL);
-//            break;
-//        case GLUT_KEY_LEFT:
-//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressLeftArrow, NULL);
-//            break;
-//        case GLUT_KEY_RIGHT:
-//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressRightArrow, NULL);
-//            break;
-//        case GLUT_KEY_F1:
-//            //showVec3("Ship Position", ship->Position());
-//            MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeypressF1, NULL);
-//            break;
-//
-//        }
         MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_SpecialKeyPress, &key);
         break;
     }
@@ -472,22 +447,6 @@ void specialKeys(int key, int x, int y)
 
 void specialUpFunc(int key, int x, int y)
 {
-//    switch (key)
-//    {
-//    case GLUT_KEY_UP:
-//        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseUpArrow, NULL);
-//        break;
-//    case GLUT_KEY_DOWN:
-//        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseDownArrow, NULL);
-//        break;
-//    case GLUT_KEY_LEFT:
-//        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseLeftArrow, NULL);
-//        break;
-//    case GLUT_KEY_RIGHT:
-//        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_KeyreleaseRightArrow, NULL);
-//        break;
-//
-//    }
     int modifiers = glutGetModifiers();
     switch (modifiers)
     {

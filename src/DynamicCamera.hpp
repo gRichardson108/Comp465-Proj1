@@ -42,7 +42,6 @@ public :
                   float nearClip = 1.0f, float farClip = 10000000.0f);
 
     ~DynamicCamera() {}
-
     virtual const std::string GetType() const
     {
         return "DynamicCamera";
@@ -62,6 +61,18 @@ public :
     void SetHeadingOffset(float offset)
     {
         m_fHeadingOffset = offset;
+    }
+
+    glm::vec3 getEye(){
+        return glm::vec3(m_vEye);
+    }
+
+    glm::vec3 getAt(){
+        return glm::vec3(m_vAt);
+    }
+
+    glm::vec3 getUp(){
+        return glm::vec3(m_vUp);
     }
 };
 
