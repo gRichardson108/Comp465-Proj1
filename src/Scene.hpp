@@ -32,7 +32,7 @@ private:
     bool m_bInit;
     static Scene* s_pInstance;
     std::map<std::string, Model*>* m_pModels; // Pointer to map of models
-    EntityMap* m_pEntities;
+    EntityMap* m_pEntities; // Hash map of all scene entities
     Set* m_pStaticEntities; // Pointer to set of static entity IDs
     Set* m_pMoveableEntities; // Pointer to set of moveable entity IDs
     std::queue<MoveableEntity*>* m_pMoveableEntitesQueue; // Moveables to add to vector
@@ -42,7 +42,6 @@ private:
     std::queue<DynamicCamera*>* m_pDynamicCamerasQueue; // Cameras to add to vector
     Set::iterator m_itViewingCamera; // Current camera iterator
     Set::iterator m_itWarpCamera; // Current camera iterator
-
     Set* m_pDestroyedEntities; // Entities that are to be destroyed
 
     void Preprocess();

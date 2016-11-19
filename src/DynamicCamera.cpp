@@ -43,17 +43,17 @@ bool DynamicCamera::HandleMsg(const Message& message)
 
     switch (message.Msg)
     {
-    case Msg_DestroySource:
-        hasMsg = true;
-        if (m_pParent != NULL && message.Sender == m_pParent->ID())
-        {
-            m_pParent = NULL;
-            Scene::Instance()->DestroyEntity(m_iID);
-        }
-        break;
+		case Msg_DestroySource:
+			hasMsg = true;
+			if (m_pParent != NULL && message.Sender == m_pParent->ID())
+			{
+				m_pParent = NULL;
+				Scene::Instance()->DestroyEntity(m_iID);
+			}
+			break;
 
-    default:
-        break;
+		default:
+			break;
     }
 
     return hasMsg;

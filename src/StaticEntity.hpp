@@ -2,7 +2,7 @@
 Kory Dondzila
 Garret Richardson
 
-BaseEntity.hpp
+StaticEntity.hpp
 10/08/2016
 
 Static entity class, used for displaying static objects in the scene.

@@ -1,3 +1,14 @@
+/*
+Kory Dondzila
+Garret Richardson
+
+MissileBattery.hpp
+11/18/2016
+
+Missile battery attaches to an object and shoots missiles
+
+*/
+
 #ifndef MISSILE_BATTERY_H
 #define MISSILE_BATTERY_H
 

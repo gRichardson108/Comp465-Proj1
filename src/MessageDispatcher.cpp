@@ -1,7 +1,6 @@
 #include "MessageDispatcher.hpp"
 #include "BaseEntity.hpp"
 #include "Scene.hpp"
-//#include "MessageTypes.hpp"
 
 using std::set;
 
@@ -22,7 +21,6 @@ void MessageDispatcher::Discharge(BaseEntity* pReceiver,
 {
 	if (!pReceiver->HandleMsg(message))
 	{
-		//telegram could not be handled
 		printf("Message not handled\n");
 	}
 }
@@ -39,14 +37,12 @@ void MessageDispatcher::DispatchMsg(double  delay,
 	int    msg,
 	void*  ExtraInfo)
 {
-	//get pointers to the sender and receiver
-	BaseEntity* pSender = Scene::Instance()->GetEntityFromID(sender);
-
+	// Negative receiver, send to all entities
 	if (receiver < 0)
 	{
 		for (auto entity : *Scene::Instance()->Entities())
 		{
-			if (pSender != entity.second)
+			if (sender != entity.second->ID())
 			{
                 DispatchMsg(delay, sender, entity.second->ID(), msg, ExtraInfo);
 			}
@@ -82,7 +78,6 @@ void MessageDispatcher::DispatchMsg(double  delay,
 		}
 	}
 }
-
 
 //---------------------- DispatchDelayedMsgs -------------------------
 //

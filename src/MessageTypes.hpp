@@ -1,6 +1,7 @@
 #ifndef MESSAGE_TYPES_H
 #define MESSAGE_TYPES_H
 
+// Defines message types, used in message handlers
 enum MessageTypes
 {
     Msg_DestroySource,

@@ -22,7 +22,7 @@ private:
     const int m_iTotalLifeTime = 2000; // Total amount of life each missile has
     int m_iLifeTime; // Number of updates the missile has to live
     bool m_bLive; // Is missile live?
-    bool m_bDestroyed;
+    bool m_bDestroyed; // Has been destroyed?
     MoveableEntity* m_pCurrentTarget; // Current tracked target
     std::vector<MoveableEntity*>* m_pTargets; // Targets that can be tracked (passed in from what is firing)
     float m_fVelocity; // Velocity of the missile

@@ -8,6 +8,7 @@ Scene* Scene::s_pInstance = NULL;
 
 Scene::~Scene()
 {
+	// Clear and delete sets
     m_pStaticEntities->clear();
     delete m_pStaticEntities;
     m_pMoveableEntities->clear();
@@ -19,6 +20,7 @@ Scene::~Scene()
     m_pDestroyedEntities->clear();
     delete m_pDestroyedEntities;
 
+	// Remove anything from queues and delete
     while (!m_pDynamicCamerasQueue->empty())
     {
         delete m_pDynamicCamerasQueue->front();
@@ -33,6 +35,7 @@ Scene::~Scene()
     }
     delete m_pMoveableEntitesQueue;
 
+	// Delete all entities and map
     for (auto i : *m_pEntities)
     {
         delete i.second;
@@ -40,6 +43,7 @@ Scene::~Scene()
     m_pEntities->clear();
     delete m_pEntities;
 
+	// Delete all models
     for (auto i : *m_pModels)
     {
         delete i.second;
@@ -55,6 +59,8 @@ void Scene::AddEntity(BaseEntity* entity)
 
 void Scene::AddToMoveableQueue(MoveableEntity* entity)
 {
+	// Add to queue if not in init otherwise
+	// add directly to set and map
     if (!m_bInit)
     {
         m_pMoveableEntitesQueue->push(entity);
@@ -68,6 +74,8 @@ void Scene::AddToMoveableQueue(MoveableEntity* entity)
 
 void Scene::AddToDynamicQueue(DynamicCamera* entity)
 {
+	// Add to queue if not in init otherwise
+	// add directly to set and map
     if (!m_bInit)
     {
         m_pDynamicCamerasQueue->push(entity);
@@ -87,7 +95,7 @@ void Scene::Update()
 {
     Preprocess();
 
-    // Update entities
+    // Update moveable entities
     for (int id : *m_pMoveableEntities)
     {
         if (m_pDestroyedEntities->find(id) == m_pDestroyedEntities->end())
@@ -96,7 +104,7 @@ void Scene::Update()
         }
     }
 
-    // Update cameras
+    // Update dynamic cameras
     for (int id : *m_pDynamicCameras)
     {
         if (m_pDestroyedEntities->find(id) == m_pDestroyedEntities->end())
@@ -131,6 +139,7 @@ void Scene::Preprocess()
         m_pDestroyedEntities->clear();
     }
 
+	// Empty queues into sets and map
     while (!m_pMoveableEntitesQueue->empty())
     {
         MoveableEntity* entity = m_pMoveableEntitesQueue->front();

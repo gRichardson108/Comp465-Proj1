@@ -2,9 +2,9 @@
 #define MESSAGE_H
 //------------------------------------------------------------------------
 //
-//  Name:   Telegram.h
+//  Name:   Message.hpp
 //
-//  Desc:   This defines a telegram. A telegram is a data structure that
+//  Desc:   This defines a message. A message is a data structure that
 //          records information required to dispatch messages. Messages
 //          are used by game agents to communicate with each other.
 //

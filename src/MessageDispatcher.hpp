@@ -2,9 +2,9 @@
 #define MESSAGE_DISPATCHER_H
 //------------------------------------------------------------------------
 //
-//  Name:   MessageDispatcher.h
+//  Name:   MessageDispatcher.hpp
 //
-//  Desc:   A message dispatcher. Manages messages of the type Telegram.
+//  Desc:   A message dispatcher. Manages messages of the type Message.
 //          Instantiated as a singleton.
 //
 //  Author: Mat Buckland 2002 (fup@ai-junkie.com)

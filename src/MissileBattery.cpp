@@ -25,6 +25,7 @@ bool MissileBattery::HandleMsg(const Message& message)
 
 	switch (message.Msg)
 	{
+		// Remove reference to the sender
 		case Msg_DestroySource :
 			hasMsg = true;
 			if (m_pActiveMissile && message.Sender == m_pActiveMissile->ID())
@@ -33,6 +34,7 @@ bool MissileBattery::HandleMsg(const Message& message)
 			}
 			else if (m_pParent && message.Sender == m_pParent->ID())
 			{
+				// Since parent is destroyed so is this
 				m_pParent = NULL;
 				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
 				m_pActiveMissile = NULL;
@@ -55,6 +57,7 @@ bool MissileBattery::HandleMsg(const Message& message)
 			}
 			break;
 
+		// Destroy self
 		case Msg_TargetDestroyed:
 			hasMsg = true;
 			m_pActiveMissile = NULL;
@@ -116,7 +119,7 @@ void MissileBattery::Update()
 
 void MissileBattery::FireMissile()
 {
-	m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(100.0f), 
+	m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(25.0f), 
 		m_vPosition + m_vForward);
 	m_pActiveMissile->SetTargets(m_pTargets);
 	m_iNumMissiles--;
