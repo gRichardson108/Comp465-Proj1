@@ -14,6 +14,7 @@ can have missiles to shoot. Can be affected by gravity.
 #define SHIP_H
 
 #include "MoveableEntity.hpp"
+#include "Missile.hpp"
 
 class Ship : public MoveableEntity
 {
@@ -22,6 +23,10 @@ private:
     int yawRotation = 0;
     int rollRotation = 0;
     int thrust = 0;
+    int m_iNumMissiles = 9; // Number of remaining missiles
+	std::vector<MoveableEntity*>* m_pTargets  = new std::vector<MoveableEntity*>(); // Vector of possible targets
+	Missile* m_pActiveMissile;
+
 public:
     enum shipSpeedSettings
     {
@@ -59,6 +64,8 @@ public:
     glm::vec3 gravityVector();
 
     void Update();
+
+    void fireMissile();
 };
 
 #endif

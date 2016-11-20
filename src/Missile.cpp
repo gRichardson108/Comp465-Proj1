@@ -1,8 +1,8 @@
 #include "Missile.hpp"
 #include "DynamicCamera.hpp"
 
-Missile::Missile(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target, 
-	const glm::vec3& up, float velocity) : 
+Missile::Missile(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target,
+	const glm::vec3& up, float velocity) :
 	MoveableEntity(model, pos, scale, target, up),
 	m_iLifeTime(m_iTotalLifeTime),
 	m_bDestroyed(false),
@@ -145,7 +145,7 @@ void Missile::MissileGuidance()
 		{
 			tempUp = glm::normalize(tempUp);
 		}
-		
+
 		if (dot <= -0.99999f) // Facing opposite the direction target is in
 		{
 			// Turn in any direction
@@ -181,7 +181,7 @@ void Missile::MissileGuidance()
 			{
 				tempForward = glm::normalize(tempForward);
 			}
-			
+
 			if (dot <= -0.99999f) // Possible bad axis
 			{
 				tempForward = glm::normalize(glm::vec3(rand(), rand(), rand()));
@@ -254,6 +254,7 @@ void Missile::CheckCollisions()
 			// If destructable type, then destroy
 			if ("Ship" == type || "Missile" == type || "MissileBattery" == type)
 			{
+                printf("Missile strikes object of type %s\n", type);
 				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, obj->ID(), Msg_TargetDestroyed, NULL);
 			}
 

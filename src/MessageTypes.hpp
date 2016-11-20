@@ -12,7 +12,8 @@ enum MessageTypes
     Msg_SpecialKeyRelease,
     Msg_CtrlMod_SpecialKeyRelease,
     Msg_ShipWarp,
-    Msg_ToggleGravity
+    Msg_ToggleGravity,
+    Msg_ShipFireMissile
 };
 
 #endif

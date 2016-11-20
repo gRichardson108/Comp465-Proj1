@@ -119,7 +119,7 @@ void MissileBattery::Update()
 
 void MissileBattery::FireMissile()
 {
-	m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(25.0f), 
+	m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(25.0f),
 		m_vPosition + m_vForward);
 	m_pActiveMissile->SetTargets(m_pTargets);
 	m_iNumMissiles--;

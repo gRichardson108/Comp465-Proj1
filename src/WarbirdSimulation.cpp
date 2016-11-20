@@ -377,6 +377,10 @@ void keyboard(unsigned char key, int x, int y)
             idleTimerFlag = true;
         }
         break;
+    case 'f':
+    case 'F':
+        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipFireMissile, NULL);
+        break;
     case 'g':
     case 'G':
         MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ToggleGravity, NULL);

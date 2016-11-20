@@ -135,6 +135,38 @@ bool Ship::HandleMsg(const Message& message)
         case Msg_ToggleGravity:
             gravityStatus = !gravityStatus;
             break;
+        case Msg_ShipFireMissile:
+            fireMissile();
+            break;
+        case Msg_DestroySource:
+			if (m_pActiveMissile && message.Sender == m_pActiveMissile->ID())
+			{
+				m_pActiveMissile = NULL;
+			}
+			else
+			{
+				if (m_pTargets->size() > 0)
+				{
+					for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+					{
+						if (message.Sender == (*it)->ID())
+						{
+							m_pTargets->erase(it);
+							break;
+						}
+					}
+				}
+			}
+            break;
+        case Msg_TargetDestroyed:
+			m_pActiveMissile = NULL;
+            printf("Ship hit by missile! Failing mission.\n");
+
+//			m_pTargets->clear();
+//			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+//			Scene::Instance()->DestroyEntity(m_iID);
+			break;
+
         default:
             hasMsg = false;
             break;
@@ -178,4 +210,22 @@ glm::vec3 Ship::gravityVector()
     float distance = glm::length(m_vPosition);
     glm::vec3 gravityVec = glm::normalize(m_vPosition * -1.0f) * (GRAVITY / (distance * distance));
     return gravityVec;
+}
+
+void Ship::fireMissile()
+{
+    if (!m_pActiveMissile)
+    {
+        if (m_iNumMissiles > 0)
+        {
+            m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(25.0f),
+                m_vPosition + m_vForward);
+            m_iNumMissiles--;
+            printf("%d Missiles remaining!\n", m_iNumMissiles);
+        } else {
+            printf("No more missiles for ship to fire!\n");
+        }
+    } else {
+        printf("Must wait for current missile to detonate!\n");
+    }
 }
