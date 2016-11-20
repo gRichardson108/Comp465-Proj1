@@ -207,7 +207,7 @@ void update(int value)
         auto e = (Ship*)scene->GetEntityFromID(5);
         if (e)
         {
-            //sprintf(shipCountStr, " Warbird %d", e->NumMissiles());
+            sprintf(shipCountStr, " Warbird %d", e->NumMissiles());
         }
         else
         {

@@ -1,5 +1,7 @@
 #include "Ship.hpp"
 #include "DynamicCamera.hpp"
+#include "MissileBattery.hpp"
+#include "Scene.hpp"
 
 Ship::Ship(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target,
            const glm::vec3& up) : MoveableEntity(model, pos, scale, target, up)
@@ -142,6 +144,10 @@ bool Ship::HandleMsg(const Message& message)
 			if (m_pActiveMissile && message.Sender == m_pActiveMissile->ID())
 			{
 				m_pActiveMissile = NULL;
+				Scene* scene = Scene::Instance();
+				if (m_iNumMissiles <= 0 && (MissileBattery*)scene->GetEntityFromID(6) && (MissileBattery*)scene->GetEntityFromID(7)){
+                    FailMission();
+				}
 			}
 			else
 			{
@@ -159,12 +165,8 @@ bool Ship::HandleMsg(const Message& message)
 			}
             break;
         case Msg_TargetDestroyed:
-			m_pActiveMissile = NULL;
             printf("Ship hit by missile! Failing mission.\n");
-
-			m_pTargets->clear();
-			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
-			Scene::Instance()->DestroyEntity(m_iID);
+            FailMission();
 			break;
 
         default:
@@ -246,5 +248,16 @@ void Ship::RemoveTarget(MoveableEntity* target)
             break;
         }
     }
+}
+
+void Ship::FailMission(){
+        m_pActiveMissile = NULL;
+        m_pTargets->clear();
+        MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+        Scene::Instance()->DestroyEntity(m_iID);
+}
+
+int Ship::NumMissiles(){
+    return m_iNumMissiles;
 }
 

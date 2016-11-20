@@ -71,6 +71,10 @@ public:
 
 	void RemoveTarget(MoveableEntity* target);
 
+	void FailMission();
+
+	int NumMissiles();
+
 };
 
 #endif
