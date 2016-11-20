@@ -162,9 +162,9 @@ bool Ship::HandleMsg(const Message& message)
 			m_pActiveMissile = NULL;
             printf("Ship hit by missile! Failing mission.\n");
 
-//			m_pTargets->clear();
-//			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
-//			Scene::Instance()->DestroyEntity(m_iID);
+			m_pTargets->clear();
+			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+			Scene::Instance()->DestroyEntity(m_iID);
 			break;
 
         default:
