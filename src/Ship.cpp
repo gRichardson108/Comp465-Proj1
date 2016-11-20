@@ -17,7 +17,7 @@ void Ship::rotateYaw(float rotationRate)
     m_vForward = glm::normalize(rot * m_vForward);
     m_vLeft = glm::normalize(rot * m_vLeft);
 	CreateRotationMatrix();
-    SetHeading();
+//    SetHeading();
 }
 
 void Ship::rotatePitch(float rotationRate)
@@ -26,7 +26,7 @@ void Ship::rotatePitch(float rotationRate)
     m_vForward = glm::normalize(rot * m_vForward);
     m_vUp = glm::normalize(rot * m_vUp);
 	CreateRotationMatrix();
-    SetHeading();
+//    SetHeading();
 }
 
 void Ship::rotateRoll(float rotationRate)
@@ -35,7 +35,7 @@ void Ship::rotateRoll(float rotationRate)
     m_vLeft= glm::normalize(rot * m_vLeft);
     m_vUp = glm::normalize(rot * m_vUp);
     CreateRotationMatrix();
-    SetHeading();
+//    SetHeading();
 }
 
 void Ship::SetHeading()
@@ -50,7 +50,6 @@ void Ship::Update()
 {
     //thrust variable allows speed changes while thrusting to take effect without releasing the arrow key
     SetHeading();
-    m_vPosition = m_vPosition + m_vHeading;
     if (pitchRotation != 0)
     {
         rotatePitch(TURN_RATE * pitchRotation);
@@ -63,6 +62,7 @@ void Ship::Update()
     {
         rotateRoll(TURN_RATE * rollRotation);
     }
+    m_vPosition = m_vPosition + m_vHeading;
     CreateObjectMatrix();
 }
 
