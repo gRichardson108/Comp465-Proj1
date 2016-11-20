@@ -64,6 +64,8 @@ void Ship::Update()
     }
     m_vPosition = m_vPosition + m_vHeading;
     CreateObjectMatrix();
+
+    CheckCollisions();
 }
 
 bool Ship::HandleMsg(const Message& message)
@@ -261,3 +263,26 @@ int Ship::NumMissiles(){
     return m_iNumMissiles;
 }
 
+void Ship::CheckCollisions()
+{
+    for (int id : *Scene::Instance()->CollidableObjects())
+	{
+        // Skip self
+		if (m_iID == id) continue;
+
+        MoveableEntity* obj = (MoveableEntity*)Scene::Instance()->GetEntityFromID(id);
+        std::string type = obj->GetType();
+
+        if ("CelestialBody" != type)
+        {
+            continue;
+        }
+
+        // Object hit?
+		float distance = glm::distance(m_vPosition, obj->Position());
+		if (distance <= m_fBoundingRadius + 10 + obj->BoundingRadius())
+		{
+            FailMission();
+		}
+	}
+}

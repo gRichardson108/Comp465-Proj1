@@ -75,6 +75,9 @@ public:
 
 	int NumMissiles();
 
+	//Check collisions with celestial bodies
+	void CheckCollisions();
+
 };
 
 #endif
