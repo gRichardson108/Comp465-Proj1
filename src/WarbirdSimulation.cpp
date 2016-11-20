@@ -316,19 +316,21 @@ void init()
     printf("\tWarbird drawn\n");
     pos = glm::vec3(5000.0f, 1000.0f, 5000.0f);
     target = glm::vec3(0.0f, 0.0f, -1.0f);
-    new Ship(scene->GetModel("Warbird"), pos, glm::vec3(100.0f), pos + target);
+    Ship* s = new Ship(scene->GetModel("Warbird"), pos, glm::vec3(100.0f), pos + target);
 
     pos = glm::vec3(0.0f, 0.0f, -((StaticEntity*)scene->GetEntityFromID(1))->BoundingRadius());
     MissileBattery* m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntityFromID(1),
                                            pos, glm::vec3(30.0f), pos + target);
     m->SetTargets("Ship");
     sprintf(unumCountStr, " Unum %d", m->NumMissiles());
+    s->AddTarget(m);
 
     pos = glm::vec3(0.0f, 0.0f, -((StaticEntity*)scene->GetEntityFromID(4))->BoundingRadius());
     m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntityFromID(4),
                            pos, glm::vec3(30.0f), pos + target);
     m->SetTargets("Ship");
     sprintf(secundusCountStr, " Secundus %d", m->NumMissiles());
+    s->AddTarget(m);
 
     // Create cameras
     new StaticCamera("Front", glm::vec3(0.0f, 10000.0f, 20000.0f), glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));

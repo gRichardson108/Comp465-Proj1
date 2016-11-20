@@ -219,7 +219,8 @@ void Ship::fireMissile()
         if (m_iNumMissiles > 0)
         {
             m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(25.0f),
-                m_vPosition + m_vForward);
+                m_vPosition + m_vForward, m_vUp, 20.0f);
+            m_pActiveMissile->SetTargets(m_pTargets);
             m_iNumMissiles--;
             printf("%d Missiles remaining!\n", m_iNumMissiles);
         } else {
@@ -229,3 +230,21 @@ void Ship::fireMissile()
         printf("Must wait for current missile to detonate!\n");
     }
 }
+
+void Ship::AddTarget(MoveableEntity* target)
+{
+    m_pTargets->push_back(target);
+}
+
+void Ship::RemoveTarget(MoveableEntity* target)
+{
+    for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+    {
+        if (target == *it)
+        {
+            m_pTargets->erase(it);
+            break;
+        }
+    }
+}
+

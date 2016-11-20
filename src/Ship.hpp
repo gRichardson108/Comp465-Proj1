@@ -66,6 +66,11 @@ public:
     void Update();
 
     void fireMissile();
+
+    void AddTarget(MoveableEntity* target);
+
+	void RemoveTarget(MoveableEntity* target);
+
 };
 
 #endif
