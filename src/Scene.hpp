@@ -155,7 +155,8 @@ public:
         if (m_bInit)
         {
             m_pWarpPoints->insert(id);
-            m_itWarpCamera = m_pStaticCameras->begin();
+            m_itWarpCamera = m_pWarpPoints->end();
+			m_itWarpCamera--;
         }
         else
         {

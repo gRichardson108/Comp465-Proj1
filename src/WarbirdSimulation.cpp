@@ -365,6 +365,10 @@ void init()
     new DynamicCamera("Unum", (MoveableEntity*)scene->GetEntityFromID(1), true, 8000.0f, true);
     new DynamicCamera("Duo", (MoveableEntity*)scene->GetEntityFromID(2), true, 8000.0f, true);
 
+	// Adds warp points for ship
+	scene->AddWarpPoint(11);
+	scene->AddWarpPoint(12);
+
     // Initialize display info
     lastTime = glutGet(GLUT_ELAPSED_TIME);
     ulastTime = lastTime;
