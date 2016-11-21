@@ -1,26 +1,37 @@
 #include "StaticCamera.hpp"
 
-StaticCamera::StaticCamera(char* name, glm::mat4 cameraMatrix, float FOVY, float nearClip, float farClip) :
-	m_mViewMatrix(cameraMatrix), m_fFOVY(FOVY), m_fNearClip(nearClip), m_fFarClip(farClip)
-{
-	size_t size = strlen(name) + 1;
-	m_cName = new char[size];
-	strncpy(m_cName, name, size);
-}
-
 StaticCamera::StaticCamera(char* name, glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY, float nearClip,
-	float farClip) : StaticCamera(name, glm::lookAt(eye, at, up), FOVY, nearClip, farClip)
+                           float farClip) :
+    BaseEntity(),
+    m_fFOVY(FOVY),
+    m_fNearClip(nearClip),
+    m_fFarClip(farClip)
 {
-	m_vEye = eye;
-	m_vAt = at;
-	m_vUp = up;
+    size_t size = strlen(name) + 1;
+    m_cName = new char[size];
+    strncpy(m_cName, name, size);
+
+    m_mViewMatrix = glm::lookAt(eye, at, up);
+
+    m_vEye = eye;
+    m_vAt = at;
+    m_vUp = up;
+
+    UpdateProjectionMatrix(m_iViewportWidth, m_iViewportHeight);
+
+    Scene::Instance()->AddStaticCamera(m_iID);
 }
 
-glm::mat4 StaticCamera::updateProjectionMatrix(int width, int height)
+bool StaticCamera::HandleMsg(const Message& message)
 {
-	m_iViewportWidth = width;
-	m_iViewportHeight = height;
+    return false;
+}
+
+glm::mat4 StaticCamera::UpdateProjectionMatrix(int width, int height)
+{
+    m_iViewportWidth = width;
+    m_iViewportHeight = height;
     float aspectRatio = (float)m_iViewportWidth / (float)m_iViewportHeight;
-    m_mProjectionMatrix = glm::perspective(m_fFOVY, aspectRatio, m_fNearClip, m_fFarClip); 
+    m_mProjectionMatrix = glm::perspective(m_fFOVY, aspectRatio, m_fNearClip, m_fFarClip);
     return m_mProjectionMatrix;
 }

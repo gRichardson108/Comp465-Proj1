@@ -22,11 +22,11 @@ CelestialBody::CelestialBody(Model* model, CelestialBody* parent, const glm::vec
 	{
 		m_vParentOldPosition = m_pParent->Position();
 		m_vPosition += m_vParentOldPosition;
-		m_fOrbitDistance = (m_vPosition - m_vParentOldPosition).length();
+		m_fOrbitDistance = glm::length(m_vPosition - m_vParentOldPosition);
 	}
 	else
 	{
-		m_fOrbitDistance = m_vPosition.length();
+		m_fOrbitDistance = glm::length(m_vPosition);
 	}
 
 	CreateObjectMatrix();
@@ -35,6 +35,11 @@ CelestialBody::CelestialBody(Model* model, CelestialBody* parent, const glm::vec
 	// multiplied by 40 because that's timeDelay
 	m_mAxisRotation = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (m_fRotationRate * 1000.0f), m_vUp));
 	m_mOrbit = glm::mat3(glm::rotate(glm::mat4(), 5 * glm::two_pi<float>() / (m_fOrbitRate * 1000.0f), m_vOrbitAxis));
+}
+
+bool CelestialBody::HandleMsg(const Message& message)
+{
+	return false;
 }
 
 void CelestialBody::SetPosition(const glm::vec3& position)
@@ -56,11 +61,11 @@ void CelestialBody::SetPosition(const glm::vec3& position)
 	{
 		m_vParentOldPosition = m_pParent->Position();
 		m_vPosition += m_vParentOldPosition;
-		m_fOrbitDistance = (m_vPosition - m_vParentOldPosition).length();
+		m_fOrbitDistance = glm::length(m_vPosition - m_vParentOldPosition);
 	}
 	else
 	{
-		m_fOrbitDistance = m_vPosition.length();
+		m_fOrbitDistance = glm::length(m_vPosition);
 	}
 
 	CreateObjectMatrix();
@@ -75,7 +80,7 @@ void CelestialBody::Update()
 		m_vLeft = glm::normalize(m_mAxisRotation * m_vLeft);
 	}
 
-	RotateToForward();
+	CreateRotationMatrix();
 
 	// Old position is due to the parent being
 	// updated before child, need to at least remember this

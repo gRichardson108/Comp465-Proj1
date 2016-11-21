@@ -13,58 +13,208 @@ update delay, entities.
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "MoveableEntity.hpp"
+#include "../includes465/include465.hpp"
+
+class Model;
+class BaseEntity;
+class StaticEntity;
+class MoveableEntity;
+class StaticCamera;
+class DynamicCamera;
+
+typedef std::map<int, BaseEntity*> EntityMap;
+typedef std::set<int> Set;
 
 class Scene
 {
 private:
-	int m_iTimerDelay; // Delay in miliseconds
-	static Scene* s_pInstance; // Singleton
-	BaseEntity** m_pEntities; // Pointer array of scene entities
-	MoveableEntity** m_pMoveableEntities; // Pointer array of moveable scene entities
-	int m_iNumEntities; // Number of entities
-	int m_iNumMoveableEntities; // Number of moveable entities
+    int m_iTimerDelay; // Delay in miliseconds
+    bool m_bInit;
+    static Scene* s_pInstance;
+    std::map<std::string, Model*>* m_pModels; // Pointer to map of models
+    EntityMap* m_pEntities; // Hash map of all scene entities
+    Set* m_pStaticEntities; // Pointer to set of static entity IDs
+    Set* m_pMoveableEntities; // Pointer to set of moveable entity IDs
+    std::queue<MoveableEntity*>* m_pMoveableEntitesQueue; // Moveables to add to vector
+    Set* m_pStaticCameras; // Pointer to vector of static cameras
+    Set* m_pDynamicCameras; // Pointer to vector of dynamic cameras
+    Set* m_pWarpPoints; // Pointer to vector of dynamic cameras that function as warp points
+    std::queue<DynamicCamera*>* m_pDynamicCamerasQueue; // Cameras to add to vector
+    Set::iterator m_itViewingCamera; // Current camera iterator
+    Set::iterator m_itWarpCamera; // Current camera iterator
+    Set* m_pDestroyedEntities; // Entities that are to be destroyed
+
+    void Preprocess();
+
+    Scene(const Scene&) = delete;
+    Scene& operator=(const Scene&) = delete;
 
 public:
-	Scene(int delay = 5) :
-		m_iTimerDelay(delay)
-	{
-		s_pInstance = this;
-		m_pEntities = NULL;
-		m_pMoveableEntities = NULL;
-		m_iNumEntities = 0;
-		m_iNumMoveableEntities = 0;
-	}
+    Scene()
+    {
+        m_iTimerDelay = 5;
+        m_bInit = true;
+        m_pModels = new std::map<std::string, Model*>();
+        m_pEntities = new EntityMap();
+        m_pStaticEntities = new Set();
+        m_pMoveableEntities = new Set();
+        m_pMoveableEntitesQueue = new std::queue<MoveableEntity*>();
+        m_pStaticCameras = new Set();
+        m_pDynamicCameras = new Set();
+        m_pWarpPoints = new Set();
+        m_pDynamicCamerasQueue = new std::queue<DynamicCamera*>();
+        m_pDestroyedEntities = new Set();
+        m_itViewingCamera = m_pStaticCameras->begin();
+        m_itWarpCamera = m_pWarpPoints->begin();
+    }
 
-	~Scene()
-	{
-		delete* m_pEntities;
-		delete* m_pMoveableEntities;
-	}
+    ~Scene();
 
-	static Scene* Instance()
-	{
-		if (!s_pInstance)
-			s_pInstance = new Scene;
-		return s_pInstance;
-	}
+    static Scene* Instance()
+    {
+        if (!s_pInstance)
+        {
+            s_pInstance = new Scene();
+        }
+        return s_pInstance;
+    }
 
-	int TimerDelay() { return m_iTimerDelay; }
-	void SetTimerDelay(int delay) { m_iTimerDelay = delay; }
-	
-	BaseEntity** Entities() { return m_pEntities; }
-	void SetEntities(BaseEntity* entities[], int num)
-	{
-		m_iNumEntities = num;
-		m_pEntities = entities;
-	}
+    void Update();
 
-	MoveableEntity** MoveableEntities() { return m_pMoveableEntities; }
-	void SetMoveables(MoveableEntity* entities[], int num)
-	{
-		m_iNumMoveableEntities = num;
-		m_pMoveableEntities = entities;
-	}
+    int TimerDelay()
+    {
+        return m_iTimerDelay;
+    }
+    void SetTimerDelay(int delay)
+    {
+        m_iTimerDelay = delay;
+    }
+    void InitDone()
+    {
+        m_bInit = false;
+    }
+
+    Model* GetModel(const std::string& name) const
+    {
+        return m_pModels->at(name);
+    }
+    void AddModel(Model* model);
+
+    EntityMap* Entities() const
+    {
+        return m_pEntities;
+    }
+    BaseEntity* GetEntityFromID(int id) const
+    {
+        auto e = m_pEntities->find(id);
+        if (e != m_pEntities->end())
+        {
+            return e->second;
+        }
+
+        return NULL;
+    }
+    void AddEntity(BaseEntity* entity);
+
+    Set* DrawableObjects()
+    {
+        return m_pStaticEntities;
+    }
+    void AddStaticEntity(int id)
+    {
+        m_pStaticEntities->insert(id);
+    }
+
+    Set* CollidableObjects()
+    {
+        return m_pMoveableEntities;
+    }
+    void AddMoveableEntity(int id)
+    {
+        m_pMoveableEntities->insert(id);
+    }
+    void AddToMoveableQueue(MoveableEntity* entity);
+
+    void AddStaticCamera(int id)
+    {
+        if (m_bInit)
+        {
+            m_pStaticCameras->insert(id);
+            m_itViewingCamera = m_pStaticCameras->begin();
+        }
+        else
+        {
+            int temp = *m_itViewingCamera;
+            m_pStaticCameras->insert(id);
+            m_itViewingCamera = m_pStaticCameras->find(temp);
+        }
+    }
+
+    void AddWarpPoint(int id)
+    {
+        if (m_bInit)
+        {
+            m_pWarpPoints->insert(id);
+            m_itWarpCamera = m_pStaticCameras->begin();
+        }
+        else
+        {
+            int temp = *m_itWarpCamera;
+            m_pWarpPoints->insert(id);
+            m_itWarpCamera = m_pWarpPoints->find(temp);
+        }
+    }
+
+    StaticCamera* ViewingCamera() const
+    {
+        return (StaticCamera*)m_pEntities->at(*m_itViewingCamera);
+    }
+    StaticCamera* NextCamera()
+    {
+        m_itViewingCamera++;
+        if (m_itViewingCamera == m_pStaticCameras->end())
+        {
+            m_itViewingCamera = m_pStaticCameras->begin();
+        }
+
+        return ViewingCamera();
+    }
+    StaticCamera* PrevCamera()
+    {
+        if (m_itViewingCamera == m_pStaticCameras->begin())
+        {
+            m_itViewingCamera = m_pStaticCameras->end();
+        }
+
+        m_itViewingCamera--;
+        return ViewingCamera();
+    }
+
+    DynamicCamera* NextWarpCamera()
+    {
+        m_itWarpCamera++;
+        if (m_itWarpCamera == m_pWarpPoints->end())
+        {
+            m_itWarpCamera = m_pWarpPoints->begin();
+        }
+
+        return WarpCamera();
+    }
+    DynamicCamera* WarpCamera() const
+    {
+        return (DynamicCamera*)m_pEntities->at(*m_itWarpCamera);
+    }
+
+    void AddDynamicCamera(int id)
+    {
+        m_pDynamicCameras->insert(id);
+    }
+    void AddToDynamicQueue(DynamicCamera* entity);
+
+    void DestroyEntity(int id)
+    {
+        m_pDestroyedEntities->insert(id);
+    }
 };
 
 #endif

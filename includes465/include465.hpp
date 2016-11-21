@@ -31,6 +31,13 @@ Mike Barnes
 
 # include <stdio.h>  // My examples use printf, I'm not a fan of cin, cout...
 # include <stdlib.h>
+# include <time.h>
+# include <algorithm>
+# include <map>
+# include <set>
+# include <vector>
+# include <iterator>
+# include <queue>
 # include <sys/stat.h>
 # include <cstring>
 
@@ -50,6 +57,29 @@ Mike Barnes
 # include "../includes465/triModel465.hpp"  // load AC3D *.tri model 
 
 // PI to 10 digits
-const float PI = 3.14159265358f;  
+const float PI = 3.14159265358f;
+
+template<class T>
+inline void SetDifference(std::set<T>*& s1, std::set<T>* s2)
+{
+	std::set<T>* result;
+	std::set_difference(s1->begin(), s1->end(), s2->begin(), s2->end(), std::inserter(result, result->begin()));
+	*s1 = result;
+}
+
+inline bool StringICompare(const std::string& str1, const std::string& str2)
+{
+	if (str1.size() != str2.size())
+	{
+		return false;
+	}
+
+	std::string str1Cpy(str1);
+	std::string str2Cpy(str2);
+	std::transform(str1Cpy.begin(), str1Cpy.end(), str1Cpy.begin(), ::tolower);
+	std::transform(str2Cpy.begin(), str2Cpy.end(), str2Cpy.begin(), ::tolower);
+
+	return (str1Cpy == str2Cpy);
+}
  
 #endif
