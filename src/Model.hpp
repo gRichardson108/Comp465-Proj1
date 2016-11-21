@@ -37,30 +37,12 @@ public:
         delete []m_cModelFile;
     }
 
-    char* ModelFile() const
-    {
-        return m_cModelFile;
-    }
-    int Vertices() const
-    {
-        return m_iVertices;
-    }
-    GLuint* VAO() const
-    {
-        return m_gliVAO;
-    }
-    GLuint* Buffer() const
-    {
-        return m_gliBuffer;
-    }
-    GLuint* ShaderProgram() const
-    {
-        return m_gliShaderProgram;
-    }
-    float BoundingRadius() const
-    {
-        return m_fBoundingRadius;
-    }
+    char* ModelFile() const { return m_cModelFile; }
+    int Vertices() const { return m_iVertices; }
+    GLuint* VAO() const { return m_gliVAO; }
+    GLuint* Buffer() const { return m_gliBuffer; }
+    GLuint* ShaderProgram() const { return m_gliShaderProgram; }
+    float BoundingRadius() const { return m_fBoundingRadius; }
 };
 
 #endif

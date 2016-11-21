@@ -40,23 +40,14 @@ public:
         delete m_pTargets;
     }
 
-    virtual const std::string GetType() const
-    {
-        return "Missile";
-    }
+    virtual const std::string GetType() const { return "Missile"; }
     virtual bool HandleMsg(const Message& message);
 
     void Update();
-    MoveableEntity* CurrentTarget() const
-    {
-        return m_pCurrentTarget;
-    }
-    std::vector<MoveableEntity*>* Targets() const
-    {
-        return m_pTargets;
-    }
+    MoveableEntity* CurrentTarget() const { return m_pCurrentTarget; }
+    std::vector<MoveableEntity*>* Targets() const { return m_pTargets; }
     void SetTargets(std::vector<MoveableEntity*>* targets)
-    {
+	{
         *m_pTargets = *targets;
         m_pCurrentTarget = NULL;
     }

@@ -36,27 +36,15 @@ public :
 
     virtual ~CelestialBody() {}
 
-    virtual const std::string GetType() const
-    {
-        return "CelestialBody";
-    }
+    virtual const std::string GetType() const { return "CelestialBody"; }
     virtual bool HandleMsg(const Message& message);
 
     void Update();
     void SetPosition(const glm::vec3& position);
-    void SetPosition(float x, float y, float z)
-    {
-        SetPosition(glm::vec3(x, y, z));
-    }
+    void SetPosition(float x, float y, float z) { SetPosition(glm::vec3(x, y, z)); }
 
-    float RotationRate() const
-    {
-        return m_fRotationRate;
-    }
-    glm::mat3 AxisRotation() const
-    {
-        return m_mAxisRotation;
-    }
+    float RotationRate() const { return m_fRotationRate; }
+    glm::mat3 AxisRotation() const { return m_mAxisRotation; }
 };
 
 #endif

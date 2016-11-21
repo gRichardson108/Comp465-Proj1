@@ -19,12 +19,12 @@ can have missiles to shoot. Can be affected by gravity.
 class Ship : public MoveableEntity
 {
 private:
-    int pitchRotation = 0;
-    int yawRotation = 0;
-    int rollRotation = 0;
-    int thrust = 0;
-    int m_iNumMissiles = 9; // Number of remaining missiles
-	std::vector<MoveableEntity*>* m_pTargets  = new std::vector<MoveableEntity*>(); // Vector of possible targets
+    signed char m_iPitchRotation;
+	signed char m_iYawRotation;
+	signed char m_iRollRotation;
+	signed char m_iThrust;
+    int m_iNumMissiles; // Number of remaining missiles
+	std::vector<MoveableEntity*>* m_pTargets; // Vector of possible targets
 	Missile* m_pActiveMissile;
 
 public:
@@ -40,44 +40,42 @@ public:
 
     const float TURN_RATE = 0.02;//radians
     const float GRAVITY = 90000000.0;
-    bool gravityStatus = false;
+    bool m_bGravityStatus = false;
 
     Ship(Model* model, const glm::vec3& pos = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f),
          const glm::vec3& target = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f));
 
-    void keypress(unsigned char key);
+	~Ship()
+	{
+		delete m_pTargets;
+	}
 
-    void rotateYaw(float rotationRate);
-    void rotatePitch(float rotationRate);
-    void rotateRoll(float rotationRate);
+	virtual const std::string GetType() const { return "Ship"; }
+	virtual bool HandleMsg(const Message& message);
 
-    void nextShipSpeed();
-    void warpToCamera(DynamicCamera* warpPoint);
+	void Update();
 
-    virtual const std::string GetType() const
-    {
-        return "Ship";
-    }
-    virtual bool HandleMsg(const Message& message);
+    void RotateYaw(float rotationRate);
+    void RotatePitch(float rotationRate);
+    void RotateRoll(float rotationRate);
+
+    void NextShipSpeed();
+    void WarpToCamera(DynamicCamera* warpPoint);
 
     void SetHeading();
-    glm::vec3 gravityVector();
+    glm::vec3 GravityVector();
 
-    void Update();
-
-    void fireMissile();
-
+    void FireMissile();
+	void SetTargets(const std::string& type);
     void AddTarget(MoveableEntity* target);
-
 	void RemoveTarget(MoveableEntity* target);
 
 	void FailMission();
 
-	int NumMissiles();
+	int NumMissiles() const { return m_iNumMissiles; }
 
 	//Check collisions with celestial bodies
 	void CheckCollisions();
-
 };
 
 #endif

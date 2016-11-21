@@ -39,12 +39,12 @@ DynamicCamera::DynamicCamera(char* name, MoveableEntity* parent, bool useHeading
 
 bool DynamicCamera::HandleMsg(const Message& message)
 {
-    bool hasMsg = false;
+    bool hasMsg = true;
 
     switch (message.Msg)
     {
 		case Msg_DestroySource:
-			hasMsg = true;
+			printf("Msg: Destroy source received by camera ID: %d\n", m_iID);
 			if (m_pParent != NULL && message.Sender == m_pParent->ID())
 			{
 				m_pParent = NULL;
@@ -53,6 +53,7 @@ bool DynamicCamera::HandleMsg(const Message& message)
 			break;
 
 		default:
+			hasMsg = false;
 			break;
     }
 

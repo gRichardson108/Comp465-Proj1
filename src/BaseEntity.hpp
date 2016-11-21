@@ -29,15 +29,8 @@ public:
 
     virtual ~BaseEntity() {};
 
-    int ID() const
-    {
-        return m_iID;
-    }
-    virtual const std::string GetType() const
-    {
-        return "BaseEntity";
-    }
-
+    int ID() const { return m_iID; }
+    virtual const std::string GetType() const { return "BaseEntity"; }
     virtual bool HandleMsg(const Message& msg) = 0;
 };
 

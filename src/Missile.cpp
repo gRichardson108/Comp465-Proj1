@@ -17,13 +17,13 @@ Missile::Missile(Model* model, const glm::vec3& pos, const glm::vec3& scale, con
 
 bool Missile::HandleMsg(const Message& message)
 {
-	bool hasMsg = false;
+	bool hasMsg = true;
 
 	switch (message.Msg)
 	{
 		// Destroy source
 		case Msg_DestroySource:
-			hasMsg = true;
+			printf("Msg: Destroy source received by missile ID: %d\n", m_iID);
 			if (m_pCurrentTarget && message.Sender == m_pCurrentTarget->ID())
 			{
 				m_pCurrentTarget = NULL;
@@ -46,13 +46,15 @@ bool Missile::HandleMsg(const Message& message)
 
 		// Destroy self
 		case Msg_TargetDestroyed:
-			hasMsg = true;
+			printf("Msg: Destroy target received by missile ID: %d\n", m_iID);
 			m_pCurrentTarget = NULL;
 			m_pTargets->clear();
+			printf("Msg: Destroy source sent by missile ID: %d\n", m_iID);
 			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
 			break;
 
 		default:
+			hasMsg = false;
 			break;
 	}
 
@@ -117,6 +119,8 @@ void Missile::Update()
 		// Life expired, destroy self
 		if (m_iLifeTime == 0)
 		{
+			printf("Missile ID: %d, detonates\n", m_iID);
+			printf("Msg: Destroy source sent by missile ID: %d\n", m_iID);
 			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
 			m_pCurrentTarget = NULL;
 			Scene::Instance()->DestroyEntity(m_iID);
@@ -136,7 +140,7 @@ void Missile::MissileGuidance()
 	dot = dot > 1.0f ? 1.0f : (dot < -1.0f ? -1.0f : dot);
 
 	// Not facing target, need to turn
-	if (dot <= 0.99999f)
+	if (dot <= 0.999999f)
 	{
 		float maxRadians = glm::half_pi<float>() / 90.0f;
 		glm::vec3 tempUp = glm::cross(m_vForward, steeringForce); // First axis to rotate on
@@ -249,14 +253,17 @@ void Missile::CheckCollisions()
 		float distance = glm::distance(m_vPosition, obj->Position());
 		if (distance <= m_fBoundingRadius + 10 + obj->BoundingRadius() + boundingOffset)
 		{
-			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+			printf("Missile ID: %d, strikes object of type %s\n", m_iID, type.c_str());
 
 			// If destructable type, then destroy
 			if ("Ship" == type || "Missile" == type || "MissileBattery" == type)
 			{
-                printf("Missile strikes object of type %s\n", type);
+				printf("Msg: Destroy target sent by missile ID: %d\n", m_iID);
 				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, obj->ID(), Msg_TargetDestroyed, NULL);
 			}
+
+			printf("Msg: Destroy source sent by missile ID: %d\n", m_iID);
+			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
 
 			m_pCurrentTarget = NULL;
 			Scene::Instance()->DestroyEntity(m_iID);

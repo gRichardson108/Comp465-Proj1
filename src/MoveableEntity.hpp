@@ -31,24 +31,12 @@ public :
 
     virtual ~MoveableEntity() {}
 
-    virtual const std::string GetType() const
-    {
-        return "MoveableEntity";
-    }
-    virtual bool HandleMsg(const Message& message)
-    {
-        return false;
-    }
+    virtual const std::string GetType() const { return "MoveableEntity"; }
+    virtual bool HandleMsg(const Message& message) { return false; }
 
     virtual void Update() = 0;
-    virtual glm::vec3 Heading() const
-    {
-        return m_vHeading;
-    }
-    virtual void SetHeading(const glm::vec3& heading)
-    {
-        m_vHeading = heading;
-    }
+    virtual glm::vec3 Heading() const { return m_vHeading; }
+    virtual void SetHeading(const glm::vec3& heading) { m_vHeading = heading; }
 };
 
 #endif

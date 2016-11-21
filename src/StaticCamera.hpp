@@ -42,54 +42,22 @@ public :
         delete []m_cName;
     }
 
-    virtual const std::string GetType() const
-    {
-        return "StaticCamera";
-    }
+    virtual const std::string GetType() const { return "StaticCamera"; }
     virtual bool  HandleMsg(const Message& msg);
 
-    glm::mat4 ViewMatrix() const
-    {
-        return m_mViewMatrix;
-    }
-
-    glm::mat4 ProjectionMatrix() const
-    {
-        return m_mProjectionMatrix;
-    }
+    glm::mat4 ViewMatrix() const { return m_mViewMatrix; }
+    glm::mat4 ProjectionMatrix() const { return m_mProjectionMatrix; }
     glm::mat4 UpdateProjectionMatrix(int width, int height);
-
-    float NearClip() const
-    {
-        return m_fNearClip;
-    }
-    void SetNearClip(float nearClip)
-    {
-        m_fNearClip = nearClip;
-    }
-
-    float FarClip() const
-    {
-        return m_fFarClip;
-    }
-    void SetFarClip(float farClip)
-    {
-        m_fFarClip = farClip;
-    }
-
-    float FOVY() const
-    {
-        return m_fFOVY;
-    }
-    void SetFOVY(float newFOVY)
-    {
-        m_fFOVY = newFOVY;
-    }
-
-    char* Name() const
-    {
-        return m_cName;
-    }
+	glm::vec3 Eye() const { return m_vEye; }
+	glm::vec3 At() const { return m_vAt; }
+	glm::vec3 Up() const { return m_vUp; }
+    float NearClip() const { return m_fNearClip; }
+    void SetNearClip(float nearClip) { m_fNearClip = nearClip; }
+    float FarClip() const { return m_fFarClip; }
+    void SetFarClip(float farClip) { m_fFarClip = farClip; }
+    float FOVY() const { return m_fFOVY; }
+	void SetFOVY(float newFOVY) { m_fFOVY = newFOVY; }
+    char* Name() const { return m_cName; }
 };
 
 #endif

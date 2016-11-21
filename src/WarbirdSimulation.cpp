@@ -185,6 +185,7 @@ void update(int value)
         }
         else
         {
+			sprintf(unumCountStr, " Unum ?");
             mb1 = false;
         }
     }
@@ -198,6 +199,7 @@ void update(int value)
         }
         else
         {
+			sprintf(secundusCountStr, " Secundus ?");
             mb2 = false;
         }
     }
@@ -323,14 +325,13 @@ void init()
                                            pos, glm::vec3(30.0f), pos + target);
     m->SetTargets("Ship");
     sprintf(unumCountStr, " Unum %d", m->NumMissiles());
-    s->AddTarget(m);
 
     pos = glm::vec3(0.0f, 0.0f, -((StaticEntity*)scene->GetEntityFromID(4))->BoundingRadius());
     m = new MissileBattery(scene->GetModel("MissileBattery"), (CelestialBody*)scene->GetEntityFromID(4),
                            pos, glm::vec3(30.0f), pos + target);
     m->SetTargets("Ship");
     sprintf(secundusCountStr, " Secundus %d", m->NumMissiles());
-    s->AddTarget(m);
+    s->SetTargets("MissileBattery");
 
     // Create cameras
     new StaticCamera("Front", glm::vec3(0.0f, 10000.0f, 20000.0f), glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -348,8 +349,10 @@ void init()
     viewMatrix = viewingCamera->ViewMatrix();
 
     // set render state values
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     // Finalize scene
     scene->InitDone();
@@ -381,15 +384,15 @@ void keyboard(unsigned char key, int x, int y)
         break;
     case 'f':
     case 'F':
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipFireMissile, NULL);
+        MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ShipFireMissile, NULL);
         break;
     case 'g':
     case 'G':
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ToggleGravity, NULL);
+        MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ToggleGravity, NULL);
         break;
     case 's':
     case 'S':
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipSpeedChange, NULL);
+        MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ShipSpeedChange, NULL);
         break;
     case 't':
     case 'T':  // Change time quantum
@@ -417,7 +420,7 @@ void keyboard(unsigned char key, int x, int y)
     case 'w':
     case 'W':
         warpCamera = scene->NextWarpCamera();
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_ShipWarp, warpCamera);
+        MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ShipWarp, warpCamera);
         printf("warping to camera at %s\n", warpCamera->Name());
         break;
     case 'v':
@@ -443,10 +446,10 @@ void specialKeys(int key, int x, int y)
     switch (modifiers)
     {
     case GLUT_ACTIVE_CTRL:
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_CtrlMod_SpecialKeyPress, &key);
+        MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_CtrlMod_SpecialKeyPress, &key);
         break;
     default:
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_SpecialKeyPress, &key);
+        MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_SpecialKeyPress, &key);
         break;
     }
 
@@ -458,10 +461,10 @@ void specialUpFunc(int key, int x, int y)
     switch (modifiers)
     {
     case GLUT_ACTIVE_CTRL:
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_CtrlMod_SpecialKeyRelease, &key);
+        MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_CtrlMod_SpecialKeyRelease, &key);
         break;
     default:
-        MessageDispatcher::Instance()->DispatchMsg(0, 0, 5, Msg_SpecialKeyRelease, &key);
+        MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_SpecialKeyRelease, &key);
         break;
     }
 }

@@ -21,13 +21,13 @@ MissileBattery::MissileBattery(Model* model, CelestialBody* parent, const glm::v
 
 bool MissileBattery::HandleMsg(const Message& message)
 {
-	bool hasMsg = false;
+	bool hasMsg = true;
 
 	switch (message.Msg)
 	{
 		// Remove reference to the sender
 		case Msg_DestroySource :
-			hasMsg = true;
+			printf("Msg: Destroy source received by missile battery ID: %d\n", m_iID);
 			if (m_pActiveMissile && message.Sender == m_pActiveMissile->ID())
 			{
 				m_pActiveMissile = NULL;
@@ -36,6 +36,7 @@ bool MissileBattery::HandleMsg(const Message& message)
 			{
 				// Since parent is destroyed so is this
 				m_pParent = NULL;
+				printf("Msg: Destroy source sent by missile battery ID: %d\n", m_iID);
 				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
 				m_pActiveMissile = NULL;
 				m_pTargets->clear();
@@ -59,15 +60,17 @@ bool MissileBattery::HandleMsg(const Message& message)
 
 		// Destroy self
 		case Msg_TargetDestroyed:
-			hasMsg = true;
+			printf("Msg: Destroy target received by missile battery ID: %d\n", m_iID);
 			m_pActiveMissile = NULL;
 			m_pParent = NULL;
 			m_pTargets->clear();
+			printf("Msg: Destroy source sent by missile battery ID: %d\n", m_iID);
 			MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
 			Scene::Instance()->DestroyEntity(m_iID);
 			break;
 
 		default :
+			hasMsg = false;
 			break;
 	}
 
@@ -119,8 +122,37 @@ void MissileBattery::Update()
 
 void MissileBattery::FireMissile()
 {
+	printf("Missile launced by missile battery ID: %d\n", m_iID);
 	m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(25.0f),
 		m_vPosition + m_vForward);
 	m_pActiveMissile->SetTargets(m_pTargets);
 	m_iNumMissiles--;
+}
+
+void MissileBattery::SetTargets(const std::string& type)
+{
+	for (auto entity : *Scene::Instance()->Entities())
+	{
+		if (StringICompare(type, entity.second->GetType()))
+		{
+			AddTarget((MoveableEntity*)entity.second);
+		}
+	}
+}
+
+void MissileBattery::AddTarget(MoveableEntity* target)
+{
+	m_pTargets->push_back(target);
+}
+
+void MissileBattery::RemoveTarget(MoveableEntity* target)
+{
+	for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
+	{
+		if (target == *it)
+		{
+			m_pTargets->erase(it);
+			break;
+		}
+	}
 }

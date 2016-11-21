@@ -43,35 +43,9 @@ public:
 	void Update();
 
 	int NumMissiles() const { return m_iNumMissiles; }
-	void SetTargets(std::vector<MoveableEntity*>* targets)
-	{
-		m_pTargets = targets;
-	}
-	void SetTargets(const std::string& type)
-	{
-		for (auto entity : *Scene::Instance()->Entities())
-		{
-			if (StringICompare(type, entity.second->GetType()))
-			{
-				AddTarget((MoveableEntity*)entity.second);
-			}
-		}
-	}
-	void AddTarget(MoveableEntity* target)
-	{
-		m_pTargets->push_back(target);
-	}
-	void RemoveTarget(MoveableEntity* target)
-	{
-		for (auto it = m_pTargets->begin(); it != m_pTargets->end(); it++)
-		{
-			if (target == *it)
-			{
-				m_pTargets->erase(it);
-				break;
-			}
-		}
-	}
+	void SetTargets(const std::string& type);
+	void AddTarget(MoveableEntity* target);
+	void RemoveTarget(MoveableEntity* target);
 };
 
 #endif

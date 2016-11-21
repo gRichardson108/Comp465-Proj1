@@ -37,8 +37,6 @@ public :
         Scene::Instance()->AddToDynamicQueue(this);
     }
 
-
-
     DynamicCamera(char* name, MoveableEntity* parent, bool useHeading = false, float headingOffset = 0.0f,
                   const glm::vec3& eyeOffset = glm::vec3(0.0f), const glm::vec3& atOffset = glm::vec3(0.0f),
                   const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f), float FOVY = glm::radians(60.0f),
@@ -50,37 +48,15 @@ public :
                   float nearClip = 1.0f, float farClip = 10000000.0f);
 
     ~DynamicCamera() {}
-    virtual const std::string GetType() const
-    {
-        return "DynamicCamera";
-    }
+
+    virtual const std::string GetType() const { return "DynamicCamera"; }
     virtual bool HandleMsg(const Message& message);
+
     void Update();
-    bool UsesHeading() const
-    {
-        return m_bUsesHeading;
-    }
 
-    float HeadingOffset() const
-    {
-        return m_fHeadingOffset;
-    }
-    void SetHeadingOffset(float offset)
-    {
-        m_fHeadingOffset = offset;
-    }
-
-    glm::vec3 getEye(){
-        return glm::vec3(m_vEye);
-    }
-
-    glm::vec3 getAt(){
-        return glm::vec3(m_vAt);
-    }
-
-    glm::vec3 getUp(){
-        return glm::vec3(m_vUp);
-    }
+    bool UsesHeading() const { return m_bUsesHeading; }
+    float HeadingOffset() const { return m_fHeadingOffset; }
+    void SetHeadingOffset(float offset) { m_fHeadingOffset = offset; }
 };
 
 #endif

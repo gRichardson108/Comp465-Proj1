@@ -4,68 +4,67 @@
 #include "Scene.hpp"
 
 Ship::Ship(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& target,
-           const glm::vec3& up) : MoveableEntity(model, pos, scale, target, up)
+	const glm::vec3& up) :
+	MoveableEntity(model, pos, scale, target, up),
+	m_iPitchRotation(0),
+	m_iRollRotation(0),
+	m_iYawRotation(0),
+	m_iThrust(0),
+	m_iNumMissiles(9),
+	m_pTargets(new std::vector<MoveableEntity*>())
 {}
 
-void Ship::keypress(unsigned char key)
-{
-}
-
-void Ship::rotateYaw(float rotationRate)
+void Ship::RotateYaw(float rotationRate)
 {
     glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), rotationRate, m_vUp));
     m_vForward = glm::normalize(rot * m_vForward);
     m_vLeft = glm::normalize(rot * m_vLeft);
 	CreateRotationMatrix();
-//    SetHeading();
 }
 
-void Ship::rotatePitch(float rotationRate)
+void Ship::RotatePitch(float rotationRate)
 {
     glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), rotationRate, m_vLeft));
     m_vForward = glm::normalize(rot * m_vForward);
     m_vUp = glm::normalize(rot * m_vUp);
 	CreateRotationMatrix();
-//    SetHeading();
 }
 
-void Ship::rotateRoll(float rotationRate)
+void Ship::RotateRoll(float rotationRate)
 {
     glm::mat3 rot = glm::mat3(glm::rotate(glm::mat4(), rotationRate, m_vForward));
     m_vLeft= glm::normalize(rot * m_vLeft);
     m_vUp = glm::normalize(rot * m_vUp);
     CreateRotationMatrix();
-//    SetHeading();
 }
 
 void Ship::SetHeading()
 {
-    m_vHeading = m_vForward * (thrust * currentMaxSpeed);
-    if (gravityStatus){
-        m_vHeading += gravityVector();
+    m_vHeading = m_vForward * (m_iThrust * currentMaxSpeed);
+    if (m_bGravityStatus){
+        m_vHeading += GravityVector();
     }
 }
 
 void Ship::Update()
 {
-    //thrust variable allows speed changes while thrusting to take effect without releasing the arrow key
-    SetHeading();
-    if (pitchRotation != 0)
+	if (m_iYawRotation != 0)
+	{
+		RotateYaw(TURN_RATE * m_iYawRotation);
+	}
+    if (m_iPitchRotation != 0)
     {
-        rotatePitch(TURN_RATE * pitchRotation);
+        RotatePitch(TURN_RATE * m_iPitchRotation);
     }
-    if (yawRotation != 0)
+    if (m_iRollRotation != 0)
     {
-        rotateYaw(TURN_RATE * yawRotation);
+        RotateRoll(TURN_RATE * m_iRollRotation);
     }
-    if (rollRotation != 0)
-    {
-        rotateRoll(TURN_RATE * rollRotation);
-    }
-    m_vPosition = m_vPosition + m_vHeading;
-    CreateObjectMatrix();
 
-    CheckCollisions();
+	SetHeading();
+    m_vPosition = m_vPosition + m_vHeading;
+	CheckCollisions();
+    CreateObjectMatrix();
 }
 
 bool Ship::HandleMsg(const Message& message)
@@ -73,81 +72,88 @@ bool Ship::HandleMsg(const Message& message)
     bool hasMsg = true;
     switch (message.Msg)
     {
-        case Msg_CtrlMod_SpecialKeyPress:
-            switch (*static_cast<int*>(message.ExtraInfo)){
+        case Msg_CtrlMod_SpecialKeyPress: // Pitch and Roll
+            switch (DereferenceToType<int>(message.ExtraInfo))
+			{
                 case GLUT_KEY_UP:
-                    pitchRotation = 1;
+                    m_iPitchRotation = 1;
                     break;
                 case GLUT_KEY_DOWN:
-                    pitchRotation = -1;
+                    m_iPitchRotation = -1;
                     break;
                 case GLUT_KEY_LEFT:
-                    rollRotation = -1;
+					m_iRollRotation = -1;
                     break;
                 case GLUT_KEY_RIGHT:
-                    rollRotation = 1;
+					m_iRollRotation = 1;
                     break;
             }
             break;
-        case Msg_SpecialKeyPress:
-            switch (*static_cast<int*>(message.ExtraInfo)){
+        case Msg_SpecialKeyPress: // Move and Yaw
+            switch (DereferenceToType<int>(message.ExtraInfo))
+			{
                 case GLUT_KEY_UP:
-                    thrust = 1;
+					m_iThrust = 1;
                     break;
                 case GLUT_KEY_DOWN:
-                    thrust = -1;
+					m_iThrust = -1;
                     break;
                 case GLUT_KEY_LEFT:
-                    yawRotation = 1;
+					m_iYawRotation = 1;
                     break;
                 case GLUT_KEY_RIGHT:
-                    yawRotation = -1;
+					m_iYawRotation = -1;
                     break;
             }
             break;
-        case Msg_SpecialKeyRelease:
-            switch (*static_cast<int*>(message.ExtraInfo)){
+        case Msg_SpecialKeyRelease: // Stop Move and Yaw
+            switch (DereferenceToType<int>(message.ExtraInfo))
+			{
                 case GLUT_KEY_UP:
                 case GLUT_KEY_DOWN:
-                    thrust = 0;
+					m_iThrust = 0;
                     break;
                 case GLUT_KEY_LEFT:
                 case GLUT_KEY_RIGHT:
-                    yawRotation = 0;
+					m_iYawRotation = 0;
                     break;
             }
-        case Msg_CtrlMod_SpecialKeyRelease:
-            switch (*static_cast<int*>(message.ExtraInfo)){
+        case Msg_CtrlMod_SpecialKeyRelease: // Stop all
+            switch (DereferenceToType<int>(message.ExtraInfo))
+			{
                 case GLUT_KEY_UP:
                 case GLUT_KEY_DOWN:
-                    pitchRotation = 0;
-                    thrust = 0;
+                    m_iPitchRotation = 0;
+					m_iThrust = 0;
                     break;
                 case GLUT_KEY_LEFT:
                 case GLUT_KEY_RIGHT:
-                    rollRotation = 0;
-                    yawRotation = 0;
+					m_iRollRotation = 0;
+					m_iYawRotation = 0;
                     break;
             }
             break;
         case Msg_ShipSpeedChange:
-            nextShipSpeed();
+            NextShipSpeed();
             break;
         case Msg_ShipWarp:
-            warpToCamera((DynamicCamera*) message.ExtraInfo);
+            WarpToCamera((DynamicCamera*)message.ExtraInfo);
             break;
         case Msg_ToggleGravity:
-            gravityStatus = !gravityStatus;
+            m_bGravityStatus = !m_bGravityStatus;
             break;
         case Msg_ShipFireMissile:
-            fireMissile();
+            FireMissile();
             break;
-        case Msg_DestroySource:
+        case Msg_DestroySource: // Destroys source
+			printf("Msg: Destroy source received by ship ID: %d\n", m_iID);
 			if (m_pActiveMissile && message.Sender == m_pActiveMissile->ID())
 			{
 				m_pActiveMissile = NULL;
 				Scene* scene = Scene::Instance();
-				if (m_iNumMissiles <= 0 && (MissileBattery*)scene->GetEntityFromID(6) && (MissileBattery*)scene->GetEntityFromID(7)){
+				if (m_iNumMissiles <= 0 && 
+					((MissileBattery*)scene->GetEntityFromID(6) || (MissileBattery*)scene->GetEntityFromID(7)))
+				{
                     FailMission();
 				}
 			}
@@ -166,7 +172,8 @@ bool Ship::HandleMsg(const Message& message)
 				}
 			}
             break;
-        case Msg_TargetDestroyed:
+        case Msg_TargetDestroyed: // Ship destroyed
+			printf("Msg: Destroy target received by ship ID: %d\n", m_iID);
             printf("Ship hit by missile! Failing mission.\n");
             FailMission();
 			break;
@@ -179,7 +186,7 @@ bool Ship::HandleMsg(const Message& message)
     return hasMsg;
 }
 
-void Ship::nextShipSpeed()
+void Ship::NextShipSpeed()
 {
     switch (speedSetting)
     {
@@ -199,40 +206,56 @@ void Ship::nextShipSpeed()
     printf("speed setting: %f\n", currentMaxSpeed);
 }
 
-void Ship::warpToCamera(DynamicCamera* warpPoint)
+void Ship::WarpToCamera(DynamicCamera* warpPoint)
 {
-    m_vPosition = warpPoint->getEye();
-    m_vForward = glm::normalize(warpPoint->getAt() - warpPoint->getEye());
-    m_vUp = warpPoint->getUp();
+    m_vPosition = warpPoint->Eye();
+    m_vForward = glm::normalize(warpPoint->At() - warpPoint->Eye());
+    m_vUp = warpPoint->Up();
     m_vLeft = glm::normalize(glm::cross(m_vUp, m_vForward));
     SetHeading();
     CreateRotationMatrix();
 }
 
-glm::vec3 Ship::gravityVector()
+glm::vec3 Ship::GravityVector()
 {
     float distance = glm::length(m_vPosition);
     glm::vec3 gravityVec = glm::normalize(m_vPosition * -1.0f) * (GRAVITY / (distance * distance));
     return gravityVec;
 }
 
-void Ship::fireMissile()
+void Ship::FireMissile()
 {
     if (!m_pActiveMissile)
     {
         if (m_iNumMissiles > 0)
         {
+			printf("Missile launced by ship ID: %d\n", m_iID);
             m_pActiveMissile = new Missile(Scene::Instance()->GetModel("Missile"), m_vPosition, glm::vec3(25.0f),
                 m_vPosition + m_vForward, m_vUp, 20.0f);
             m_pActiveMissile->SetTargets(m_pTargets);
             m_iNumMissiles--;
             printf("%d Missiles remaining!\n", m_iNumMissiles);
-        } else {
+        }
+		else
+		{
             printf("No more missiles for ship to fire!\n");
         }
-    } else {
+    }
+	else
+	{
         printf("Must wait for current missile to detonate!\n");
     }
+}
+
+void Ship::SetTargets(const std::string& type)
+{
+	for (auto entity : *Scene::Instance()->Entities())
+	{
+		if (StringICompare(type, entity.second->GetType()))
+		{
+			AddTarget((MoveableEntity*)entity.second);
+		}
+	}
 }
 
 void Ship::AddTarget(MoveableEntity* target)
@@ -252,15 +275,13 @@ void Ship::RemoveTarget(MoveableEntity* target)
     }
 }
 
-void Ship::FailMission(){
-        m_pActiveMissile = NULL;
-        m_pTargets->clear();
-        MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
-        Scene::Instance()->DestroyEntity(m_iID);
-}
-
-int Ship::NumMissiles(){
-    return m_iNumMissiles;
+void Ship::FailMission()
+{
+	printf("Msg: Destroy source sent by ship ID: %d\n", m_iID);
+	MessageDispatcher::Instance()->DispatchMsg(0, m_iID, -1, Msg_DestroySource, NULL);
+	m_pActiveMissile = NULL;
+	m_pTargets->clear();
+	Scene::Instance()->DestroyEntity(m_iID);
 }
 
 void Ship::CheckCollisions()
@@ -271,17 +292,25 @@ void Ship::CheckCollisions()
 		if (m_iID == id) continue;
 
         MoveableEntity* obj = (MoveableEntity*)Scene::Instance()->GetEntityFromID(id);
-        std::string type = obj->GetType();
+		std::string type = obj->GetType();
 
-        if ("CelestialBody" != type)
-        {
-            continue;
-        }
+		if ("Missile" == type)
+		{
+			continue;
+		}
 
         // Object hit?
 		float distance = glm::distance(m_vPosition, obj->Position());
 		if (distance <= m_fBoundingRadius + 10 + obj->BoundingRadius())
 		{
+			printf("Ship ID: %d, hits object of type %s\n", m_iID, type.c_str());
+
+			// If destructable type, then destroy
+			if ("MissileBattery" == type)
+			{
+				printf("Msg: Destroy target sent by ship ID: %d\n", m_iID);
+				MessageDispatcher::Instance()->DispatchMsg(0, m_iID, obj->ID(), Msg_TargetDestroyed, NULL);
+			}
             FailMission();
 		}
 	}

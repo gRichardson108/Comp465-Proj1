@@ -19,10 +19,7 @@ MessageDispatcher* MessageDispatcher::Instance()
 void MessageDispatcher::Discharge(BaseEntity* pReceiver,
 	const Message& message)
 {
-	if (!pReceiver->HandleMsg(message))
-	{
-		printf("Message not handled\n");
-	}
+	pReceiver->HandleMsg(message);
 }
 
 //---------------------------- DispatchMessage ---------------------------
@@ -56,6 +53,7 @@ void MessageDispatcher::DispatchMsg(double  delay,
 		if (pReceiver == NULL)
 		{
 			printf("\nWarning! No Receiver with ID of %d found\n", receiver);
+			printf("Message sent by ID %d\n", sender);
 			return;
 		}
 
