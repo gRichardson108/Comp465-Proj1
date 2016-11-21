@@ -1,23 +1,42 @@
-/* 
-SimpleVertex.glsl
+/*
+textureModelVertex.glsl
 
-Vertex shader with position, color, normal and ModelViewProject
-input and color output.
+Vertex shader for colored and 
+textured surfaces.
 
 Mike Barnes
-8/17/2013
+11/10/2015
 */
 
 # version 330 core
+        
+in vec4 vPosition, vColor;
+in vec2 vTexCoord;
+in vec3 vNormal;
+out vec2 vs_texCoord;      
+out vec3 vs_normal, vs_worldPos;
+out vec4 vs_color;
 
-in vec4 vPosition;
-in vec4 vColor;
-in vec3 vNormal;  // not used
+uniform bool IsTexture;
+uniform mat3 NormalMatrix;
+uniform mat4 ModelView;
+uniform mat4 MVP;
 
-uniform mat4 ModelViewProjection;  // = projection * view * model
-out vec4 color;
-
-void main() {
-  color = vColor;
-  gl_Position = ModelViewProjection * vPosition;
+void main(void)
+{
+  vec4 position = MVP * vPosition;
+  gl_Position = position;
+  vs_worldPos = (ModelView * vPosition).xyz;
+  vs_normal = NormalMatrix * vNormal; 
+  if (IsTexture)
+  {
+      vs_texCoord = vTexCoord;
+      vs_color = vec4(0,0,0,0);
   }
+  else
+  {
+      vs_texCoord = vec2(0, 0);
+      vs_color = vColor;
+  }
+}
+ 

@@ -57,11 +57,19 @@ char * vertexShaderFile   = "src/simpleVertex.glsl";
 char * fragmentShaderFile = "src/simpleFragment.glsl";
 
 // Shader handles, matrices, etc
-GLuint MVP;  // Model View Projection matrix's handle
+GLuint MVP, NormalMatrix, ModelView;  // Model View Projection matrix's handle
 GLuint VAO[nModels], buffer[nModels];
 
+// Lights and textures
+glm::vec3 lightPos[2];
+GLuint texture, Texture, showTexture, light[2];  // texture id, shader, light handles
+GLuint ruberLight, headLight, shipLight, ambient, noLighting;
+bool ruberLightOn = true, headLightOn = true, shipLightOn = false, ambientOn = true;
+
 // model, view, projection matrices and values to create modelMatrix.
+glm::mat3 normalMatrix;
 glm::mat4 modelMatrix;          // set in display()
+glm::mat4 modelViewMatrix;
 glm::mat4 projectionMatrix;     // set in reshape()
 glm::mat4 ModelViewProjectionMatrix; // set in display();
 
@@ -127,18 +135,30 @@ void updateTitle()
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glUniform1f(showTexture, 0);
+	glUniform1f(noLighting, 1);
+
     // update model matrix
     for (int id : *scene->DrawableObjects())
     {
         StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
+		modelViewMatrix = entity->ObjectMatrix();
+		glUniformMatrix4fv(ModelView, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
+		normalMatrix = glm::mat3(modelViewMatrix);
+		glUniformMatrix3fv(NormalMatrix, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+
         ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entity->ObjectMatrix();
         glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
         glBindVertexArray(*(entity->ModelFile()->VAO()));
         glDrawArrays(GL_TRIANGLES, 0, entity->ModelFile()->Vertices());
+
+		if (id == 0)
+			glUniform1f(noLighting, 0);
     }
 
     if (showAxesFlag)
     {
+		glUniform1f(noLighting, 1);
         Model* axis = scene->GetModel("axes-r100");
         // Local axis for each entity
         for (int id : *scene->DrawableObjects())
@@ -210,6 +230,8 @@ void update(int value)
         if (e)
         {
             sprintf(shipCountStr, " Warbird %d", e->NumMissiles());
+			lightPos[1] = e->Position();
+			glUniform3fv(light[1], 1, glm::value_ptr(lightPos[1]));  // update shipLight value
         }
         else
         {
@@ -219,6 +241,8 @@ void update(int value)
 
     viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
+	lightPos[0] = viewingCamera->Eye() - viewingCamera->At();
+	glUniform3fv(light[0], 1, glm::value_ptr(lightPos[0]));  // update headLight value
 
     updateCount++;
     currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -262,13 +286,13 @@ void init()
 
     printf("\tRuber drawn\n");
     pos = glm::vec3(0.0f);
-    target = glm::vec3(rand() , rand(), rand());
+    target = glm::vec3(rand(), rand(), rand());
     up = glm::vec3(0, 1, 0);
     if (colinear(target, up, 0.1)) // Up and target can't be colinear
     {
         up = glm::vec3(-1, 0, 0);
     }
-    new CelestialBody(scene->GetModel("Ruber"), NULL, pos, glm::vec3(2000), pos + target,
+    new CelestialBody(scene->GetModel("Ruber"), NULL, pos, glm::vec3(2000), target,
                       up, 60.0f);
 
     printf("\tUnum drawn\n");
@@ -344,9 +368,24 @@ void init()
     // Initialize display info
     lastTime = glutGet(GLUT_ELAPSED_TIME);
     ulastTime = lastTime;
-    MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
+
+    MVP = glGetUniformLocation(shaderProgram, "MVP");
+	light[0] = glGetUniformLocation(shaderProgram, "headLightDir");
+	light[1] = glGetUniformLocation(shaderProgram, "shipLightPos");
+	showTexture = glGetUniformLocation(shaderProgram, "IsTexture");
+	NormalMatrix = glGetUniformLocation(shaderProgram, "NormalMatrix");
+	ModelView = glGetUniformLocation(shaderProgram, "ModelView");
+	ruberLight = glGetUniformLocation(shaderProgram, "ruberLightOn");
+	headLight = glGetUniformLocation(shaderProgram, "headLightOn");
+	shipLight = glGetUniformLocation(shaderProgram, "shipLightOn");
+	ambient = glGetUniformLocation(shaderProgram, "ambientOn");
+	noLighting = glGetUniformLocation(shaderProgram, "noLighting");
+
     viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
+
+	lightPos[0] = glm::vec3(0.0f, 10000.0f, 20000.0f); // default value
+	lightPos[1] = glm::vec3(5000.0f, 1300.0f, 6000.0f);
 
     // set render state values
 	glEnable(GL_CULL_FACE);
@@ -370,30 +409,38 @@ void keyboard(unsigned char key, int x, int y)
         break;
 
     case 'a':
-    case 'A':  // change animation timer
-        if (idleTimerFlag) // switch to interval timer
-        {
-            glutIdleFunc(NULL);
-            idleTimerFlag = false;
-        }
-        else // switch to idle timer
-        {
-            glutIdleFunc(display);
-            idleTimerFlag = true;
-        }
+    case 'A':  // Toggle ambient light
+		ambientOn = !ambientOn;
+		glUniform1f(ambient, ambientOn);
         break;
+
     case 'f':
     case 'F':
         MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ShipFireMissile, NULL);
         break;
+
+	case 'p':
+	case 'P':  // Toggle ambient light
+		ruberLightOn = !ruberLightOn;
+		glUniform1f(ruberLight, ruberLightOn);
+		break;
+
+	case 'h':
+	case 'H':  // Toggle ambient light
+		headLightOn = !headLightOn;
+		glUniform1f(headLight, headLightOn);
+		break;
+
     case 'g':
     case 'G':
         MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ToggleGravity, NULL);
         break;
+
     case 's':
     case 'S':
         MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ShipSpeedChange, NULL);
         break;
+
     case 't':
     case 'T':  // Change time quantum
         tq = (tq + 1) % 4;
@@ -413,22 +460,26 @@ void keyboard(unsigned char key, int x, int y)
             break;
         }
         break;
+
     case 'u':
     case 'U':  // Toggle axes
         showAxesFlag = !showAxesFlag;
         break;
+
     case 'w':
     case 'W':
         warpCamera = scene->NextWarpCamera();
         MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ShipWarp, warpCamera);
         printf("warping to camera at %s\n", warpCamera->Name());
         break;
+
     case 'v':
     case 'V':  // Next camera
         viewingCamera = scene->NextCamera();
         viewMatrix = viewingCamera->ViewMatrix();
         sprintf(viewStr, "  View %s", viewingCamera->Name());
         break;
+
     case 'x':
     case 'X':  // Prev camera
         viewingCamera = scene->PrevCamera();
