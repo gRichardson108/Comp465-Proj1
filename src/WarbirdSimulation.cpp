@@ -63,8 +63,8 @@ GLuint VAO[nModels], buffer[nModels];
 // Lights and textures
 glm::vec3 lightPos[2];
 GLuint texture, Texture, showTexture, light[2];  // texture id, shader, light handles
-GLuint ruberLight, headLight, shipLight, ambient, noLighting;
-bool ruberLightOn = true, headLightOn = true, shipLightOn = false, ambientOn = true;
+GLuint ruberLight, headLight, shipLight, ambient, noLighting, debug;
+bool ruberLightOn = true, headLightOn = true, shipLightOn = false, ambientOn = true, debugOn = false;
 
 // model, view, projection matrices and values to create modelMatrix.
 glm::mat3 normalMatrix;
@@ -144,6 +144,7 @@ void display()
         StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
 		modelViewMatrix = entity->ObjectMatrix();
 		glUniformMatrix4fv(ModelView, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
+
 		normalMatrix = glm::mat3(modelViewMatrix);
 		glUniformMatrix3fv(NormalMatrix, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
@@ -384,6 +385,8 @@ void init()
 	shipLight = glGetUniformLocation(shaderProgram, "shipLightOn");
 	ambient = glGetUniformLocation(shaderProgram, "ambientOn");
 	noLighting = glGetUniformLocation(shaderProgram, "noLighting");
+	debug = glGetUniformLocation(shaderProgram, "debugOn");
+
 
     viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
@@ -417,6 +420,12 @@ void keyboard(unsigned char key, int x, int y)
 		ambientOn = !ambientOn;
 		glUniform1f(ambient, ambientOn);
         break;
+
+	case 'd':
+	case 'D':  // Toggle ambient light
+		debugOn = !debugOn;
+		glUniform1f(debug, debugOn);
+		break;
 
     case 'f':
     case 'F':

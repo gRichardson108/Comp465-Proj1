@@ -64,8 +64,8 @@ void main(void)
 {
 	if (!noLighting)
 	{
-		headLightIntensity = vec3(vs_color) * 0.3f;
-		vec3 tempColor = vec3(vs_color) * 0.2f;
+		headLightIntensity = vec3(vs_color) * 0.2f;
+		vec3 tempColor = vec3(vs_color) * 0.1f;
 		if (ruberLightOn)
 			tempColor += vLight(ruberLightPos, ruberLightIntensity, false);
 		if (headLightOn)
