@@ -57,14 +57,16 @@ char * vertexShaderFile   = "src/simpleVertex.glsl";
 char * fragmentShaderFile = "src/simpleFragment.glsl";
 
 // Shader handles, matrices, etc
-GLuint MVP, NormalMatrix, ModelView;  // Model View Projection matrix's handle
+GLuint shaderProgram;
+GLuint MVP, NormalMatrix, ModelMatrix, ModelView;  // Model View Projection matrix's handle
 GLuint VAO[nModels], buffer[nModels];
 
 // Lights and textures
-glm::vec3 lightPos[2];
-GLuint texture, Texture, showTexture, light[2];  // texture id, shader, light handles
+glm::vec3 lightDir[2];
+glm::vec4 shipPos;
+GLuint texture, Texture, showTexture, light[2], shipLightPos;  // texture id, shader, light handles
 GLuint ruberLight, headLight, shipLight, ambient, noLighting, debug;
-bool ruberLightOn = true, headLightOn = true, shipLightOn = false, ambientOn = true, debugOn = false;
+bool ruberLightOn = true, headLightOn = true, shipLightOn = true, ambientOn = true, debugOn = false;
 
 // model, view, projection matrices and values to create modelMatrix.
 glm::mat3 normalMatrix;
@@ -132,6 +134,24 @@ void updateTitle()
     glutSetWindowTitle(titleStr);
 }
 
+void setUniform(const char *name, float x)
+{
+	GLint loc = glGetUniformLocation(shaderProgram, name);
+	glUniform1f(loc, x);
+}
+
+void setUniform(const char *name, const glm::vec3& v)
+{
+	GLint loc = glGetUniformLocation(shaderProgram, name);
+	glUniform3fv(loc, 1, glm::value_ptr(v));
+}
+
+void setUniform(const char *name, const glm::mat4& m)
+{
+	GLint loc = glGetUniformLocation(shaderProgram, name);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
+}
+
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -142,10 +162,30 @@ void display()
     for (int id : *scene->DrawableObjects())
     {
         StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
-		modelViewMatrix = entity->ObjectMatrix();
+
+		if ("Ship" == entity->GetType() || "Missile" == entity->GetType() || "MissileBattery" == entity->GetType())
+		{
+			setUniform("Material.Ka", 0.05f);
+			setUniform("Material.Kd", 1.0f);
+			setUniform("Material.Ks", 1.0f);
+			setUniform("Material.Shininess", 180.0f);
+		}
+		else
+		{
+			setUniform("Material.Ka", 0.05f);
+			setUniform("Material.Kd", 1.0f);
+			setUniform("Material.Ks", 0.01f);
+			setUniform("Material.Shininess", 1.0f);
+		}
+
+
+		modelMatrix = entity->ObjectMatrix();
+		glUniformMatrix4fv(ModelMatrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+		modelViewMatrix = viewMatrix * modelMatrix;
 		glUniformMatrix4fv(ModelView, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
 
-		normalMatrix = glm::mat3(modelViewMatrix);
+		normalMatrix = glm::mat3(modelMatrix);
 		glUniformMatrix3fv(NormalMatrix, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
         ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entity->ObjectMatrix();
@@ -166,9 +206,9 @@ void display()
         {
             StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
             modelMatrix = glm::translate(glm::mat4(), entity->Position()) *
-                          glm::rotate(glm::mat4(), glm::pi<float>(), entity->Up()) *
-                          entity->RotationMatrix() *
-                          glm::scale(glm::mat4(), entity->Scale() * entity->ModelFile()->BoundingRadius() * 1.5f / axis->BoundingRadius());
+				glm::rotate(glm::mat4(), glm::pi<float>(), entity->Up()) *
+				entity->RotationMatrix() *
+				glm::scale(glm::mat4(), entity->Scale() * entity->ModelFile()->BoundingRadius() * 1.5f / axis->BoundingRadius());
             ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
             glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
             glBindVertexArray(*(axis->VAO()));
@@ -231,19 +271,23 @@ void update(int value)
         if (e)
         {
             sprintf(shipCountStr, " Warbird %d", e->NumMissiles());
-			lightPos[1] = e->Position();
-			glUniform3fv(light[1], 1, glm::value_ptr(lightPos[1]));  // update shipLight value
+			shipPos = viewMatrix * glm::vec4(e->Position() + (100 + e->BoundingRadius()) * e->Forward(), 1.0f);
+			glUniform4fv(shipLightPos, 1, glm::value_ptr(shipPos));  // update shipLightPos value
+			lightDir[1] =  glm::mat3(viewMatrix) * e->Forward();
+			glUniform3fv(light[1], 1, glm::value_ptr(lightDir[1]));  // update shipLightDir value
         }
         else
         {
+			setUniform("shipLightIntensity", glm::vec3(0.0));
             ship = false;
         }
     }
 
     viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
-	lightPos[0] = viewingCamera->Eye() - viewingCamera->At();
-	glUniform3fv(light[0], 1, glm::value_ptr(lightPos[0]));  // update headLight value
+	setUniform("viewMatrix", viewMatrix);
+	lightDir[0] = viewingCamera->Eye() - viewingCamera->At();
+	glUniform3fv(light[0], 1, glm::value_ptr(lightDir[0]));  // update headLight value
 
     updateCount++;
     currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -265,7 +309,7 @@ void update(int value)
 void init()
 {
     // load the shader programs
-    GLuint shaderProgram = loadShaders(vertexShaderFile,fragmentShaderFile);
+    shaderProgram = loadShaders(vertexShaderFile,fragmentShaderFile);
     glUseProgram(shaderProgram);
 
     // generate VAOs and VBOs
@@ -374,11 +418,14 @@ void init()
     lastTime = glutGet(GLUT_ELAPSED_TIME);
     ulastTime = lastTime;
 
+	// Get shader program locations
     MVP = glGetUniformLocation(shaderProgram, "MVP");
 	light[0] = glGetUniformLocation(shaderProgram, "headLightDir");
-	light[1] = glGetUniformLocation(shaderProgram, "shipLightPos");
+	light[1] = glGetUniformLocation(shaderProgram, "shipLightDir");
+	shipLightPos = glGetUniformLocation(shaderProgram, "shipLightPos");
 	showTexture = glGetUniformLocation(shaderProgram, "IsTexture");
 	NormalMatrix = glGetUniformLocation(shaderProgram, "NormalMatrix");
+	ModelMatrix = glGetUniformLocation(shaderProgram, "Model");
 	ModelView = glGetUniformLocation(shaderProgram, "ModelView");
 	ruberLight = glGetUniformLocation(shaderProgram, "ruberLightOn");
 	headLight = glGetUniformLocation(shaderProgram, "headLightOn");
@@ -387,12 +434,15 @@ void init()
 	noLighting = glGetUniformLocation(shaderProgram, "noLighting");
 	debug = glGetUniformLocation(shaderProgram, "debugOn");
 
-
+	// Set camera
     viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
+	setUniform("viewMatrix", viewMatrix);
 
-	lightPos[0] = glm::vec3(0.0f, 10000.0f, 20000.0f); // default value
-	lightPos[1] = glm::vec3(5000.0f, 1300.0f, 6000.0f);
+	// Initialize lights
+	lightDir[0] = glm::vec3(0.0f, -1.0f, 0.0f); 
+	lightDir[1] =  glm::mat3(viewMatrix) * glm::vec3(0.0f, 0.0f, -1.0f);
+	shipPos = viewMatrix * glm::vec4(5000.0f, 1000.0f, 5000.0f, 1.0f);
 
     // set render state values
 	glEnable(GL_CULL_FACE);
@@ -442,6 +492,12 @@ void keyboard(unsigned char key, int x, int y)
 	case 'H':  // Toggle ambient light
 		headLightOn = !headLightOn;
 		glUniform1f(headLight, headLightOn);
+		break;
+
+	case 'l':
+	case 'L':  // Toggle ambient light
+		shipLightOn = !shipLightOn;
+		glUniform1f(shipLight, shipLightOn);
 		break;
 
     case 'g':
