@@ -11,7 +11,8 @@ Ship::Ship(Model* model, const glm::vec3& pos, const glm::vec3& scale, const glm
 	m_iYawRotation(0),
 	m_iThrust(0),
 	m_iNumMissiles(9),
-	m_pTargets(new std::vector<MoveableEntity*>())
+	m_pTargets(new std::vector<MoveableEntity*>()),
+	m_pActiveMissile(NULL)
 {}
 
 void Ship::RotateYaw(float rotationRate)
@@ -151,7 +152,7 @@ bool Ship::HandleMsg(const Message& message)
 			{
 				m_pActiveMissile = NULL;
 				Scene* scene = Scene::Instance();
-				if (m_iNumMissiles <= 0 && 
+				if (m_iNumMissiles <= 0 &&
 					((MissileBattery*)scene->GetEntityFromID(6) || (MissileBattery*)scene->GetEntityFromID(7)))
 				{
                     FailMission();
