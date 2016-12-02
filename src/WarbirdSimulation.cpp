@@ -55,6 +55,9 @@ char * modelFile [nModels] = {"src/axes-r100.tri", "src/Missile.tri", "src/Warbi
 const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 112 * 3};
 char * vertexShaderFile   = "src/simpleVertex.glsl";
 char * fragmentShaderFile = "src/simpleFragment.glsl";
+char * skyboxVertexFile = "src/skyboxVertex.glsl";
+char * skyboxFragmentFile = "src/skyboxFragment.glsl";
+
 
 // Shader handles, matrices, etc
 GLuint shaderProgram;
@@ -194,7 +197,9 @@ void display()
         glDrawArrays(GL_TRIANGLES, 0, entity->ModelFile()->Vertices());
 
 		if (id == 0)
+		{
 			glUniform1f(noLighting, 0);
+		}
     }
 
     if (showAxesFlag)
@@ -440,7 +445,7 @@ void init()
 	setUniform("viewMatrix", viewMatrix);
 
 	// Initialize lights
-	lightDir[0] = glm::vec3(0.0f, -1.0f, 0.0f); 
+	lightDir[0] = glm::vec3(0.0f, -1.0f, 0.0f);
 	lightDir[1] =  glm::mat3(viewMatrix) * glm::vec3(0.0f, 0.0f, -1.0f);
 	shipPos = viewMatrix * glm::vec4(5000.0f, 1000.0f, 5000.0f, 1.0f);
 
