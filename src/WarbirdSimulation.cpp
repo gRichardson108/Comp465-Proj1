@@ -58,7 +58,7 @@ char * fragmentShaderFile = "src/simpleFragment.glsl";
 
 // Shader handles, matrices, etc
 GLuint shaderProgram;
-GLuint MVP, NormalMatrix, ModelMatrix, ModelView;  // Model View Projection matrix's handle
+GLuint MVP, NormalMatrix, ModelView;  // Model View Projection matrix's handle
 GLuint VAO[nModels], buffer[nModels];
 
 // Lights and textures
@@ -178,17 +178,14 @@ void display()
 			setUniform("Material.Shininess", 1.0f);
 		}
 
-
 		modelMatrix = entity->ObjectMatrix();
-		glUniformMatrix4fv(ModelMatrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
 		modelViewMatrix = viewMatrix * modelMatrix;
 		glUniformMatrix4fv(ModelView, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
 
-		normalMatrix = glm::mat3(modelMatrix);
+		normalMatrix = glm::mat3(modelViewMatrix);
 		glUniformMatrix3fv(NormalMatrix, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
-        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entity->ObjectMatrix();
+        ModelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
         glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
         glBindVertexArray(*(entity->ModelFile()->VAO()));
         glDrawArrays(GL_TRIANGLES, 0, entity->ModelFile()->Vertices());
@@ -285,8 +282,8 @@ void update(int value)
 
     viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
-	setUniform("viewMatrix", viewMatrix);
-	lightDir[0] = viewingCamera->Eye() - viewingCamera->At();
+	setUniform("ruberLightPos", glm::vec3(viewMatrix * glm::vec4(0.0, 0.0, 0.0, 1.0)));
+	lightDir[0] = glm::mat3(viewMatrix) * (viewingCamera->Eye() - viewingCamera->At());
 	glUniform3fv(light[0], 1, glm::value_ptr(lightDir[0]));  // update headLight value
 
     updateCount++;
@@ -425,7 +422,6 @@ void init()
 	shipLightPos = glGetUniformLocation(shaderProgram, "shipLightPos");
 	showTexture = glGetUniformLocation(shaderProgram, "IsTexture");
 	NormalMatrix = glGetUniformLocation(shaderProgram, "NormalMatrix");
-	ModelMatrix = glGetUniformLocation(shaderProgram, "Model");
 	ModelView = glGetUniformLocation(shaderProgram, "ModelView");
 	ruberLight = glGetUniformLocation(shaderProgram, "ruberLightOn");
 	headLight = glGetUniformLocation(shaderProgram, "headLightOn");
@@ -437,7 +433,6 @@ void init()
 	// Set camera
     viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
-	setUniform("viewMatrix", viewMatrix);
 
 	// Initialize lights
 	lightDir[0] = glm::vec3(0.0f, -1.0f, 0.0f); 
