@@ -11,7 +11,7 @@ Mike Barnes
 # version 330 core
 
 in vec4 vs_color;
-in vec3 vs_normal, vs_worldPos, vs_normalView, vs_worldView;
+in vec3 vs_normal, vs_worldPos;
 out vec4 color;
 
 struct MaterialInfo
@@ -23,8 +23,6 @@ struct MaterialInfo
 };
 
 uniform MaterialInfo Material;
-
-uniform mat4 viewMatrix;
 
 uniform vec3 ruberLightPos = vec3(0.0f, 0.0f, 0.0f);
 uniform vec3 ruberLightIntensity = vec3(0.8f, 0.5f, 0.1f);
@@ -54,28 +52,26 @@ vec3 vLight(vec3 LightPosition, vec3 LightIntensity, bool directional)
 	float specular = 0.0f;
 	float attenuation = 1.0f;
 
+	n = normalize(vs_normal);
+
 	if (directional)
 	{
 		ambient = 0.2f;
 		s = normalize(LightPosition);
+		diffuse = Material.Kd * max(dot(s,n), 0.0);
 	}
 	else
 	{
+		ambient = 0.0f;
 		s = LightPosition - vs_worldPos;
 		attenuation = 50 * inversesqrt(length(s));
 		s = normalize(s);
-		ambient = 0.0f;
-		vec3 nV = normalize(vs_normalView);
-		vec3 sV = normalize( vec3(viewMatrix * vec4(LightPosition, 1.0)) - vs_worldView);
-		vec3 v = normalize(-vs_worldView);
-		vec3 h = normalize(v + sV);
+		vec3 v = normalize(-vs_worldPos);
+		vec3 h = normalize(v + s);
 
-		specular = Material.Kd * max(dot(sV,nV), 0.0) + 
-			Material.Ks * pow(max(dot(h,nV), 0.0), Material.Shininess);
+		diffuse = Material.Kd * max(dot(s,n), 0.0); 
+		specular = Material.Ks * pow(max(dot(h,n), 0.0), Material.Shininess);
 	}
-
-	n = normalize(vs_normal);
-	diffuse = max(dot(s, n), 0.0);
 
 	if (!ambientOn)
 		ambient = 0.0f;
@@ -96,8 +92,8 @@ vec3 spotLightFactor(vec3 spotPosition, vec3 spotDirection, vec3 spotIntensity, 
 	if (!ambientOn)
 		ambient = 0.0f;
 
-	vec3 n = normalize(vs_normalView);
-	vec3 s = spotPosition - vs_worldView;
+	vec3 n = normalize(vs_normal);
+	vec3 s = spotPosition - vs_worldPos;
 	float attenuation = 50 * inversesqrt(length(s));
 	s = normalize(s);
 	vec3 spotDir = normalize(spotDirection);
@@ -108,7 +104,7 @@ vec3 spotLightFactor(vec3 spotPosition, vec3 spotDirection, vec3 spotIntensity, 
 	if (angle < cutoff)
 	{
 		float factor = dot(-s, spotDir) * attenuation * angleAttenuation;
-		vec3 v = normalize(-vs_worldView);
+		vec3 v = normalize(-vs_worldPos);
 		vec3 h = normalize(v + s);
 
 		if (debugOn)
