@@ -12,6 +12,9 @@ update speed, toggle axes, and toggle idle function.
 */
 
 #include "../includes465/include465.hpp"
+#include "../includes465/texture.hpp"
+#include <string>
+#include <vector>
 
 // Initial gl includes required before wglext.h/glxext.h include
 #ifdef _WIN32
@@ -45,6 +48,7 @@ PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
 #include "MissileBattery.hpp"
 #include "Missile.hpp"
 #include "DynamicCamera.hpp"
+#include "Skybox.hpp"
 
 // constants for models:  file names, vertex count, model display size
 const int nModels = 9;  // number of models in this scene
@@ -55,14 +59,63 @@ char * modelFile [nModels] = {"src/axes-r100.tri", "src/Missile.tri", "src/Warbi
 const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 112 * 3};
 char * vertexShaderFile   = "src/simpleVertex.glsl";
 char * fragmentShaderFile = "src/simpleFragment.glsl";
-char * skyboxVertexFile = "src/skyboxVertex.glsl";
-char * skyboxFragmentFile = "src/skyboxFragment.glsl";
 
 
 // Shader handles, matrices, etc
 GLuint shaderProgram;
+GLuint skyboxShaderProgram;
 GLuint MVP, NormalMatrix, ModelView;  // Model View Projection matrix's handle
 GLuint VAO[nModels], buffer[nModels];
+
+//skybox stuff
+char * skyboxVertexFile = "src/skyboxVertex.glsl";
+char * skyboxFragmentFile = "src/skyboxFragment.glsl";
+GLuint skyboxVAO, skyboxVBO;
+GLfloat skyboxVertices[] =
+{
+    // Positions
+    -1.0f,  1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+    -1.0f,  1.0f, -1.0f,
+    1.0f,  1.0f, -1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+    1.0f, -1.0f,  1.0f
+};
 
 // Lights and textures
 glm::vec3 lightDir[2];
@@ -70,6 +123,10 @@ glm::vec4 shipPos;
 GLuint texture, Texture, showTexture, light[2], shipLightPos;  // texture id, shader, light handles
 GLuint ruberLight, headLight, shipLight, ambient, noLighting, debug;
 bool ruberLightOn = true, headLightOn = true, shipLightOn = true, ambientOn = true, debugOn = false;
+
+//skybox cubemap
+std::vector<const GLchar*> faces;
+GLuint skyboxTexture;
 
 // model, view, projection matrices and values to create modelMatrix.
 glm::mat3 normalMatrix;
@@ -137,27 +194,43 @@ void updateTitle()
     glutSetWindowTitle(titleStr);
 }
 
-void setUniform(const char *name, float x)
+void setUniform(const char *name, float x, GLuint shader = shaderProgram)
 {
-	GLint loc = glGetUniformLocation(shaderProgram, name);
+	GLint loc = glGetUniformLocation(shader, name);
 	glUniform1f(loc, x);
 }
 
-void setUniform(const char *name, const glm::vec3& v)
+void setUniform(const char *name, const glm::vec3& v, GLuint shader = shaderProgram)
 {
-	GLint loc = glGetUniformLocation(shaderProgram, name);
+	GLint loc = glGetUniformLocation(shader, name);
 	glUniform3fv(loc, 1, glm::value_ptr(v));
 }
 
-void setUniform(const char *name, const glm::mat4& m)
+void setUniform(const char *name, const glm::mat4& m, GLuint shader = shaderProgram)
 {
-	GLint loc = glGetUniformLocation(shaderProgram, name);
+	GLint loc = glGetUniformLocation(shader, name);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void display()
 {
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //draw skybox first
+    glDepthMask(GL_FALSE);
+    glUseProgram(skyboxShaderProgram);
+    setUniform("view", glm::mat4(glm::mat3(viewMatrix)), skyboxShaderProgram);
+    setUniform("projection", projectionMatrix, skyboxShaderProgram);
+    glBindVertexArray(skyboxVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(glGetUniformLocation(skyboxShaderProgram, "skybox"), 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+    glDepthMask(GL_TRUE);
+
+    glUseProgram(shaderProgram);
 	glUniform1f(showTexture, 0);
 	glUniform1f(noLighting, 1);
 
@@ -312,8 +385,8 @@ void init()
 {
     // load the shader programs
     shaderProgram = loadShaders(vertexShaderFile,fragmentShaderFile);
+    skyboxShaderProgram = loadShaders(skyboxVertexFile, skyboxFragmentFile);
     glUseProgram(shaderProgram);
-
     // generate VAOs and VBOs
     glGenVertexArrays( nModels, VAO );
     glGenBuffers( nModels, buffer );
@@ -443,6 +516,27 @@ void init()
 	lightDir[0] = glm::vec3(0.0f, -1.0f, 0.0f);
 	lightDir[1] =  glm::mat3(viewMatrix) * glm::vec3(0.0f, 0.0f, -1.0f);
 	shipPos = viewMatrix * glm::vec4(5000.0f, 1000.0f, 5000.0f, 1.0f);
+
+
+	//initialize skybox
+    glUseProgram(skyboxShaderProgram);
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glBindVertexArray(0);
+
+    faces.push_back("src/skybox/right.data");
+    faces.push_back("src/skybox/left.data");
+    faces.push_back("src/skybox/top.data");
+    faces.push_back("src/skybox/bottom.data");
+    faces.push_back("src/skybox/back.data");
+    faces.push_back("src/skybox/front.data");
+
+	skyboxTexture = loadSkyboxTexture(faces);
 
     // set render state values
 	glEnable(GL_CULL_FACE);

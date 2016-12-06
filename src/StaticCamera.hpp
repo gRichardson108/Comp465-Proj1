@@ -35,7 +35,7 @@ protected :
 
 public :
     StaticCamera(char* name, glm::vec3 eye, glm::vec3 at, glm::vec3 up, float FOVY = glm::radians(60.0f),
-                 float nearClip = 1.0f, float farClip = 10000000.0f);
+                 float nearClip = 0.1f, float farClip = 10000000.0f);
 
     virtual ~StaticCamera()
     {

@@ -1,9 +1,9 @@
 // fragment shader
 # version 330 core
 in vec3 TexCoords;
-uniform samplerCube SkyBoxTexture;
+uniform samplerCube skybox;
 out vec4 FragColor;
 void main()
 {
-    FragColor = texture(SkyBoxTexture, TexCoords);
+    FragColor = texture(skybox, TexCoords);
 }
