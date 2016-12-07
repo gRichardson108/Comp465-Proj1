@@ -531,8 +531,8 @@ void init()
 
     faces.push_back("src/skybox/right.data");
     faces.push_back("src/skybox/left.data");
-    faces.push_back("src/skybox/top.data");
-    faces.push_back("src/skybox/bottom.data");
+    faces.push_back("src/skybox/up.data");
+    faces.push_back("src/skybox/down.data");
     faces.push_back("src/skybox/back.data");
     faces.push_back("src/skybox/front.data");
 
