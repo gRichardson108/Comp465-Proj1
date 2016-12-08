@@ -64,7 +64,7 @@ vec3 vLight(vec3 LightPosition, vec3 LightIntensity, bool directional)
 	{
 		ambient = 0.0f;
 		s = LightPosition - vs_worldPos;
-		attenuation = 50 * inversesqrt(length(s));
+		attenuation = 100 * inversesqrt(length(s));
 		s = normalize(s);
 		vec3 v = normalize(-vs_worldPos);
 		vec3 h = normalize(v + s);
@@ -103,7 +103,7 @@ vec3 spotLightFactor(vec3 spotPosition, vec3 spotDirection, vec3 spotIntensity, 
 
 	if (angle < cutoff)
 	{
-		float factor = dot(-s, spotDir) * attenuation * angleAttenuation;
+		float factor = attenuation * angleAttenuation;
 		vec3 v = normalize(-vs_worldPos);
 		vec3 h = normalize(v + s);
 

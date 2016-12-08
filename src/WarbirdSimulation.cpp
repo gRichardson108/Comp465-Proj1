@@ -136,7 +136,7 @@ glm::mat4 projectionMatrix;     // set in reshape()
 glm::mat4 ModelViewProjectionMatrix; // set in display();
 
 // flags
-bool showAxesFlag = false, idleTimerFlag = true, mb1 = true, mb2 = true, ship = true;
+bool showAxesFlag = false, mb1 = true, mb2 = true, ship = true;
 
 // Constants for scene
 Scene* scene = Scene::Instance();  // Scene object
@@ -172,6 +172,7 @@ void reshape(int width, int height)
 // Update window title
 void updateTitle()
 {
+	// Can win and then get ship destroyed
     if (!ship)
     {
         strcpy(titleStr, "Cadet resigns from War College");
@@ -194,6 +195,8 @@ void updateTitle()
     glutSetWindowTitle(titleStr);
 }
 
+// Easy to use update functions from GLSL example code, added param
+// for shader program
 void setUniform(const char *name, float x, GLuint shader = shaderProgram)
 {
 	GLint loc = glGetUniformLocation(shader, name);
@@ -239,6 +242,7 @@ void display()
     {
         StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
 
+		// Set material
 		if ("Ship" == entity->GetType() || "Missile" == entity->GetType() || "MissileBattery" == entity->GetType())
 		{
 			setUniform("Material.Ka", 0.05f);
@@ -312,6 +316,7 @@ void update(int value)
 
     scene->Update();
 
+	// Update Missile battery missle count
     if (mb1)
     {
         auto e = (MissileBattery*)scene->GetEntityFromID(6);
@@ -340,6 +345,7 @@ void update(int value)
         }
     }
 
+	// Update ship missile count and spot light
     if (ship)
     {
         auto e = (Ship*)scene->GetEntityFromID(5);
@@ -376,8 +382,6 @@ void update(int value)
         updateCount = 0;
         updateTitle();
     }
-
-    if (!idleTimerFlag) glutPostRedisplay(); // Redisplay if no idle function
 }
 
 // load the shader programs, vertex data from model files, create the solids, set initial view
