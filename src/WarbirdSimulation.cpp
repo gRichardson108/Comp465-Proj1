@@ -57,8 +57,8 @@ char * modelFile [nModels] = {"src/axes-r100.tri", "src/Missile.tri", "src/Warbi
                               "src/MissileBattery.tri"
                              };
 const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 112 * 3};
-char * vertexShaderFile   = "src/simpleVertex.glsl";
-char * fragmentShaderFile = "src/simpleFragment.glsl";
+char * vertexShaderFile   = "src/lightingVertex.glsl";
+char * fragmentShaderFile = "src/lightingFragment.glsl";
 
 
 // Shader handles, matrices, etc
