@@ -8,7 +8,6 @@ GLuint loadSkyboxTexture(std::vector<const GLchar*> faces)
 
     int width = 2048;
     int height = 2048;
-    unsigned char* image;
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
     for(GLuint i = 0; i < faces.size(); i++)
