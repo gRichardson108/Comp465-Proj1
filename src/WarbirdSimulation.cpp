@@ -12,6 +12,9 @@ update speed, toggle axes, and toggle idle function.
 */
 
 #include "../includes465/include465.hpp"
+#include "../includes465/texture.hpp"
+#include <string>
+#include <vector>
 
 // Initial gl includes required before wglext.h/glxext.h include
 #ifdef _WIN32
@@ -45,6 +48,7 @@ PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
 #include "MissileBattery.hpp"
 #include "Missile.hpp"
 #include "DynamicCamera.hpp"
+#include "Skybox.hpp"
 
 // constants for models:  file names, vertex count, model display size
 const int nModels = 9;  // number of models in this scene
@@ -53,20 +57,86 @@ char * modelFile [nModels] = {"src/axes-r100.tri", "src/Missile.tri", "src/Warbi
                               "src/MissileBattery.tri"
                              };
 const int nVertices[nModels] = { 120 * 3, 928 * 3, 4914 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 760 * 3, 112 * 3};
-char * vertexShaderFile   = "src/simpleVertex.glsl";
-char * fragmentShaderFile = "src/simpleFragment.glsl";
+char * vertexShaderFile   = "src/lightingVertex.glsl";
+char * fragmentShaderFile = "src/lightingFragment.glsl";
+
 
 // Shader handles, matrices, etc
-GLuint MVP;  // Model View Projection matrix's handle
+GLuint shaderProgram;
+GLuint skyboxShaderProgram;
+GLuint MVP, NormalMatrix, ModelView;  // Model View Projection matrix's handle
 GLuint VAO[nModels], buffer[nModels];
 
+//skybox stuff
+char * skyboxVertexFile = "src/skyboxVertex.glsl";
+char * skyboxFragmentFile = "src/skyboxFragment.glsl";
+GLuint skyboxVAO, skyboxVBO;
+GLfloat skyboxVertices[] =
+{
+    // Positions
+    -1.0f,  1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+    -1.0f,  1.0f, -1.0f,
+    1.0f,  1.0f, -1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+    1.0f, -1.0f,  1.0f
+};
+
+// Lights and textures
+glm::vec3 lightDir[2];
+glm::vec4 shipPos;
+GLuint texture, Texture, showTexture, light[2], shipLightPos;  // texture id, shader, light handles
+GLuint ruberLight, headLight, shipLight, ambient, noLighting, debug;
+bool ruberLightOn = true, headLightOn = true, shipLightOn = true, ambientOn = true, debugOn = false;
+
+//skybox cubemap
+std::vector<const GLchar*> faces;
+GLuint skyboxTexture;
+
 // model, view, projection matrices and values to create modelMatrix.
+glm::mat3 normalMatrix;
 glm::mat4 modelMatrix;          // set in display()
+glm::mat4 modelViewMatrix;
 glm::mat4 projectionMatrix;     // set in reshape()
 glm::mat4 ModelViewProjectionMatrix; // set in display();
 
 // flags
-bool showAxesFlag = false, idleTimerFlag = true, mb1 = true, mb2 = true, ship = true;
+bool showAxesFlag = false, mb1 = true, mb2 = true, ship = true;
 
 // Constants for scene
 Scene* scene = Scene::Instance();  // Scene object
@@ -102,6 +172,7 @@ void reshape(int width, int height)
 // Update window title
 void updateTitle()
 {
+	// Can win and then get ship destroyed
     if (!ship)
     {
         strcpy(titleStr, "Cadet resigns from War College");
@@ -124,30 +195,99 @@ void updateTitle()
     glutSetWindowTitle(titleStr);
 }
 
+// Easy to use update functions from GLSL example code, added param
+// for shader program
+void setUniform(const char *name, float x, GLuint shader = shaderProgram)
+{
+	GLint loc = glGetUniformLocation(shader, name);
+	glUniform1f(loc, x);
+}
+
+void setUniform(const char *name, const glm::vec3& v, GLuint shader = shaderProgram)
+{
+	GLint loc = glGetUniformLocation(shader, name);
+	glUniform3fv(loc, 1, glm::value_ptr(v));
+}
+
+void setUniform(const char *name, const glm::mat4& m, GLuint shader = shaderProgram)
+{
+	GLint loc = glGetUniformLocation(shader, name);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
+}
+
 void display()
 {
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //draw skybox first
+    glDepthMask(GL_FALSE);
+    glUseProgram(skyboxShaderProgram);
+    setUniform("view", glm::mat4(glm::mat3(viewMatrix)), skyboxShaderProgram);
+    setUniform("projection", projectionMatrix, skyboxShaderProgram);
+    glBindVertexArray(skyboxVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(glGetUniformLocation(skyboxShaderProgram, "skybox"), 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+    glDepthMask(GL_TRUE);
+
+    glUseProgram(shaderProgram);
+	glUniform1f(showTexture, 0);
+	glUniform1f(noLighting, 1);
+
     // update model matrix
     for (int id : *scene->DrawableObjects())
     {
         StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
-        ModelViewProjectionMatrix = projectionMatrix * viewMatrix * entity->ObjectMatrix();
+
+		// Set material
+		if ("Ship" == entity->GetType() || "Missile" == entity->GetType() || "MissileBattery" == entity->GetType())
+		{
+			setUniform("Material.Ka", 0.05f);
+			setUniform("Material.Kd", 1.0f);
+			setUniform("Material.Ks", 1.0f);
+			setUniform("Material.Shininess", 180.0f);
+		}
+		else
+		{
+			setUniform("Material.Ka", 0.05f);
+			setUniform("Material.Kd", 1.0f);
+			setUniform("Material.Ks", 0.01f);
+			setUniform("Material.Shininess", 1.0f);
+		}
+
+		modelMatrix = entity->ObjectMatrix();
+		modelViewMatrix = viewMatrix * modelMatrix;
+		glUniformMatrix4fv(ModelView, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
+
+		normalMatrix = glm::mat3(modelViewMatrix);
+		glUniformMatrix3fv(NormalMatrix, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+
+        ModelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
         glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
         glBindVertexArray(*(entity->ModelFile()->VAO()));
         glDrawArrays(GL_TRIANGLES, 0, entity->ModelFile()->Vertices());
+
+		if (id == 0)
+		{
+			glUniform1f(noLighting, 0);
+		}
     }
 
     if (showAxesFlag)
     {
+		glUniform1f(noLighting, 1);
         Model* axis = scene->GetModel("axes-r100");
         // Local axis for each entity
         for (int id : *scene->DrawableObjects())
         {
             StaticEntity* entity = (StaticEntity*)scene->GetEntityFromID(id);
             modelMatrix = glm::translate(glm::mat4(), entity->Position()) *
-                          glm::rotate(glm::mat4(), glm::pi<float>(), entity->Up()) *
-                          entity->RotationMatrix() *
-                          glm::scale(glm::mat4(), entity->Scale() * entity->ModelFile()->BoundingRadius() * 1.5f / axis->BoundingRadius());
+				glm::rotate(glm::mat4(), glm::pi<float>(), entity->Up()) *
+				entity->RotationMatrix() *
+				glm::scale(glm::mat4(), entity->Scale() * entity->ModelFile()->BoundingRadius() * 1.5f / axis->BoundingRadius());
             ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
             glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
             glBindVertexArray(*(axis->VAO()));
@@ -176,6 +316,7 @@ void update(int value)
 
     scene->Update();
 
+	// Update Missile battery missle count
     if (mb1)
     {
         auto e = (MissileBattery*)scene->GetEntityFromID(6);
@@ -204,21 +345,30 @@ void update(int value)
         }
     }
 
+	// Update ship missile count and spot light
     if (ship)
     {
         auto e = (Ship*)scene->GetEntityFromID(5);
         if (e)
         {
             sprintf(shipCountStr, " Warbird %d", e->NumMissiles());
+			shipPos = viewMatrix * glm::vec4(e->Position() + (100 + e->BoundingRadius()) * e->Forward(), 1.0f);
+			glUniform4fv(shipLightPos, 1, glm::value_ptr(shipPos));  // update shipLightPos value
+			lightDir[1] =  glm::mat3(viewMatrix) * e->Forward();
+			glUniform3fv(light[1], 1, glm::value_ptr(lightDir[1]));  // update shipLightDir value
         }
         else
         {
+			setUniform("shipLightIntensity", glm::vec3(0.0));
             ship = false;
         }
     }
 
     viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
+	setUniform("ruberLightPos", glm::vec3(viewMatrix * glm::vec4(0.0, 0.0, 0.0, 1.0)));
+	lightDir[0] = glm::mat3(viewMatrix) * (viewingCamera->Eye() - viewingCamera->At());
+	glUniform3fv(light[0], 1, glm::value_ptr(lightDir[0]));  // update headLight value
 
     updateCount++;
     currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -232,17 +382,15 @@ void update(int value)
         updateCount = 0;
         updateTitle();
     }
-
-    if (!idleTimerFlag) glutPostRedisplay(); // Redisplay if no idle function
 }
 
 // load the shader programs, vertex data from model files, create the solids, set initial view
 void init()
 {
     // load the shader programs
-    GLuint shaderProgram = loadShaders(vertexShaderFile,fragmentShaderFile);
+    shaderProgram = loadShaders(vertexShaderFile,fragmentShaderFile);
+    skyboxShaderProgram = loadShaders(skyboxVertexFile, skyboxFragmentFile);
     glUseProgram(shaderProgram);
-
     // generate VAOs and VBOs
     glGenVertexArrays( nModels, VAO );
     glGenBuffers( nModels, buffer );
@@ -262,13 +410,13 @@ void init()
 
     printf("\tRuber drawn\n");
     pos = glm::vec3(0.0f);
-    target = glm::vec3(rand() , rand(), rand());
+    target = glm::vec3(rand(), rand(), rand());
     up = glm::vec3(0, 1, 0);
     if (colinear(target, up, 0.1)) // Up and target can't be colinear
     {
         up = glm::vec3(-1, 0, 0);
     }
-    new CelestialBody(scene->GetModel("Ruber"), NULL, pos, glm::vec3(2000), pos + target,
+    new CelestialBody(scene->GetModel("Ruber"), NULL, pos, glm::vec3(2000), target,
                       up, 60.0f);
 
     printf("\tUnum drawn\n");
@@ -348,9 +496,51 @@ void init()
     // Initialize display info
     lastTime = glutGet(GLUT_ELAPSED_TIME);
     ulastTime = lastTime;
-    MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
+
+	// Get shader program locations
+    MVP = glGetUniformLocation(shaderProgram, "MVP");
+	light[0] = glGetUniformLocation(shaderProgram, "headLightDir");
+	light[1] = glGetUniformLocation(shaderProgram, "shipLightDir");
+	shipLightPos = glGetUniformLocation(shaderProgram, "shipLightPos");
+	showTexture = glGetUniformLocation(shaderProgram, "IsTexture");
+	NormalMatrix = glGetUniformLocation(shaderProgram, "NormalMatrix");
+	ModelView = glGetUniformLocation(shaderProgram, "ModelView");
+	ruberLight = glGetUniformLocation(shaderProgram, "ruberLightOn");
+	headLight = glGetUniformLocation(shaderProgram, "headLightOn");
+	shipLight = glGetUniformLocation(shaderProgram, "shipLightOn");
+	ambient = glGetUniformLocation(shaderProgram, "ambientOn");
+	noLighting = glGetUniformLocation(shaderProgram, "noLighting");
+	debug = glGetUniformLocation(shaderProgram, "debugOn");
+
+	// Set camera
     viewingCamera = scene->ViewingCamera();
     viewMatrix = viewingCamera->ViewMatrix();
+
+	// Initialize lights
+	lightDir[0] = glm::vec3(0.0f, -1.0f, 0.0f);
+	lightDir[1] =  glm::mat3(viewMatrix) * glm::vec3(0.0f, 0.0f, -1.0f);
+	shipPos = viewMatrix * glm::vec4(5000.0f, 1000.0f, 5000.0f, 1.0f);
+
+
+	//initialize skybox
+    glUseProgram(skyboxShaderProgram);
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glBindVertexArray(0);
+
+    faces.push_back("src/skybox/right.data");
+    faces.push_back("src/skybox/left.data");
+    faces.push_back("src/skybox/up.data");
+    faces.push_back("src/skybox/down.data");
+    faces.push_back("src/skybox/back.data");
+    faces.push_back("src/skybox/front.data");
+
+	skyboxTexture = loadSkyboxTexture(faces);
 
     // set render state values
 	glEnable(GL_CULL_FACE);
@@ -374,30 +564,50 @@ void keyboard(unsigned char key, int x, int y)
         break;
 
     case 'a':
-    case 'A':  // change animation timer
-        if (idleTimerFlag) // switch to interval timer
-        {
-            glutIdleFunc(NULL);
-            idleTimerFlag = false;
-        }
-        else // switch to idle timer
-        {
-            glutIdleFunc(display);
-            idleTimerFlag = true;
-        }
+    case 'A':  // Toggle ambient light
+		ambientOn = !ambientOn;
+		glUniform1f(ambient, ambientOn);
         break;
+
+	case 'd':
+	case 'D':  // Toggle ambient light
+		debugOn = !debugOn;
+		glUniform1f(debug, debugOn);
+		break;
+
     case 'f':
     case 'F':
         MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ShipFireMissile, NULL);
         break;
+
+	case 'p':
+	case 'P':  // Toggle ambient light
+		ruberLightOn = !ruberLightOn;
+		glUniform1f(ruberLight, ruberLightOn);
+		break;
+
+	case 'h':
+	case 'H':  // Toggle ambient light
+		headLightOn = !headLightOn;
+		glUniform1f(headLight, headLightOn);
+		break;
+
+	case 'l':
+	case 'L':  // Toggle ambient light
+		shipLightOn = !shipLightOn;
+		glUniform1f(shipLight, shipLightOn);
+		break;
+
     case 'g':
     case 'G':
         MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ToggleGravity, NULL);
         break;
+
     case 's':
     case 'S':
         MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ShipSpeedChange, NULL);
         break;
+
     case 't':
     case 'T':  // Change time quantum
         tq = (tq + 1) % 4;
@@ -417,22 +627,26 @@ void keyboard(unsigned char key, int x, int y)
             break;
         }
         break;
+
     case 'u':
     case 'U':  // Toggle axes
         showAxesFlag = !showAxesFlag;
         break;
+
     case 'w':
     case 'W':
         warpCamera = scene->NextWarpCamera();
         MessageDispatcher::Instance()->DispatchMsg(0, -1, 5, Msg_ShipWarp, warpCamera);
         printf("warping to camera at %s\n", warpCamera->Name());
         break;
+
     case 'v':
     case 'V':  // Next camera
         viewingCamera = scene->NextCamera();
         viewMatrix = viewingCamera->ViewMatrix();
         sprintf(viewStr, "  View %s", viewingCamera->Name());
         break;
+
     case 'x':
     case 'X':  // Prev camera
         viewingCamera = scene->PrevCamera();

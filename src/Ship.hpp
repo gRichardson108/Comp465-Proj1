@@ -38,8 +38,8 @@ public:
     shipSpeedSettings speedSetting = SPEED_DEFAULT;
     float currentMaxSpeed = 10.0;
 
-    const float TURN_RATE = 0.02;//radians
-    const float GRAVITY = 90000000.0;
+    const float TURN_RATE = 0.02f;//radians
+    const float GRAVITY = 90000000.0f;
     bool m_bGravityStatus = false;
 
     Ship(Model* model, const glm::vec3& pos = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f),
